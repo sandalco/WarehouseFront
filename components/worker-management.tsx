@@ -88,67 +88,67 @@ export function WorkerManagement({ onViewWorker }: WorkerManagementProps) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-purple-primary">Worker Management</h2>
-          <p className="text-gray-600">Manage warehouse staff and their assignments</p>
+          <h2 className="text-2xl font-bold text-purple-primary">İşçi İdarəetməsi</h2>
+          <p className="text-gray-600">Anbar işçilərini və onların tapşırıqlarını idarə edin</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-purple-primary hover:bg-purple-600">
               <Plus className="h-4 w-4 mr-2" />
-              Add Worker
+              İşçi Əlavə Et
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Worker</DialogTitle>
-              <DialogDescription>Enter the details for the new warehouse worker</DialogDescription>
+              <DialogTitle>Yeni İşçi Əlavə Et</DialogTitle>
+              <DialogDescription>Yeni anbar işçisi üçün məlumatları daxil edin</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="workerName">Full Name</Label>
-                <Input id="workerName" placeholder="Enter full name" />
+                <Label htmlFor="workerName">Tam Ad</Label>
+                <Input id="workerName" placeholder="Tam adı daxil edin" />
               </div>
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">E-poçt</Label>
                 <Input id="email" type="email" placeholder="worker@company.com" />
               </div>
               <div>
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone">Telefon</Label>
                 <Input id="phone" placeholder="+1 (555) 123-4567" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="warehouse">Warehouse</Label>
+                  <Label htmlFor="warehouse">Anbar</Label>
                   <Select>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select warehouse" />
+                      <SelectValue placeholder="Anbar seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="wh1">Main Distribution Center</SelectItem>
-                      <SelectItem value="wh2">West Coast Hub</SelectItem>
-                      <SelectItem value="wh3">Central Storage</SelectItem>
+                      <SelectItem value="wh1">Əsas Paylama Mərkəzi</SelectItem>
+                      <SelectItem value="wh2">Qərb Sahili Mərkəzi</SelectItem>
+                      <SelectItem value="wh3">Mərkəzi Anbar</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="shift">Shift</Label>
+                  <Label htmlFor="shift">Növbə</Label>
                   <Select>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select shift" />
+                      <SelectValue placeholder="Növbə seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="morning">Morning</SelectItem>
-                      <SelectItem value="evening">Evening</SelectItem>
-                      <SelectItem value="night">Night</SelectItem>
+                      <SelectItem value="morning">Səhər</SelectItem>
+                      <SelectItem value="evening">Axşam</SelectItem>
+                      <SelectItem value="night">Gecə</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div className="flex justify-end space-x-2">
                 <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                  Cancel
+                  Ləğv Et
                 </Button>
-                <Button onClick={() => setIsAddDialogOpen(false)}>Add Worker</Button>
+                <Button onClick={() => setIsAddDialogOpen(false)}>İşçi Əlavə Et</Button>
               </div>
             </div>
           </DialogContent>
@@ -157,13 +157,13 @@ export function WorkerManagement({ onViewWorker }: WorkerManagementProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Workers</CardTitle>
+          <CardTitle>İşçilər</CardTitle>
           <CardDescription>
             <div className="flex items-center space-x-4">
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search workers..."
+                  placeholder="İşçiləri axtar..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -176,14 +176,14 @@ export function WorkerManagement({ onViewWorker }: WorkerManagementProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Worker</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Warehouse</TableHead>
-                <TableHead>Shift</TableHead>
-                <TableHead>Tasks</TableHead>
-                <TableHead>Performance</TableHead>
+                <TableHead>İşçi</TableHead>
+                <TableHead>Əlaqə</TableHead>
+                <TableHead>Anbar</TableHead>
+                <TableHead>Növbə</TableHead>
+                <TableHead>Tapşırıqlar</TableHead>
+                <TableHead>Performans</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>Əməliyyatlar</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

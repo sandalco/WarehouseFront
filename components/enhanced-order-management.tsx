@@ -181,40 +181,40 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-purple-primary">Order Management</h2>
-          <p className="text-gray-600">Manage incoming and outgoing warehouse orders</p>
+          <h2 className="text-2xl font-bold text-purple-primary">Sifariş İdarəetməsi</h2>
+          <p className="text-gray-600">Daxil olan və çıxan anbar sifarişlərini idarə edin</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={onCreateOrder} className="bg-purple-primary hover:bg-purple-600">
               <Plus className="h-4 w-4 mr-2" />
-              Create Order
+              Sifariş Yarat
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Create New Order</DialogTitle>
-              <DialogDescription>Create a new incoming or outgoing order</DialogDescription>
+              <DialogTitle>Yeni Sifariş Yarat</DialogTitle>
+              <DialogDescription>Yeni daxil olan və ya çıxan sifariş yaradın</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="orderType">Order Type</Label>
+                <Label htmlFor="orderType">Sifariş Növü</Label>
                 <Select>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select order type" />
+                    <SelectValue placeholder="Sifariş növünü seçin" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="incoming">Incoming</SelectItem>
-                    <SelectItem value="outgoing">Outgoing</SelectItem>
+                    <SelectItem value="incoming">Daxil olan</SelectItem>
+                    <SelectItem value="outgoing">Çıxan</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="customer">Customer/Vendor</Label>
+                  <Label htmlFor="customer">Müştəri/Təchizatçı</Label>
                   <Select>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select customer/vendor" />
+                      <SelectValue placeholder="Müştəri/təchizatçı seçin" />
                     </SelectTrigger>
                     <SelectContent>
                       {customers.map((customer) => (
@@ -231,29 +231,29 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="priority">Priority</Label>
+                  <Label htmlFor="priority">Prioritet</Label>
                   <Select>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select priority" />
+                      <SelectValue placeholder="Prioritet seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="high">Yüksək</SelectItem>
+                      <SelectItem value="medium">Orta</SelectItem>
+                      <SelectItem value="low">Aşağı</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div>
-                <Label htmlFor="dueDate">Due Date</Label>
+                <Label htmlFor="dueDate">Son Tarix</Label>
                 <Input id="dueDate" type="date" />
               </div>
               <div className="flex justify-end space-x-2">
                 <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                  Cancel
+                  Ləğv et
                 </Button>
                 <Button onClick={() => setIsAddDialogOpen(false)} className="bg-purple-primary hover:bg-purple-600">
-                  Create Order
+                  Sifariş Yarat
                 </Button>
               </div>
             </div>
@@ -263,14 +263,14 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
 
       <Card>
         <CardHeader>
-          <CardTitle>Orders</CardTitle>
+          <CardTitle>Sifarişlər</CardTitle>
           <CardDescription>
             <div className="flex flex-col space-y-4">
               <div className="flex items-center space-x-4">
                 <div className="relative flex-1 max-w-sm">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Search orders..."
+                    placeholder="Sifarişləri axtar..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
@@ -282,7 +282,7 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
                   className="border-purple-primary text-purple-primary hover:bg-purple-primary hover:text-white"
                 >
                   <Filter className="h-4 w-4 mr-2" />
-                  Filters
+                  Filtrlər
                   {activeFiltersCount > 0 && (
                     <Badge variant="secondary" className="ml-2 bg-purple-primary text-white">
                       {activeFiltersCount}
@@ -292,7 +292,7 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
                 {activeFiltersCount > 0 && (
                   <Button variant="outline" onClick={clearFilters} size="sm">
                     <X className="h-4 w-4 mr-2" />
-                    Clear
+                    Təmizlə
                   </Button>
                 )}
               </div>
@@ -303,42 +303,42 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
                     <Label htmlFor="statusFilter">Status</Label>
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
                       <SelectTrigger>
-                        <SelectValue placeholder="All Statuses" />
+                        <SelectValue placeholder="Bütün Statuslar" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Statuses</SelectItem>
-                        <SelectItem value="Pending">Pending</SelectItem>
-                        <SelectItem value="Processing">Processing</SelectItem>
-                        <SelectItem value="In Transit">In Transit</SelectItem>
-                        <SelectItem value="Shipped">Shipped</SelectItem>
-                        <SelectItem value="Completed">Completed</SelectItem>
+                        <SelectItem value="all">Bütün Statuslar</SelectItem>
+                        <SelectItem value="Pending">Gözləyən</SelectItem>
+                        <SelectItem value="Processing">Emal olunur</SelectItem>
+                        <SelectItem value="In Transit">Yoldadır</SelectItem>
+                        <SelectItem value="Shipped">Göndərilib</SelectItem>
+                        <SelectItem value="Completed">Tamamlanıb</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
-                    <Label htmlFor="priorityFilter">Priority</Label>
+                    <Label htmlFor="priorityFilter">Prioritet</Label>
                     <Select value={priorityFilter} onValueChange={setPriorityFilter}>
                       <SelectTrigger>
-                        <SelectValue placeholder="All Priorities" />
+                        <SelectValue placeholder="Bütün Prioritetlər" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Priorities</SelectItem>
-                        <SelectItem value="High">High</SelectItem>
-                        <SelectItem value="Medium">Medium</SelectItem>
-                        <SelectItem value="Low">Low</SelectItem>
+                        <SelectItem value="all">Bütün Prioritetlər</SelectItem>
+                        <SelectItem value="High">Yüksək</SelectItem>
+                        <SelectItem value="Medium">Orta</SelectItem>
+                        <SelectItem value="Low">Aşağı</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
-                    <Label htmlFor="customerFilter">Customer/Vendor</Label>
+                    <Label htmlFor="customerFilter">Müştəri/Təchizatçı</Label>
                     <Select value={customerFilter} onValueChange={setCustomerFilter}>
                       <SelectTrigger>
-                        <SelectValue placeholder="All Customers" />
+                        <SelectValue placeholder="Bütün Müştərilər" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Customers</SelectItem>
+                        <SelectItem value="all">Bütün Müştərilər</SelectItem>
                         {customers.map((customer) => (
                           <SelectItem key={customer} value={customer}>
                             {customer}
@@ -354,7 +354,7 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
                   </div>
 
                   <div>
-                    <Label>Date From</Label>
+                    <Label>Başlanğıc Tarixi</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -365,7 +365,7 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {dateFrom ? format(dateFrom, "PPP") : "Pick a date"}
+                          {dateFrom ? format(dateFrom, "PPP") : "Tarix seçin"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
@@ -375,7 +375,7 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
                   </div>
 
                   <div>
-                    <Label>Date To</Label>
+                    <Label>Son Tarix</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -386,7 +386,7 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
                           )}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {dateTo ? format(dateTo, "PPP") : "Pick a date"}
+                          {dateTo ? format(dateTo, "PPP") : "Tarix seçin"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
@@ -402,24 +402,24 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
         <CardContent>
           <Tabs defaultValue="all" className="space-y-4">
             <TabsList>
-              <TabsTrigger value="all">All Orders ({filteredOrders.length})</TabsTrigger>
-              <TabsTrigger value="outgoing">Outgoing ({outgoingOrders.length})</TabsTrigger>
-              <TabsTrigger value="incoming">Incoming ({incomingOrders.length})</TabsTrigger>
+              <TabsTrigger value="all">Bütün Sifarişlər ({filteredOrders.length})</TabsTrigger>
+              <TabsTrigger value="outgoing">Çıxan ({outgoingOrders.length})</TabsTrigger>
+              <TabsTrigger value="incoming">Daxil olan ({incomingOrders.length})</TabsTrigger>
             </TabsList>
 
             <TabsContent value="all">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Order ID</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Customer/Vendor</TableHead>
-                    <TableHead>Value</TableHead>
-                    <TableHead>Priority</TableHead>
+                    <TableHead>Sifariş ID</TableHead>
+                    <TableHead>Növ</TableHead>
+                    <TableHead>Müştəri/Təchizatçı</TableHead>
+                    <TableHead>Dəyər</TableHead>
+                    <TableHead>Prioritet</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Due Date</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>Yaradılıb</TableHead>
+                    <TableHead>Son Tarix</TableHead>
+                    <TableHead>Əməliyyatlar</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -466,14 +466,14 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Order ID</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Value</TableHead>
-                    <TableHead>Priority</TableHead>
+                    <TableHead>Sifariş ID</TableHead>
+                    <TableHead>Müştəri</TableHead>
+                    <TableHead>Dəyər</TableHead>
+                    <TableHead>Prioritet</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Due Date</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>Yaradılıb</TableHead>
+                    <TableHead>Son Tarix</TableHead>
+                    <TableHead>Əməliyyatlar</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -510,14 +510,14 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Order ID</TableHead>
-                    <TableHead>Vendor</TableHead>
-                    <TableHead>Value</TableHead>
-                    <TableHead>Priority</TableHead>
+                    <TableHead>Sifariş ID</TableHead>
+                    <TableHead>Təchizatçı</TableHead>
+                    <TableHead>Dəyər</TableHead>
+                    <TableHead>Prioritet</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Due Date</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>Yaradılıb</TableHead>
+                    <TableHead>Son Tarix</TableHead>
+                    <TableHead>Əməliyyatlar</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

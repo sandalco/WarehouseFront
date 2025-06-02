@@ -102,7 +102,7 @@ export function WorkerDetailsPage({ workerId, onBack }: WorkerDetailsPageProps) 
         <div className="flex items-center space-x-4">
           <Button variant="outline" onClick={onBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Workers
+            İşçilərə Qayıt
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-purple-primary">{worker.name}</h1>
@@ -116,17 +116,17 @@ export function WorkerDetailsPage({ workerId, onBack }: WorkerDetailsPageProps) 
             <>
               <Button variant="outline" onClick={() => setIsEditing(false)}>
                 <X className="h-4 w-4 mr-2" />
-                Cancel
+                Ləğv Et
               </Button>
               <Button onClick={() => setIsEditing(false)}>
                 <Save className="h-4 w-4 mr-2" />
-                Save Changes
+                Dəyişiklikləri Saxla
               </Button>
             </>
           ) : (
             <Button onClick={() => setIsEditing(true)}>
               <Edit className="h-4 w-4 mr-2" />
-              Edit Worker
+              İşçini Redaktə Et
             </Button>
           )}
         </div>
@@ -134,35 +134,35 @@ export function WorkerDetailsPage({ workerId, onBack }: WorkerDetailsPageProps) 
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="tasks">Recent Tasks</TabsTrigger>
-          <TabsTrigger value="certifications">Certifications</TabsTrigger>
+          <TabsTrigger value="overview">Ümumi</TabsTrigger>
+          <TabsTrigger value="performance">Performans</TabsTrigger>
+          <TabsTrigger value="tasks">Son Tapşırıqlar</TabsTrigger>
+          <TabsTrigger value="certifications">Sertifikatlar</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Personal Information</CardTitle>
+                <CardTitle>Şəxsi Məlumat</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isEditing ? (
                   <>
                     <div>
-                      <Label htmlFor="name">Full Name</Label>
+                      <Label htmlFor="name">Tam Ad</Label>
                       <Input id="name" defaultValue={worker.name} />
                     </div>
                     <div>
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email">E-poçt</Label>
                       <Input id="email" type="email" defaultValue={worker.email} />
                     </div>
                     <div>
-                      <Label htmlFor="phone">Phone</Label>
+                      <Label htmlFor="phone">Telefon</Label>
                       <Input id="phone" defaultValue={worker.phone} />
                     </div>
                     <div>
-                      <Label htmlFor="address">Address</Label>
+                      <Label htmlFor="address">Ünvan</Label>
                       <Textarea id="address" defaultValue={worker.address} />
                     </div>
                   </>
@@ -191,34 +191,34 @@ export function WorkerDetailsPage({ workerId, onBack }: WorkerDetailsPageProps) 
 
             <Card>
               <CardHeader>
-                <CardTitle>Work Information</CardTitle>
+                <CardTitle>İş Məlumatı</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isEditing ? (
                   <>
                     <div>
-                      <Label htmlFor="warehouse">Warehouse</Label>
+                      <Label htmlFor="warehouse">Anbar</Label>
                       <Select defaultValue={worker.warehouse}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Main Distribution Center">Main Distribution Center</SelectItem>
-                          <SelectItem value="West Coast Hub">West Coast Hub</SelectItem>
-                          <SelectItem value="Central Storage">Central Storage</SelectItem>
+                          <SelectItem value="Main Distribution Center">Əsas Paylama Mərkəzi</SelectItem>
+                          <SelectItem value="West Coast Hub">Qərb Sahili Mərkəzi</SelectItem>
+                          <SelectItem value="Central Storage">Mərkəzi Anbar</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
-                      <Label htmlFor="shift">Shift</Label>
+                      <Label htmlFor="shift">Növbə</Label>
                       <Select defaultValue={worker.shift}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Morning">Morning</SelectItem>
-                          <SelectItem value="Evening">Evening</SelectItem>
-                          <SelectItem value="Night">Night</SelectItem>
+                          <SelectItem value="Morning">Səhər</SelectItem>
+                          <SelectItem value="Evening">Axşam</SelectItem>
+                          <SelectItem value="Night">Gecə</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -229,9 +229,9 @@ export function WorkerDetailsPage({ workerId, onBack }: WorkerDetailsPageProps) 
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Active">Active</SelectItem>
-                          <SelectItem value="On Leave">On Leave</SelectItem>
-                          <SelectItem value="Inactive">Inactive</SelectItem>
+                          <SelectItem value="Active">Aktiv</SelectItem>
+                          <SelectItem value="On Leave">Məzuniyyətdə</SelectItem>
+                          <SelectItem value="Inactive">Qeyri-aktiv</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -269,7 +269,7 @@ export function WorkerDetailsPage({ workerId, onBack }: WorkerDetailsPageProps) 
 
             <Card>
               <CardHeader>
-                <CardTitle>Emergency Contact</CardTitle>
+                <CardTitle>Təcili Əlaqə</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
@@ -289,7 +289,7 @@ export function WorkerDetailsPage({ workerId, onBack }: WorkerDetailsPageProps) 
 
             <Card>
               <CardHeader>
-                <CardTitle>Quick Stats</CardTitle>
+                <CardTitle>Qısa Statistika</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
@@ -317,7 +317,7 @@ export function WorkerDetailsPage({ workerId, onBack }: WorkerDetailsPageProps) 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Performance Metrics</CardTitle>
+                <CardTitle>Performans Göstəriciləri</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
@@ -346,7 +346,7 @@ export function WorkerDetailsPage({ workerId, onBack }: WorkerDetailsPageProps) 
 
             <Card>
               <CardHeader>
-                <CardTitle>Performance Rating</CardTitle>
+                <CardTitle>Performans Reytinqi</CardTitle>
               </CardHeader>
               <CardContent className="flex items-center justify-center">
                 <div className="text-center">
@@ -362,20 +362,20 @@ export function WorkerDetailsPage({ workerId, onBack }: WorkerDetailsPageProps) 
         <TabsContent value="tasks" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Tasks</CardTitle>
-              <CardDescription>Latest task activities and performance</CardDescription>
+              <CardTitle>Son Tapşırıqlar</CardTitle>
+              <CardDescription>Son tapşırıq fəaliyyətləri və performans</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Task ID</TableHead>
-                    <TableHead>Order</TableHead>
-                    <TableHead>Type</TableHead>
+                    <TableHead>Tapşırıq ID</TableHead>
+                    <TableHead>Sifariş</TableHead>
+                    <TableHead>Növ</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Accuracy</TableHead>
-                    <TableHead>Completed</TableHead>
+                    <TableHead>Müddət</TableHead>
+                    <TableHead>Dəqiqlik</TableHead>
+                    <TableHead>Tamamlanıb</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -414,18 +414,18 @@ export function WorkerDetailsPage({ workerId, onBack }: WorkerDetailsPageProps) 
         <TabsContent value="certifications" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Certifications & Training</CardTitle>
-              <CardDescription>Worker certifications and training records</CardDescription>
+              <CardTitle>Sertifikatlar və Təlimlər</CardTitle>
+              <CardDescription>İşçi sertifikatları və təlim qeydləri</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Certification</TableHead>
-                    <TableHead>Issue Date</TableHead>
-                    <TableHead>Expiry Date</TableHead>
+                    <TableHead>Sertifikat</TableHead>
+                    <TableHead>Verilmə Tarixi</TableHead>
+                    <TableHead>Bitmə Tarixi</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>Əməliyyatlar</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

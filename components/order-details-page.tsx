@@ -58,11 +58,11 @@ export function OrderDetailsPage({ task, onBack, onCompleteProduct }: OrderDetai
         <div className="flex items-center space-x-4">
           <Button variant="outline" onClick={onBack} className="flex items-center">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Tasks
+            Tapşırıqlara Qayıt
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-purple-primary">Order Details</h1>
-            <p className="text-gray-600">Complete order processing tasks</p>
+            <h1 className="text-2xl font-bold text-purple-primary">Sifariş Təfərrüatları</h1>
+            <p className="text-gray-600">Sifariş emalı tapşırıqlarını tamamlayın</p>
           </div>
         </div>
         <Badge variant={getPriorityColor(task.priority)} className="text-sm px-3 py-1">
@@ -144,11 +144,11 @@ export function OrderDetailsPage({ task, onBack, onCompleteProduct }: OrderDetai
       {/* Products List */}
       <Card>
         <CardHeader>
-          <CardTitle>Products to Process</CardTitle>
+          <CardTitle>Emal Ediləcək Məhsullar</CardTitle>
           <CardDescription>
             {task.orderType === "Outgoing"
-              ? "Pick these items from their locations"
-              : "Put away these items to their designated locations"}
+              ? "Bu məhsulları yerləşdikləri yerdən götürün"
+              : "Bu məhsulları təyin olunmuş yerlərinə qoyun"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -197,7 +197,7 @@ export function OrderDetailsPage({ task, onBack, onCompleteProduct }: OrderDetai
                         className="bg-purple-primary hover:bg-purple-600"
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
-                        Mark Complete
+                        Tamamlandı Kimi İşarələ
                       </Button>
                     )}
                   </div>
@@ -238,7 +238,7 @@ export function OrderDetailsPage({ task, onBack, onCompleteProduct }: OrderDetai
       <div className="flex justify-between items-center">
         <Button variant="outline" onClick={onBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Task List
+          Tapşırıq Siyahısına Qayıt
         </Button>
 
         <div className="flex space-x-3">

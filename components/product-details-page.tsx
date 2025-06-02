@@ -114,7 +114,7 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
         <div className="flex items-center space-x-4">
           <Button variant="outline" onClick={onBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Products
+            Məhsullara Qayıt
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-purple-primary">{product.name}</h1>
@@ -128,17 +128,17 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
             <>
               <Button variant="outline" onClick={() => setIsEditing(false)}>
                 <X className="h-4 w-4 mr-2" />
-                Cancel
+                Ləğv Et
               </Button>
               <Button onClick={() => setIsEditing(false)}>
                 <Save className="h-4 w-4 mr-2" />
-                Save Changes
+                Dəyişiklikləri Saxla
               </Button>
             </>
           ) : (
             <Button onClick={() => setIsEditing(true)}>
               <Edit className="h-4 w-4 mr-2" />
-              Edit Product
+              Məhsulu Redaktə Et
             </Button>
           )}
         </div>
@@ -146,23 +146,23 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="inventory">Inventory</TabsTrigger>
-          <TabsTrigger value="sales">Sales Data</TabsTrigger>
-          <TabsTrigger value="specifications">Specifications</TabsTrigger>
+          <TabsTrigger value="overview">Ümumi</TabsTrigger>
+          <TabsTrigger value="inventory">İnventar</TabsTrigger>
+          <TabsTrigger value="sales">Satış Məlumatları</TabsTrigger>
+          <TabsTrigger value="specifications">Xüsusiyyətlər</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Product Information</CardTitle>
+                <CardTitle>Məhsul Məlumatı</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isEditing ? (
                   <>
                     <div>
-                      <Label htmlFor="name">Product Name</Label>
+                      <Label htmlFor="name">Məhsul Adı</Label>
                       <Input id="name" defaultValue={product.name} />
                     </div>
                     <div>
@@ -170,11 +170,11 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
                       <Input id="sku" defaultValue={product.sku} />
                     </div>
                     <div>
-                      <Label htmlFor="category">Category</Label>
+                      <Label htmlFor="category">Kateqoriya</Label>
                       <Input id="category" defaultValue={product.category} />
                     </div>
                     <div>
-                      <Label htmlFor="brand">Brand</Label>
+                      <Label htmlFor="brand">Marka</Label>
                       <Input id="brand" defaultValue={product.brand} />
                     </div>
                   </>
@@ -207,17 +207,17 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
 
             <Card>
               <CardHeader>
-                <CardTitle>Pricing & Costs</CardTitle>
+                <CardTitle>Qiymət və Xərclər</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isEditing ? (
                   <>
                     <div>
-                      <Label htmlFor="price">Selling Price</Label>
+                      <Label htmlFor="price">Satış Qiyməti</Label>
                       <Input id="price" type="number" defaultValue={product.price} />
                     </div>
                     <div>
-                      <Label htmlFor="cost">Cost Price</Label>
+                      <Label htmlFor="cost">Maya Dəyəri</Label>
                       <Input id="cost" type="number" defaultValue={product.cost} />
                     </div>
                   </>
@@ -246,7 +246,7 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
 
             <Card>
               <CardHeader>
-                <CardTitle>Stock Status</CardTitle>
+                <CardTitle>Stok Statusu</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
@@ -278,7 +278,7 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
 
           <Card>
             <CardHeader>
-              <CardTitle>Product Description</CardTitle>
+              <CardTitle>Məhsul Təsviri</CardTitle>
             </CardHeader>
             <CardContent>
               {isEditing ? (
@@ -292,7 +292,7 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Physical Properties</CardTitle>
+                <CardTitle>Fiziki Xüsusiyyətlər</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between">
@@ -312,7 +312,7 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
 
             <Card>
               <CardHeader>
-                <CardTitle>Supplier Information</CardTitle>
+                <CardTitle>Təchizatçı Məlumatı</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between">
@@ -336,17 +336,17 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Stock Locations</CardTitle>
-                <CardDescription>Current stock distribution across warehouses</CardDescription>
+                <CardTitle>Stok Yerləri</CardTitle>
+                <CardDescription>Anbarlar üzrə cari stok paylanması</CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Warehouse</TableHead>
-                      <TableHead>Zone</TableHead>
-                      <TableHead>Shelf</TableHead>
-                      <TableHead>Quantity</TableHead>
+                      <TableHead>Anbar</TableHead>
+                      <TableHead>Zona</TableHead>
+                      <TableHead>Rəf</TableHead>
+                      <TableHead>Miqdar</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -367,17 +367,17 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
 
             <Card>
               <CardHeader>
-                <CardTitle>Recent Movements</CardTitle>
-                <CardDescription>Latest inventory movements</CardDescription>
+                <CardTitle>Son Hərəkətlər</CardTitle>
+                <CardDescription>Son inventar hərəkətləri</CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Quantity</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Reference</TableHead>
+                      <TableHead>Növ</TableHead>
+                      <TableHead>Miqdar</TableHead>
+                      <TableHead>Tarix</TableHead>
+                      <TableHead>İstinad</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -461,10 +461,10 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Quantity Purchased</TableHead>
-                    <TableHead>Revenue Generated</TableHead>
-                    <TableHead>Avg Price</TableHead>
+                    <TableHead>Müştəri</TableHead>
+                    <TableHead>Alınmış Miqdar</TableHead>
+                    <TableHead>Yaradılmış Gəlir</TableHead>
+                    <TableHead>Orta Qiymət</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -485,8 +485,8 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
         <TabsContent value="specifications" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Technical Specifications</CardTitle>
-              <CardDescription>Detailed product specifications and features</CardDescription>
+              <CardTitle>Texniki Xüsusiyyətlər</CardTitle>
+              <CardDescription>Ətraflı məhsul xüsusiyyətləri və funksiyaları</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

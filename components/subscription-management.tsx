@@ -9,23 +9,23 @@ export function SubscriptionManagement() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-purple-primary">Subscription Management</h2>
-        <p className="text-gray-600">Manage your subscription plan and billing</p>
+        <h2 className="text-2xl font-bold text-purple-primary">Abunəlik İdarəetməsi</h2>
+        <p className="text-gray-600">Abunəlik planınızı və ödənişlərinizi idarə edin</p>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview" className="flex items-center space-x-2">
             <BarChart3 className="h-4 w-4" />
-            <span>Overview</span>
+            <span>İcmal</span>
           </TabsTrigger>
           <TabsTrigger value="plans" className="flex items-center space-x-2">
             <Package className="h-4 w-4" />
-            <span>Plans</span>
+            <span>Planlar</span>
           </TabsTrigger>
           <TabsTrigger value="billing" className="flex items-center space-x-2">
             <CreditCard className="h-4 w-4" />
-            <span>Billing</span>
+            <span>Ödənişlər</span>
           </TabsTrigger>
         </TabsList>
 
@@ -36,8 +36,8 @@ export function SubscriptionManagement() {
         <TabsContent value="plans">
           <Card>
             <CardHeader>
-              <CardTitle>Choose Your Plan</CardTitle>
-              <CardDescription>Select the plan that best fits your warehouse management needs</CardDescription>
+              <CardTitle>Planınızı Seçin</CardTitle>
+              <CardDescription>Anbar idarəetmə ehtiyaclarınıza ən uyğun planı seçin</CardDescription>
             </CardHeader>
             <CardContent>
               <SubscriptionPlans />
@@ -48,8 +48,8 @@ export function SubscriptionManagement() {
         <TabsContent value="billing">
           <Card>
             <CardHeader>
-              <CardTitle>Billing History</CardTitle>
-              <CardDescription>View your payment history and download invoices</CardDescription>
+              <CardTitle>Ödəniş Tarixçəsi</CardTitle>
+              <CardDescription>Ödəniş tarixçənizi görün və faktura yükləyin</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-8 text-gray-500">Billing history component would go here</div>

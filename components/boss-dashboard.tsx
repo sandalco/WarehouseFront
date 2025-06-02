@@ -343,7 +343,7 @@ export function BossDashboard() {
 
             {/* Dashboard Period Selector */}
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold tracking-tight">Analitika Baxışı</h2>
+              <h2 className="text-2xl font-bold tracking-tight">Analitika İcmalı</h2>
               <Tabs value={dashboardPeriod} onValueChange={setDashboardPeriod} className="w-[400px]">
                 <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="week">Həftə</TabsTrigger>

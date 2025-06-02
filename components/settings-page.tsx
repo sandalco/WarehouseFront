@@ -41,42 +41,44 @@ export function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium">Settings</h3>
-        <p className="text-sm text-muted-foreground">Manage your account settings and set preferences.</p>
+        <h3 className="text-lg font-medium">Tənzimləmələr</h3>
+        <p className="text-sm text-muted-foreground">
+          Hesab tənzimləmələrinizi idarə edin və tərcihlərinizi təyin edin.
+        </p>
       </div>
       <Tabs defaultValue="general" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="subscription">Subscription</TabsTrigger>
+          <TabsTrigger value="general">Ümumi</TabsTrigger>
+          <TabsTrigger value="security">Təhlükəsizlik</TabsTrigger>
+          <TabsTrigger value="notifications">Bildirişlər</TabsTrigger>
+          <TabsTrigger value="subscription">Abunəlik</TabsTrigger>
         </TabsList>
 
         {/* General Settings Tab */}
         <TabsContent value="general">
           <Card>
             <CardHeader>
-              <CardTitle>General Settings</CardTitle>
-              <CardDescription>Manage your account details and preferences.</CardDescription>
+              <CardTitle>Ümumi Tənzimləmələr</CardTitle>
+              <CardDescription>Hesab məlumatlarınızı və tərcihlərinizi idarə edin.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <h4 className="text-sm font-medium">Profile Information</h4>
+                <h4 className="text-sm font-medium">Profil Məlumatı</h4>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
+                    <Label htmlFor="name">Ad</Label>
                     <Input id="name" defaultValue="John Doe" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">E-poçt</Label>
                     <Input id="email" type="email" defaultValue="john.doe@example.com" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="company">Company</Label>
+                    <Label htmlFor="company">Şirkət</Label>
                     <Input id="company" defaultValue="Acme Inc." />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="role">Role</Label>
+                    <Label htmlFor="role">Rol</Label>
                     <Select defaultValue="boss">
                       <SelectTrigger>
                         <SelectValue placeholder="Select role" />
@@ -92,17 +94,17 @@ export function SettingsPage() {
               </div>
 
               <div className="space-y-4">
-                <h4 className="text-sm font-medium">Preferences</h4>
+                <h4 className="text-sm font-medium">Tərcihləri</h4>
                 <div className="flex items-center space-x-2">
                   <Switch id="dark-mode" defaultChecked />
-                  <Label htmlFor="dark-mode">Enable dark mode</Label>
+                  <Label htmlFor="dark-mode">Qaranlıq rejimi aktivləşdir</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch id="compact-view" />
-                  <Label htmlFor="compact-view">Use compact view</Label>
+                  <Label htmlFor="compact-view">Kompakt görünüş istifadə et</Label>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="language">Language</Label>
+                  <Label htmlFor="language">Dil</Label>
                   <Select defaultValue="en">
                     <SelectTrigger>
                       <SelectValue placeholder="Select language" />
@@ -120,7 +122,7 @@ export function SettingsPage() {
             </CardContent>
             <CardFooter>
               <Button onClick={handleSaveGeneral} disabled={loading}>
-                {loading ? "Saving..." : "Save Changes"}
+                {loading ? "Saxlanılır..." : "Dəyişiklikləri Saxla"}
               </Button>
             </CardFooter>
           </Card>
@@ -130,33 +132,33 @@ export function SettingsPage() {
         <TabsContent value="security">
           <Card>
             <CardHeader>
-              <CardTitle>Security Settings</CardTitle>
-              <CardDescription>Manage your password and security preferences.</CardDescription>
+              <CardTitle>Təhlükəsizlik Tənzimləmələri</CardTitle>
+              <CardDescription>Şifrənizi və təhlükəsizlik tərcihlərinizi idarə edin.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <h4 className="text-sm font-medium">Change Password</h4>
+                <h4 className="text-sm font-medium">Şifrəni Dəyişdir</h4>
                 <div className="grid gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="current-password">Current Password</Label>
+                    <Label htmlFor="current-password">Cari Şifrə</Label>
                     <Input id="current-password" type="password" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="new-password">New Password</Label>
+                    <Label htmlFor="new-password">Yeni Şifrə</Label>
                     <Input id="new-password" type="password" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm New Password</Label>
+                    <Label htmlFor="confirm-password">Yeni Şifrəni Təsdiqləyin</Label>
                     <Input id="confirm-password" type="password" />
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <h4 className="text-sm font-medium">Two-Factor Authentication</h4>
+                <h4 className="text-sm font-medium">İki Faktorlu Autentifikasiya</h4>
                 <div className="flex items-center space-x-2">
                   <Switch id="2fa" />
-                  <Label htmlFor="2fa">Enable two-factor authentication</Label>
+                  <Label htmlFor="2fa">İki faktorlu autentifikasiyanı aktivləşdir</Label>
                 </div>
                 <p className="text-sm text-muted-foreground">
                   Add an extra layer of security to your account by requiring a verification code in addition to your
@@ -165,7 +167,7 @@ export function SettingsPage() {
               </div>
 
               <div className="space-y-4">
-                <h4 className="text-sm font-medium">Session Management</h4>
+                <h4 className="text-sm font-medium">Sessiya İdarəetməsi</h4>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div>
@@ -189,7 +191,7 @@ export function SettingsPage() {
             </CardContent>
             <CardFooter>
               <Button onClick={handleSaveSecurity} disabled={loading}>
-                {loading ? "Saving..." : "Save Changes"}
+                {loading ? "Saxlanılır..." : "Dəyişiklikləri Saxla"}
               </Button>
             </CardFooter>
           </Card>
@@ -199,12 +201,12 @@ export function SettingsPage() {
         <TabsContent value="notifications">
           <Card>
             <CardHeader>
-              <CardTitle>Notification Settings</CardTitle>
-              <CardDescription>Manage how you receive notifications and alerts.</CardDescription>
+              <CardTitle>Bildiriş Tənzimləmələri</CardTitle>
+              <CardDescription>Bildiriş və xəbərdarlıqları necə alacağınızı idarə edin.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <h4 className="text-sm font-medium">Email Notifications</h4>
+                <h4 className="text-sm font-medium">E-poçt Bildirişləri</h4>
                 <div className="space-y-3">
                   <div className="flex items-start space-x-2">
                     <Checkbox id="email-orders" defaultChecked />
@@ -248,7 +250,7 @@ export function SettingsPage() {
               </div>
 
               <div className="space-y-4">
-                <h4 className="text-sm font-medium">Push Notifications</h4>
+                <h4 className="text-sm font-medium">Push Bildirişləri</h4>
                 <div className="space-y-3">
                   <div className="flex items-start space-x-2">
                     <Checkbox id="push-orders" defaultChecked />
@@ -274,24 +276,24 @@ export function SettingsPage() {
               </div>
 
               <div className="space-y-4">
-                <h4 className="text-sm font-medium">Notification Frequency</h4>
+                <h4 className="text-sm font-medium">Bildiriş Tezliyi</h4>
                 <div className="space-y-2">
-                  <Label htmlFor="frequency">Email Digest Frequency</Label>
+                  <Label htmlFor="frequency">E-poçt Xülasə Tezliyi</Label>
                   <Select defaultValue="daily">
                     <SelectTrigger>
-                      <SelectValue placeholder="Select frequency" />
+                      <SelectValue placeholder="Tezlik seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="realtime">Real-time</SelectItem>
-                      <SelectItem value="daily">Daily Digest</SelectItem>
-                      <SelectItem value="weekly">Weekly Digest</SelectItem>
+                      <SelectItem value="realtime">Real vaxt</SelectItem>
+                      <SelectItem value="daily">Gündəlik Xülasə</SelectItem>
+                      <SelectItem value="weekly">Həftəlik Xülasə</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
             </CardContent>
             <CardFooter>
-              <Button>Save Changes</Button>
+              <Button>Dəyişiklikləri Saxla</Button>
             </CardFooter>
           </Card>
         </TabsContent>

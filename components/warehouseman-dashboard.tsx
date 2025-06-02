@@ -71,7 +71,7 @@ function TaskSummaryCard({ task, onViewDetails }: { task: any; onViewDetails: (t
           </div>
           <Button onClick={() => onViewDetails(task)} className="bg-purple-primary hover:bg-purple-600">
             <Eye className="h-4 w-4 mr-2" />
-            View Details
+            Ətraflı Bax
           </Button>
         </div>
       </div>
@@ -270,19 +270,19 @@ export function WarehousemanDashboard() {
   const getPageTitle = () => {
     switch (activeTab) {
       case "tasks":
-        return "My Tasks"
+        return "Mənim Tapşırıqlarım"
       case "order-details":
-        return "Order Details"
+        return "Sifariş Təfərrüatları"
       case "inventory":
-        return "Inventory"
+        return "İnventar"
       case "completed":
-        return "Completed"
+        return "Tamamlanmış"
       case "settings":
-        return "Settings"
+        return "Tənzimləmələr"
       case "profile":
-        return "My Profile"
+        return "Mənim Profilim"
       default:
-        return "My Tasks"
+        return "Mənim Tapşırıqlarım"
     }
   }
 
@@ -292,8 +292,10 @@ export function WarehousemanDashboard() {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Pending Orders</CardTitle>
-              <CardDescription>Orders assigned to you - click "View Details" to start processing</CardDescription>
+              <CardTitle>Gözləyən Sifarişlər</CardTitle>
+              <CardDescription>
+                Sizə təyin edilmiş sifarişlər - işləməyə başlamaq üçün "Ətraflı Bax" düyməsinə klikləyin
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -440,7 +442,11 @@ export function WarehousemanDashboard() {
             </DropdownMenu>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4">{renderContent()}</div>
+        <div className="flex flex-1 flex-col gap-4 p-4">
+          <h1 className="text-2xl font-bold text-purple-primary">Mənim Tapşırıqlarım</h1>
+          <p className="text-gray-600">Sizə təyin edilmiş tapşırıqlar</p>
+          {renderContent()}
+        </div>
       </SidebarInset>
     </SidebarProvider>
   )
