@@ -129,8 +129,8 @@ export function ImportExportButtons({
     (type: "products" | "warehouses" | "customers") => {
       downloadTemplate(type)
       toast({
-        title: "Template Downloaded",
-        description: `${type}_template.xlsx has been downloaded successfully.`,
+        title: "Şablon Yükləndi",
+        description: `${type}_template.xlsx uğurla yükləndi.`,
       })
     },
     [toast],
@@ -140,8 +140,8 @@ export function ImportExportButtons({
     (type: "products" | "warehouses" | "customers", data: any[]) => {
       exportData(type, data)
       toast({
-        title: "Data Exported",
-        description: `${type}_export.csv has been downloaded successfully.`,
+        title: "Məlumatlar İxrac Edildi",
+        description: `${type}_export.csv uğurla yükləndi.`,
       })
     },
     [toast],
@@ -163,7 +163,7 @@ export function ImportExportButtons({
         className="border-purple-primary text-purple-primary hover:bg-purple-primary hover:text-white"
       >
         <Download className="h-4 w-4 mr-2" />
-        Template
+        Şablon
       </Button>
 
       <label className="cursor-pointer">
@@ -175,7 +175,7 @@ export function ImportExportButtons({
         >
           <span>
             <Upload className="h-4 w-4 mr-2" />
-            Import
+            İdxal
           </span>
         </Button>
         <input type="file" accept=".xlsx,.xls,.csv" onChange={handleFileUpload} className="hidden" />
@@ -188,7 +188,7 @@ export function ImportExportButtons({
         className="border-purple-primary text-purple-primary hover:bg-purple-primary hover:text-white"
       >
         <Download className="h-4 w-4 mr-2" />
-        Export
+        İxrac
       </Button>
     </div>
   )

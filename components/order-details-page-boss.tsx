@@ -113,28 +113,28 @@ export function OrderDetailsPageBoss({ order, onBack }: OrderDetailsPageBossProp
         <div className="flex items-center space-x-4">
           <Button variant="outline" onClick={onBack} className="flex items-center">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Orders
+            Sifarişlərə Qayıt
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-purple-primary">Order Details</h1>
-            <p className="text-gray-600">View and manage order information</p>
+            <h1 className="text-2xl font-bold text-purple-primary">Sifariş Təfərrüatları</h1>
+            <p className="text-gray-600">Sifariş məlumatlarını görün və idarə edin</p>
           </div>
         </div>
         <div className="flex items-center space-x-3">
           {!isEditing ? (
             <Button onClick={() => setIsEditing(true)} className="bg-purple-primary hover:bg-purple-600">
               <Edit className="h-4 w-4 mr-2" />
-              Edit Order
+              Sifarişi Redaktə Et
             </Button>
           ) : (
             <div className="flex space-x-2">
               <Button onClick={handleSaveChanges} className="bg-purple-primary hover:bg-purple-600">
                 <Save className="h-4 w-4 mr-2" />
-                Save Changes
+                Dəyişiklikləri Saxla
               </Button>
               <Button onClick={handleCancelEdit} variant="outline">
                 <X className="h-4 w-4 mr-2" />
-                Cancel
+                Ləğv Et
               </Button>
             </div>
           )}
@@ -253,10 +253,10 @@ export function OrderDetailsPageBoss({ order, onBack }: OrderDetailsPageBossProp
       {/* Products List */}
       <Card>
         <CardHeader>
-          <CardTitle>Order Products</CardTitle>
+          <CardTitle>Sifariş Məhsulları</CardTitle>
           <CardDescription>
-            Products included in this order
-            {order.products && ` (${order.products.length} items)`}
+            Bu sifarişə daxil olan məhsullar
+            {order.products && ` (${order.products.length} məhsul)`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -327,7 +327,7 @@ export function OrderDetailsPageBoss({ order, onBack }: OrderDetailsPageBossProp
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Financial Summary</CardTitle>
+            <CardTitle>Maliyyə Xülasəsi</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between">
@@ -353,7 +353,7 @@ export function OrderDetailsPageBoss({ order, onBack }: OrderDetailsPageBossProp
 
         <Card>
           <CardHeader>
-            <CardTitle>Order Timeline</CardTitle>
+            <CardTitle>Sifariş Zaman Qrafiki</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center space-x-3">
@@ -394,7 +394,7 @@ export function OrderDetailsPageBoss({ order, onBack }: OrderDetailsPageBossProp
       {/* Notes Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Order Notes</CardTitle>
+          <CardTitle>Sifariş Qeydləri</CardTitle>
         </CardHeader>
         <CardContent>
           {isEditing ? (

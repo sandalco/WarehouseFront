@@ -93,10 +93,10 @@ export function SubscriptionDashboard() {
             <div>
               <CardTitle className="flex items-center space-x-2">
                 {getStatusIcon(currentSubscription.status)}
-                <span>Current Subscription</span>
+                <span>Cari Abunəlik</span>
               </CardTitle>
               <CardDescription>
-                {currentPlan?.name} Plan - {currentSubscription.status}
+                {currentPlan?.name} Planı - {currentSubscription.status}
               </CardDescription>
             </div>
             <Badge variant={currentSubscription.status === "active" ? "default" : "secondary"} className="capitalize">
@@ -118,7 +118,7 @@ export function SubscriptionDashboard() {
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
                 <Calendar className="h-4 w-4 text-gray-500" />
-                <span className="text-sm font-medium">Next Billing</span>
+                <span className="text-sm font-medium">Növbəti Ödəniş</span>
               </div>
               <p className="text-lg">{formatDate(currentSubscription.currentPeriodEnd)}</p>
             </div>
@@ -128,7 +128,7 @@ export function SubscriptionDashboard() {
 
           {/* Usage Statistics */}
           <div className="space-y-4">
-            <h4 className="font-semibold">Usage Overview</h4>
+            <h4 className="font-semibold">İstifadə İcmalı</h4>
 
             <div className="grid gap-4 md:grid-cols-2">
               {/* Warehouses */}
@@ -136,7 +136,7 @@ export function SubscriptionDashboard() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Warehouse className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm">Warehouses</span>
+                    <span className="text-sm">Anbarlar</span>
                   </div>
                   <span
                     className={`text-sm font-medium ${getUsageColor(
@@ -163,7 +163,7 @@ export function SubscriptionDashboard() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Users className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm">Users</span>
+                    <span className="text-sm">İstifadəçilər</span>
                   </div>
                   <span
                     className={`text-sm font-medium ${getUsageColor(
@@ -187,7 +187,7 @@ export function SubscriptionDashboard() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <ShoppingCart className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm">Orders (this month)</span>
+                    <span className="text-sm">Sifarişlər (bu ay)</span>
                   </div>
                   <span
                     className={`text-sm font-medium ${getUsageColor(
@@ -211,7 +211,7 @@ export function SubscriptionDashboard() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <HardDrive className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm">Storage</span>
+                    <span className="text-sm">Yaddaş</span>
                   </div>
                   <span className="text-sm font-medium">
                     {currentSubscription.usage.storageUsed} / {currentPlan?.limits.storage}
@@ -227,11 +227,13 @@ export function SubscriptionDashboard() {
           <div className="flex space-x-4">
             {currentSubscription.status === "active" && !currentSubscription.cancelAtPeriodEnd && (
               <Button variant="outline" onClick={cancelSubscription}>
-                Cancel Subscription
+                Abunəliyi Ləğv Et
               </Button>
             )}
 
-            {currentSubscription.cancelAtPeriodEnd && <Button onClick={resumeSubscription}>Resume Subscription</Button>}
+            {currentSubscription.cancelAtPeriodEnd && (
+              <Button onClick={resumeSubscription}>Abunəliyi Davam Etdir</Button>
+            )}
           </div>
 
           {/* Cancellation Notice */}
@@ -239,11 +241,11 @@ export function SubscriptionDashboard() {
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <div className="flex items-center space-x-2">
                 <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                <span className="font-medium text-yellow-800">Subscription Cancelled</span>
+                <span className="font-medium text-yellow-800">Abunəlik Ləğv Edilib</span>
               </div>
               <p className="text-sm text-yellow-700 mt-1">
-                Your subscription will end on {formatDate(currentSubscription.currentPeriodEnd)}. You can resume it
-                anytime before then.
+                Abunəliyiniz {formatDate(currentSubscription.currentPeriodEnd)} tarixində bitəcək. O vaxta qədər
+                istənilən vaxt onu bərpa edə bilərsiniz.
               </p>
             </div>
           )}

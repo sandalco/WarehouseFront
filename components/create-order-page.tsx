@@ -236,11 +236,11 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
         <div className="flex items-center space-x-4">
           <Button variant="outline" onClick={onBack} className="flex items-center">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Orders
+            Sifarişlərə Qayıt
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-purple-primary">Create New Order</h1>
-            <p className="text-gray-600">Create a new incoming or outgoing order</p>
+            <h1 className="text-2xl font-bold text-purple-primary">Yeni Sifariş Yarat</h1>
+            <p className="text-gray-600">Yeni daxil olan və ya çıxan sifariş yaradın</p>
           </div>
         </div>
       </div>
@@ -251,29 +251,29 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
           {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle>Order Information</CardTitle>
-              <CardDescription>Basic details about the order</CardDescription>
+              <CardTitle>Sifariş Məlumatları</CardTitle>
+              <CardDescription>Sifariş haqqında əsas məlumatlar</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="orderType">Order Type *</Label>
+                  <Label htmlFor="orderType">Sifariş Növü *</Label>
                   <Select value={orderType} onValueChange={(value: "incoming" | "outgoing") => setOrderType(value)}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select order type" />
+                      <SelectValue placeholder="Sifariş növünü seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="incoming">Incoming (Receiving)</SelectItem>
-                      <SelectItem value="outgoing">Outgoing (Shipping)</SelectItem>
+                      <SelectItem value="incoming">Daxil olan (Qəbul)</SelectItem>
+                      <SelectItem value="outgoing">Çıxan (Göndərmə)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
-                  <Label htmlFor="warehouse">Warehouse *</Label>
+                  <Label htmlFor="warehouse">Anbar *</Label>
                   <Select value={selectedWarehouse} onValueChange={setSelectedWarehouse}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select warehouse" />
+                      <SelectValue placeholder="Anbar seçin" />
                     </SelectTrigger>
                     <SelectContent>
                       {warehouses.map((warehouse) => (
@@ -293,10 +293,10 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {orderType === "outgoing" && (
                   <div>
-                    <Label htmlFor="customer">Customer *</Label>
+                    <Label htmlFor="customer">Müştəri *</Label>
                     <Select value={selectedCustomer} onValueChange={setSelectedCustomer}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select customer" />
+                        <SelectValue placeholder="Müştəri seçin" />
                       </SelectTrigger>
                       <SelectContent>
                         {customers.map((customer) => (
@@ -314,10 +314,10 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
 
                 {orderType === "incoming" && (
                   <div>
-                    <Label htmlFor="vendor">Vendor *</Label>
+                    <Label htmlFor="vendor">Təchizatçı *</Label>
                     <Select value={selectedVendor} onValueChange={setSelectedVendor}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select vendor" />
+                        <SelectValue placeholder="Təchizatçı seçin" />
                       </SelectTrigger>
                       <SelectContent>
                         {vendors.map((vendor) => (
@@ -334,22 +334,22 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
                 )}
 
                 <div>
-                  <Label htmlFor="priority">Priority *</Label>
+                  <Label htmlFor="priority">Prioritet *</Label>
                   <Select value={priority} onValueChange={setPriority}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select priority" />
+                      <SelectValue placeholder="Prioritet seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="high">Yüksək</SelectItem>
+                      <SelectItem value="medium">Orta</SelectItem>
+                      <SelectItem value="low">Aşağı</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="dueDate">Due Date *</Label>
+                <Label htmlFor="dueDate">Son Tarix *</Label>
                 <Input
                   id="dueDate"
                   type="date"
@@ -360,10 +360,10 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
               </div>
 
               <div>
-                <Label htmlFor="notes">Notes</Label>
+                <Label htmlFor="notes">Qeydlər</Label>
                 <Textarea
                   id="notes"
-                  placeholder="Additional notes or special instructions..."
+                  placeholder="Əlavə qeydlər və ya xüsusi təlimatlar..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
@@ -375,16 +375,16 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
           {/* Add Products */}
           <Card>
             <CardHeader>
-              <CardTitle>Add Products</CardTitle>
-              <CardDescription>Select products and quantities for this order</CardDescription>
+              <CardTitle>Məhsul Əlavə Et</CardTitle>
+              <CardDescription>Bu sifariş üçün məhsul və miqdar seçin</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="md:col-span-2">
-                  <Label htmlFor="product">Product</Label>
+                  <Label htmlFor="product">Məhsul</Label>
                   <Select value={selectedProduct} onValueChange={setSelectedProduct}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select product" />
+                      <SelectValue placeholder="Məhsul seçin" />
                     </SelectTrigger>
                     <SelectContent>
                       {availableProducts.map((product) => (
@@ -410,7 +410,7 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
                 </div>
 
                 <div>
-                  <Label htmlFor="quantity">Quantity</Label>
+                  <Label htmlFor="quantity">Miqdar</Label>
                   <div className="flex items-center space-x-2">
                     <Input
                       id="quantity"
@@ -432,8 +432,8 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
           {orderProducts.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Order Products ({orderProducts.length})</CardTitle>
-                <CardDescription>Products added to this order</CardDescription>
+                <CardTitle>Sifariş Məhsulları ({orderProducts.length})</CardTitle>
+                <CardDescription>Bu sifarişə əlavə edilmiş məhsullar</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -496,7 +496,7 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
+              <CardTitle>Sifariş Xülasəsi</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -561,7 +561,7 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
 
               <Button onClick={handleCreateOrder} className="w-full bg-purple-primary hover:bg-purple-600">
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Create Order
+                Sifariş Yarat
               </Button>
             </CardContent>
           </Card>
@@ -569,7 +569,7 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
           {/* Validation Status */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Validation Status</CardTitle>
+              <CardTitle className="text-sm">Doğrulama Statusu</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex items-center space-x-2 text-sm">

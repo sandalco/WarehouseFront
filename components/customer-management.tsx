@@ -105,8 +105,8 @@ export function CustomerManagement({ onViewCustomerOrders }: CustomerManagementP
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-purple-primary">Customer Management</h2>
-          <p className="text-gray-600">Manage your customers and their order history</p>
+          <h2 className="text-2xl font-bold text-purple-primary">Müştəri İdarəetməsi</h2>
+          <p className="text-gray-600">Müştərilərinizi və onların sifariş tarixçəsini idarə edin</p>
         </div>
         <div className="flex space-x-3">
           <ImportExportButtons type="customers" data={customersList} onImport={handleImport} />
@@ -114,45 +114,45 @@ export function CustomerManagement({ onViewCustomerOrders }: CustomerManagementP
             <DialogTrigger asChild>
               <Button className="bg-purple-primary hover:bg-purple-600">
                 <Plus className="h-4 w-4 mr-2" />
-                Add Customer
+                Müştəri Əlavə Et
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add New Customer</DialogTitle>
-                <DialogDescription>Enter the details for the new customer</DialogDescription>
+                <DialogTitle>Yeni Müştəri Əlavə Et</DialogTitle>
+                <DialogDescription>Yeni müştəri üçün məlumatları daxil edin</DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="customerName">Company Name</Label>
-                  <Input id="customerName" placeholder="Enter company name" />
+                  <Label htmlFor="customerName">Şirkət Adı</Label>
+                  <Input id="customerName" placeholder="Şirkət adını daxil edin" />
                 </div>
                 <div>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">E-poçt</Label>
                   <Input id="email" type="email" placeholder="contact@company.com" />
                 </div>
                 <div>
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone">Telefon</Label>
                   <Input id="phone" placeholder="+1 (555) 123-4567" />
                 </div>
                 <div>
-                  <Label htmlFor="address">Address</Label>
-                  <Input id="address" placeholder="Full business address" />
+                  <Label htmlFor="address">Ünvan</Label>
+                  <Input id="address" placeholder="Tam biznes ünvanı" />
                 </div>
                 <div>
-                  <Label htmlFor="type">Customer Type</Label>
+                  <Label htmlFor="type">Müştəri Növü</Label>
                   <select className="w-full p-2 border rounded-md">
-                    <option value="">Select type</option>
-                    <option value="Enterprise">Enterprise</option>
-                    <option value="SMB">Small/Medium Business</option>
-                    <option value="Startup">Startup</option>
+                    <option value="">Növ seçin</option>
+                    <option value="Enterprise">Müəssisə</option>
+                    <option value="SMB">Kiçik/Orta Biznes</option>
+                    <option value="Startup">Startap</option>
                   </select>
                 </div>
                 <div className="flex justify-end space-x-2">
                   <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                    Cancel
+                    Ləğv Et
                   </Button>
-                  <Button onClick={() => setIsAddDialogOpen(false)}>Add Customer</Button>
+                  <Button onClick={() => setIsAddDialogOpen(false)}>Müştəri Əlavə Et</Button>
                 </div>
               </div>
             </DialogContent>
@@ -163,7 +163,7 @@ export function CustomerManagement({ onViewCustomerOrders }: CustomerManagementP
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
+            <CardTitle className="text-sm font-medium">Ümumi Müştərilər</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{customersList.length}</div>
@@ -174,7 +174,7 @@ export function CustomerManagement({ onViewCustomerOrders }: CustomerManagementP
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Active Customers</CardTitle>
+            <CardTitle className="text-sm font-medium">Aktiv Müştərilər</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{customersList.filter((c) => c.status === "Active").length}</div>
@@ -185,7 +185,7 @@ export function CustomerManagement({ onViewCustomerOrders }: CustomerManagementP
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+            <CardTitle className="text-sm font-medium">Ümumi Sifarişlər</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{customersList.reduce((sum, c) => sum + c.totalOrders, 0)}</div>
@@ -196,7 +196,7 @@ export function CustomerManagement({ onViewCustomerOrders }: CustomerManagementP
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium">Ümumi Gəlir</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -211,13 +211,13 @@ export function CustomerManagement({ onViewCustomerOrders }: CustomerManagementP
 
       <Card>
         <CardHeader>
-          <CardTitle>Customers</CardTitle>
+          <CardTitle>Müştərilər</CardTitle>
           <CardDescription>
             <div className="flex items-center space-x-4">
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search customers..."
+                  placeholder="Müştəriləri axtar..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -230,14 +230,14 @@ export function CustomerManagement({ onViewCustomerOrders }: CustomerManagementP
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Customer</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Orders</TableHead>
-                <TableHead>Total Value</TableHead>
-                <TableHead>Last Order</TableHead>
+                <TableHead>Müştəri</TableHead>
+                <TableHead>Əlaqə</TableHead>
+                <TableHead>Növ</TableHead>
+                <TableHead>Sifarişlər</TableHead>
+                <TableHead>Ümumi Dəyər</TableHead>
+                <TableHead>Son Sifariş</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>Əməliyyatlar</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

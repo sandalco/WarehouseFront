@@ -96,16 +96,16 @@ export function CustomerOrdersPage({ customerId, customerName, onBack, onViewOrd
         <div className="flex items-center space-x-4">
           <Button variant="outline" onClick={onBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Customers
+            Müştərilərə Qayıt
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-purple-primary">Orders for {customerName}</h1>
-            <p className="text-gray-600">{customerId} • Order History</p>
+            <h1 className="text-2xl font-bold text-purple-primary">{customerName} üçün Sifarişlər</h1>
+            <p className="text-gray-600">{customerId} • Sifariş Tarixçəsi</p>
           </div>
         </div>
         <Button variant="outline">
           <Download className="h-4 w-4 mr-2" />
-          Export Orders
+          Sifarişləri İxrac Et
         </Button>
       </div>
 
@@ -113,7 +113,7 @@ export function CustomerOrdersPage({ customerId, customerName, onBack, onViewOrd
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+            <CardTitle className="text-sm font-medium">Ümumi Sifarişlər</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{customerStats.totalOrders}</div>
@@ -124,7 +124,7 @@ export function CustomerOrdersPage({ customerId, customerName, onBack, onViewOrd
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Spent</CardTitle>
+            <CardTitle className="text-sm font-medium">Ümumi Xərclənmiş</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${customerStats.totalSpent.toLocaleString()}</div>
@@ -135,7 +135,7 @@ export function CustomerOrdersPage({ customerId, customerName, onBack, onViewOrd
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Avg Order Value</CardTitle>
+            <CardTitle className="text-sm font-medium">Orta Sifariş Dəyəri</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${customerStats.avgOrderValue.toFixed(2)}</div>
@@ -144,7 +144,7 @@ export function CustomerOrdersPage({ customerId, customerName, onBack, onViewOrd
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Last Order</CardTitle>
+            <CardTitle className="text-sm font-medium">Son Sifariş</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{customerStats.lastOrderDate}</div>
@@ -156,7 +156,7 @@ export function CustomerOrdersPage({ customerId, customerName, onBack, onViewOrd
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Order History</CardTitle>
+          <CardTitle>Sifariş Tarixçəsi</CardTitle>
           <CardDescription>
             <div className="flex items-center space-x-4 mt-4">
               <div className="relative flex-1 max-w-sm">
@@ -173,20 +173,20 @@ export function CustomerOrdersPage({ customerId, customerName, onBack, onViewOrd
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="delivered">Delivered</SelectItem>
-                  <SelectItem value="processing">Processing</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                  <SelectItem value="all">Bütün Statuslar</SelectItem>
+                  <SelectItem value="delivered">Çatdırılıb</SelectItem>
+                  <SelectItem value="processing">Emal olunur</SelectItem>
+                  <SelectItem value="cancelled">Ləğv edilib</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={dateFilter} onValueChange={setDateFilter}>
                 <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Date Range" />
+                  <SelectValue placeholder="Tarix Aralığı" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Time</SelectItem>
-                  <SelectItem value="recent">Last 30 Days</SelectItem>
-                  <SelectItem value="older">Older than 30 Days</SelectItem>
+                  <SelectItem value="all">Bütün Zamanlar</SelectItem>
+                  <SelectItem value="recent">Son 30 Gün</SelectItem>
+                  <SelectItem value="older">30 Gündən Köhnə</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -196,14 +196,14 @@ export function CustomerOrdersPage({ customerId, customerName, onBack, onViewOrd
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Date</TableHead>
+                <TableHead>Sifariş ID</TableHead>
+                <TableHead>Tarix</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Items</TableHead>
-                <TableHead>Products</TableHead>
-                <TableHead>Warehouse</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>Məhsullar</TableHead>
+                <TableHead>Anbar</TableHead>
+                <TableHead>Cəmi</TableHead>
+                <TableHead>Əməliyyatlar</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -256,7 +256,7 @@ export function CustomerOrdersPage({ customerId, customerName, onBack, onViewOrd
                   <TableCell>
                     <Button variant="outline" size="sm" onClick={() => onViewOrder(order.id)}>
                       <Eye className="h-4 w-4 mr-1" />
-                      View
+                      Bax
                     </Button>
                   </TableCell>
                 </TableRow>

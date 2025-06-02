@@ -60,11 +60,11 @@ export function SubscriptionPlans() {
 
   const getButtonText = (plan: SubscriptionPlan) => {
     if (isCurrentPlan(plan.id)) {
-      return "Current Plan"
+      return "Cari Plan"
     }
 
     if (!currentSubscription) {
-      return "Get Started"
+      return "Başla"
     }
 
     const currentTierOrder = ["bronze", "silver", "gold"]
@@ -72,12 +72,12 @@ export function SubscriptionPlans() {
     const newIndex = currentTierOrder.indexOf(plan.tier)
 
     if (newIndex > currentIndex) {
-      return "Upgrade"
+      return "Yüksəlt"
     } else if (newIndex < currentIndex) {
-      return "Downgrade"
+      return "Endir"
     }
 
-    return "Select Plan"
+    return "Planı Seç"
   }
 
   if (isLoading) {
@@ -104,16 +104,16 @@ export function SubscriptionPlans() {
     <div className="space-y-6">
       {/* Billing Toggle */}
       <div className="flex items-center justify-center space-x-4">
-        <Label htmlFor="billing-toggle">Monthly</Label>
+        <Label htmlFor="billing-toggle">Aylıq</Label>
         <Switch
           id="billing-toggle"
           checked={billingCycle === "yearly"}
           onCheckedChange={(checked) => setBillingCycle(checked ? "yearly" : "monthly")}
         />
         <Label htmlFor="billing-toggle">
-          Yearly
+          İllik
           <Badge variant="secondary" className="ml-2">
-            Save 20%
+            20% Endirim
           </Badge>
         </Label>
       </div>
@@ -150,13 +150,13 @@ export function SubscriptionPlans() {
                   <div className="text-4xl font-bold">
                     ${billingCycle === "yearly" ? Math.round(plan.price * 0.8) : plan.price}
                     <span className="text-lg font-normal text-gray-600">
-                      /{billingCycle === "yearly" ? "year" : "month"}
+                      /{billingCycle === "yearly" ? "il" : "ay"}
                     </span>
                   </div>
                   {billingCycle === "yearly" && (
                     <div className="text-sm text-gray-500">
                       <span className="line-through">${plan.price * 12}</span>
-                      <span className="ml-2 text-green-600">Save ${plan.price * 12 * 0.2}/year</span>
+                      <span className="ml-2 text-green-600">İldə ${plan.price * 12 * 0.2} qənaət edin</span>
                     </div>
                   )}
                 </div>
@@ -175,12 +175,12 @@ export function SubscriptionPlans() {
 
                 {/* Limits */}
                 <div className="border-t pt-4 space-y-2">
-                  <h4 className="font-semibold text-sm">Limits:</h4>
+                  <h4 className="font-semibold text-sm">Limitlər:</h4>
                   <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                    <div>Warehouses: {plan.limits.warehouses === -1 ? "Unlimited" : plan.limits.warehouses}</div>
-                    <div>Users: {plan.limits.users === -1 ? "Unlimited" : plan.limits.users}</div>
-                    <div>Orders/month: {plan.limits.orders === -1 ? "Unlimited" : plan.limits.orders}</div>
-                    <div>Storage: {plan.limits.storage}</div>
+                    <div>Anbarlar: {plan.limits.warehouses === -1 ? "Limitsiz" : plan.limits.warehouses}</div>
+                    <div>İstifadəçilər: {plan.limits.users === -1 ? "Limitsiz" : plan.limits.users}</div>
+                    <div>Sifarişlər/ay: {plan.limits.orders === -1 ? "Limitsiz" : plan.limits.orders}</div>
+                    <div>Yaddaş: {plan.limits.storage}</div>
                   </div>
                 </div>
 
