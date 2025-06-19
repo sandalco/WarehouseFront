@@ -36,4 +36,3 @@ export async function getHistory(): Promise<SubscriptionHistory[]> {
     throw error;
   }
 }
-
