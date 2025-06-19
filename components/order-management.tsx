@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -18,74 +18,31 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Plus, Search, Edit, Eye, ArrowUpCircle, ArrowDownCircle } from "lucide-react"
+import { Order } from "@/types/order"
+import { getOrdersByCompany } from "@/lib/api/order"
 
 export function OrderManagement() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [orders, setOrders] = useState<Order[]>([])
 
-  const orders = [
-    {
-      id: "ORD-001",
-      type: "Outgoing",
-      customer: "ABC Corporation",
-      vendor: null,
-      products: [{ name: "Laptop Dell XPS 13", quantity: 5, price: 1299.99 }],
-      totalValue: 6499.95,
-      status: "Processing",
-      priority: "High",
-      createdAt: "2024-01-15",
-      dueDate: "2024-01-18",
-    },
-    {
-      id: "ORD-002",
-      type: "Incoming",
-      customer: null,
-      vendor: "Tech Supplies Inc",
-      products: [{ name: "Wireless Mouse", quantity: 100, price: 29.99 }],
-      totalValue: 2999.0,
-      status: "Completed",
-      priority: "Medium",
-      createdAt: "2024-01-14",
-      dueDate: "2024-01-16",
-    },
-    {
-      id: "ORD-003",
-      type: "Outgoing",
-      customer: "XYZ Limited",
-      vendor: null,
-      products: [
-        { name: "Monitor 24 inch", quantity: 3, price: 299.99 },
-        { name: "Keyboard Mechanical", quantity: 3, price: 89.99 },
-      ],
-      totalValue: 1169.94,
-      status: "Pending",
-      priority: "Medium",
-      createdAt: "2024-01-15",
-      dueDate: "2024-01-20",
-    },
-    {
-      id: "ORD-004",
-      type: "Incoming",
-      customer: null,
-      vendor: "Global Electronics",
-      products: [{ name: "USB Cable", quantity: 200, price: 4.99 }],
-      totalValue: 998.0,
-      status: "In Transit",
-      priority: "Low",
-      createdAt: "2024-01-13",
-      dueDate: "2024-01-17",
-    },
-  ]
+  useEffect(() => {
+    getOrdersByCompany().then(setOrders);
+  }, []);
 
   const filteredOrders = orders.filter(
     (order) =>
       order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (order.customer && order.customer.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (order.vendor && order.vendor.toLowerCase().includes(searchTerm.toLowerCase())),
-  )
+      order.warehouseName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customerId?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const outgoingOrders = filteredOrders.filter((order) => order.type === "Outgoing")
-  const incomingOrders = filteredOrders.filter((order) => order.type === "Incoming")
+  //const outgoingOrders = filteredOrders.filter((order) => order.type === "Outgoing")
+  //const incomingOrders = filteredOrders.filter((order) => order.type === "Incoming")
+
+  const outgoingOrders = filteredOrders.filter((order) => !!order.customerId)
+  const incomingOrders = filteredOrders.filter((order) => !order.customerId)
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -235,23 +192,26 @@ export function OrderManagement() {
                       <TableCell className="font-mono">{order.id}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className="flex items-center w-fit">
-                          {order.type === "Incoming" ? (
+                          {/* {order.type === "Incoming" ? (
                             <ArrowDownCircle className="h-3 w-3 mr-1" />
                           ) : (
                             <ArrowUpCircle className="h-3 w-3 mr-1" />
                           )}
-                          {order.type}
+                          {order.type} */}
+                            <ArrowUpCircle className="h-3 w-3 mr-1" />
+
                         </Badge>
                       </TableCell>
-                      <TableCell>{order.customer || order.vendor}</TableCell>
-                      <TableCell>${order.totalValue.toLocaleString()}</TableCell>
-                      <TableCell>
+                      {/* <TableCell>{order.customer || order.vendor}</TableCell> */}
+                      <TableCell>{order.customerId}</TableCell>
+                      {/* <TableCell>${order.totalValue.toLocaleString()}</TableCell> */}
+                      {/* <TableCell>
                         <Badge variant={getPriorityColor(order.priority)}>{order.priority}</Badge>
                       </TableCell>
                       <TableCell>
                         <Badge variant={getStatusColor(order.status)}>{order.status}</Badge>
-                      </TableCell>
-                      <TableCell>{order.dueDate}</TableCell>
+                      </TableCell> */}
+                      <TableCell>{order.closed}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button variant="outline" size="sm">
@@ -285,15 +245,15 @@ export function OrderManagement() {
                   {outgoingOrders.map((order) => (
                     <TableRow key={order.id}>
                       <TableCell className="font-mono">{order.id}</TableCell>
-                      <TableCell>{order.customer}</TableCell>
-                      <TableCell>${order.totalValue.toLocaleString()}</TableCell>
+                      <TableCell>{order.customerId}</TableCell>
+                      {/* <TableCell>${order.totalValue.toLocaleString()}</TableCell>
                       <TableCell>
                         <Badge variant={getPriorityColor(order.priority)}>{order.priority}</Badge>
                       </TableCell>
                       <TableCell>
                         <Badge variant={getStatusColor(order.status)}>{order.status}</Badge>
-                      </TableCell>
-                      <TableCell>{order.dueDate}</TableCell>
+                      </TableCell> */}
+                      <TableCell>{order.closed}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button variant="outline" size="sm">
@@ -327,15 +287,15 @@ export function OrderManagement() {
                   {incomingOrders.map((order) => (
                     <TableRow key={order.id}>
                       <TableCell className="font-mono">{order.id}</TableCell>
-                      <TableCell>{order.vendor}</TableCell>
+                      {/* <TableCell>{order.vendor}</TableCell>
                       <TableCell>${order.totalValue.toLocaleString()}</TableCell>
                       <TableCell>
                         <Badge variant={getPriorityColor(order.priority)}>{order.priority}</Badge>
                       </TableCell>
                       <TableCell>
                         <Badge variant={getStatusColor(order.status)}>{order.status}</Badge>
-                      </TableCell>
-                      <TableCell>{order.dueDate}</TableCell>
+                      </TableCell> */}
+                      <TableCell>{order.closed}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button variant="outline" size="sm">

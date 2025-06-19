@@ -1,6 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { getWarehouses } from "@/lib/api/warehouse"
+import { getCustomers } from "@/lib/api/customer"
+import { getProducts } from "@/lib/api/products"
+import { Product } from "@/types/product"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,6 +14,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { ArrowLeft, Plus, Trash2, Package, Building, Warehouse, AlertTriangle, CheckCircle } from "lucide-react"
+import { Warehouse as WarehouseType } from "@/types/warehouse"
+import { Customer } from "@/types/customer"
+import { createOrder } from "@/lib/api/order"
+import { OrderCreate, OrderCreateItem, OrderAddress } from "@/types/order"
 
 interface CreateOrderPageProps {
   onBack: () => void
@@ -19,7 +27,7 @@ interface OrderProduct {
   id: string
   name: string
   sku: string
-  price: number
+  sellPrice: number
   quantity: number
   availableStock: number
 }
@@ -28,7 +36,6 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
   const { toast } = useToast()
   const [orderType, setOrderType] = useState<"incoming" | "outgoing" | "">("")
   const [selectedCustomer, setSelectedCustomer] = useState("")
-  const [selectedVendor, setSelectedVendor] = useState("")
   const [selectedWarehouse, setSelectedWarehouse] = useState("")
   const [priority, setPriority] = useState("")
   const [dueDate, setDueDate] = useState("")
@@ -36,57 +43,36 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
   const [orderProducts, setOrderProducts] = useState<OrderProduct[]>([])
   const [selectedProduct, setSelectedProduct] = useState("")
   const [productQuantity, setProductQuantity] = useState(1)
+  const [warehouses, setWarehouses] = useState<WarehouseType[]>([])
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [availableProducts, setAvailableProducts] = useState<Product[]>([])
+  const [address, setAddress] = useState<OrderAddress>({
+    city: "",
+    district: "",
+    street: "",
+    zipCode: "",
+  })
 
-  // Mock data
-  const customers = [
-    { id: "CUST-001", name: "ABC Corporation" },
-    { id: "CUST-002", name: "XYZ Limited" },
-    { id: "CUST-003", name: "Tech Solutions Inc" },
-    { id: "CUST-004", name: "Global Trade Co" },
-  ]
+  useEffect(() => {
+    getWarehouses().then(setWarehouses)
+    getCustomers().then(setCustomers)
+    getProducts().then(setAvailableProducts)
+  }, [])
 
-  const vendors = [
-    { id: "VEND-001", name: "Tech Supplies Inc" },
-    { id: "VEND-002", name: "Global Electronics" },
-    { id: "VEND-003", name: "Office Equipment Ltd" },
-  ]
-
-  const warehouses = [
-    { id: "WH-001", name: "Main Distribution Center", location: "New York, NY" },
-    { id: "WH-002", name: "West Coast Hub", location: "Los Angeles, CA" },
-    { id: "WH-003", name: "Central Storage", location: "Chicago, IL" },
-  ]
-
-  const availableProducts = [
-    {
-      id: "PROD-001",
-      name: "Laptop Dell XPS 13",
-      sku: "DELL-XPS13-001",
-      price: 1299.99,
-      availableStock: 45,
-    },
-    {
-      id: "PROD-002",
-      name: "Wireless Mouse",
-      sku: "MOUSE-WL-002",
-      price: 29.99,
-      availableStock: 150,
-    },
-    {
-      id: "PROD-003",
-      name: "Monitor 24 inch",
-      sku: "MON-24-003",
-      price: 299.99,
-      availableStock: 8,
-    },
-    {
-      id: "PROD-004",
-      name: "Keyboard Mechanical",
-      sku: "KB-MECH-004",
-      price: 89.99,
-      availableStock: 75,
-    },
-  ]
+  // Customer seçiləndə address-i doldur
+  useEffect(() => {
+    if (orderType === "outgoing" && selectedCustomer) {
+      const customer = customers.find((c) => c.id === selectedCustomer)
+      if (customer && customer.address) {
+        setAddress({
+          city: customer.address.city || "",
+          district: customer.address.district || "",
+          street: customer.address.street || "",
+          zipCode: customer.address.zipCode || "",
+        })
+      }
+    }
+  }, [selectedCustomer, orderType, customers])
 
   const addProduct = () => {
     if (!selectedProduct) {
@@ -101,7 +87,6 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
     const product = availableProducts.find((p) => p.id === selectedProduct)
     if (!product) return
 
-    // Check if product already exists in order
     const existingProduct = orderProducts.find((p) => p.id === selectedProduct)
     if (existingProduct) {
       toast({
@@ -112,7 +97,6 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
       return
     }
 
-    // Check stock availability for outgoing orders
     if (orderType === "outgoing" && productQuantity > product.availableStock) {
       toast({
         title: "Error",
@@ -162,10 +146,10 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
   }
 
   const calculateTotal = () => {
-    return orderProducts.reduce((total, product) => total + product.price * product.quantity, 0)
+    return orderProducts.reduce((total, product) => total + product.sellPrice * product.quantity, 0)
   }
 
-  const handleCreateOrder = () => {
+  const handleCreateOrder = async () => {
     if (!orderType) {
       toast({
         title: "Error",
@@ -193,15 +177,6 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
       return
     }
 
-    if (orderType === "incoming" && !selectedVendor) {
-      toast({
-        title: "Error",
-        description: "Please select a vendor",
-        variant: "destructive",
-      })
-      return
-    }
-
     if (orderProducts.length === 0) {
       toast({
         title: "Error",
@@ -211,22 +186,40 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
       return
     }
 
-    if (!priority || !dueDate) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      })
-      return
+    const orderItems: OrderCreateItem[] = orderProducts.map((p) => ({
+      productId: p.id,
+      productName: p.name,
+      unitPrice: p.sellPrice,
+      imageUrl: "aa",
+      quantity: p.quantity,
+    }))
+
+    const warehouse = warehouses.find((w) => w.id === selectedWarehouse)
+
+    const orderData: OrderCreate = {
+      warehouseId: selectedWarehouse,
+      warehouseName: warehouse?.name || "",
+      customerId: selectedCustomer,
+      address,
+      orderItems,
     }
 
-    // Create order logic here
-    toast({
-      title: "Order Created",
-      description: "Order has been created successfully",
-    })
+    console.log("Creating order with data:", orderData)
 
-    onBack()
+    try {
+      await createOrder(orderData)
+      toast({
+        title: "Order Created",
+        description: "Order has been created successfully",
+      })
+      onBack()
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Order could not be created",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
@@ -281,7 +274,7 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
                           <div className="flex items-center space-x-2">
                             <Warehouse className="h-4 w-4" />
                             <span>{warehouse.name}</span>
-                            <span className="text-sm text-gray-500">({warehouse.location})</span>
+                            <span className="text-sm text-gray-500">({warehouse.city})</span>
                           </div>
                         </SelectItem>
                       ))}
@@ -303,7 +296,7 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
                           <SelectItem key={customer.id} value={customer.id}>
                             <div className="flex items-center space-x-2">
                               <Building className="h-4 w-4" />
-                              <span>{customer.name}</span>
+                              <span>{customer.fullName}</span>
                             </div>
                           </SelectItem>
                         ))}
@@ -312,51 +305,47 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
                   </div>
                 )}
 
-                {orderType === "incoming" && (
-                  <div>
-                    <Label htmlFor="vendor">Təchizatçı *</Label>
-                    <Select value={selectedVendor} onValueChange={setSelectedVendor}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Təchizatçı seçin" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {vendors.map((vendor) => (
-                          <SelectItem key={vendor.id} value={vendor.id}>
-                            <div className="flex items-center space-x-2">
-                              <Building className="h-4 w-4" />
-                              <span>{vendor.name}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                <div>
-                  <Label htmlFor="priority">Prioritet *</Label>
-                  <Select value={priority} onValueChange={setPriority}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Prioritet seçin" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="high">Yüksək</SelectItem>
-                      <SelectItem value="medium">Orta</SelectItem>
-                      <SelectItem value="low">Aşağı</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Vendor seçimi varsa buraya əlavə et */}
               </div>
 
-              <div>
-                <Label htmlFor="dueDate">Son Tarix *</Label>
-                <Input
-                  id="dueDate"
-                  type="date"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  min={new Date().toISOString().split("T")[0]}
-                />
+              {/* Address inputları */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="city">Şəhər</Label>
+                  <Input
+                    id="city"
+                    value={address.city}
+                    onChange={e => setAddress(addr => ({ ...addr, city: e.target.value }))}
+                    placeholder="Şəhər"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="district">Rayon</Label>
+                  <Input
+                    id="district"
+                    value={address.district}
+                    onChange={e => setAddress(addr => ({ ...addr, district: e.target.value }))}
+                    placeholder="Rayon"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="street">Küçə</Label>
+                  <Input
+                    id="street"
+                    value={address.street}
+                    onChange={e => setAddress(addr => ({ ...addr, street: e.target.value }))}
+                    placeholder="Küçə"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="zipCode">Poçt Kodu</Label>
+                  <Input
+                    id="zipCode"
+                    value={address.zipCode}
+                    onChange={e => setAddress(addr => ({ ...addr, zipCode: e.target.value }))}
+                    placeholder="AZxxxx"
+                  />
+                </div>
               </div>
 
               <div>
@@ -395,10 +384,10 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
                               <span>{product.name}</span>
                             </div>
                             <div className="flex items-center space-x-2 text-sm text-gray-500">
-                              <span>${product.price}</span>
+                              <span>${product.sellPrice}</span>
                               {orderType === "outgoing" && (
-                                <Badge variant={product.availableStock < 10 ? "destructive" : "outline"}>
-                                  Stock: {product.availableStock}
+                                <Badge variant={product.quantity < 10 ? "destructive" : "outline"}>
+                                  Stock: {product.quantity}
                                 </Badge>
                               )}
                             </div>
@@ -445,14 +434,14 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
                           <div>
                             <h3 className="font-medium">{product.name}</h3>
                             <p className="text-sm text-gray-600">SKU: {product.sku}</p>
-                            <p className="text-sm text-gray-600">Price: ${product.price}</p>
+                            <p className="text-sm text-gray-600">Price: {product.sellPrice}₼</p>
                           </div>
                         </div>
 
                         <div className="flex items-center space-x-4">
                           <div className="flex items-center space-x-2">
                             <Label htmlFor={`qty-${product.id}`} className="text-sm">
-                              Qty:
+                              Miq.:
                             </Label>
                             <Input
                               id={`qty-${product.id}`}
@@ -465,7 +454,7 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
                           </div>
 
                           <div className="text-right">
-                            <p className="font-medium">${(product.price * product.quantity).toFixed(2)}</p>
+                            <p className="font-medium">₼{(product.sellPrice * product.quantity).toFixed(2)}</p>
                             {orderType === "outgoing" && product.quantity > product.availableStock && (
                               <p className="text-xs text-red-600 flex items-center">
                                 <AlertTriangle className="h-3 w-3 mr-1" />
@@ -521,9 +510,7 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
                       ? selectedCustomer
                         ? customers.find((c) => c.id === selectedCustomer)?.name
                         : "Not selected"
-                      : selectedVendor
-                        ? vendors.find((v) => v.id === selectedVendor)?.name
-                        : "Not selected"}
+                      : "Vendor seçimi yoxdur"}
                   </span>
                 </div>
 
@@ -585,7 +572,7 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
               <div className="flex items-center space-x-2 text-sm">
                 <CheckCircle
                   className={`h-4 w-4 ${
-                    (orderType === "outgoing" && selectedCustomer) || (orderType === "incoming" && selectedVendor)
+                    (orderType === "outgoing" && selectedCustomer) || (orderType === "incoming" && false)
                       ? "text-green-600"
                       : "text-gray-400"
                   }`}

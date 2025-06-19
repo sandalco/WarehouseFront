@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { getOrdersByCompany } from "@/lib/api/order"
+import { Order } from "@/types/order"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -22,6 +24,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Plus, Search, Edit, Eye, ArrowUpCircle, ArrowDownCircle, Filter, CalendarIcon, X } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { formatDate } from "@/utils/dateFormat"
 
 interface EnhancedOrderManagementProps {
   onViewOrder?: (order: any) => void
@@ -29,6 +32,10 @@ interface EnhancedOrderManagementProps {
 }
 
 export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: EnhancedOrderManagementProps = {}) {
+  // Dummy data for customers and vendors; replace with real data as needed
+  const customers: string[] = ["Müştəri 1", "Müştəri 2", "Müştəri 3"]
+  const vendors: string[] = ["Təchizatçı 1", "Təchizatçı 2", "Təchizatçı 3"]
+
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [statusFilter, setStatusFilter] = useState("all")
@@ -37,113 +44,49 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
   const [dateFrom, setDateFrom] = useState<Date>()
   const [dateTo, setDateTo] = useState<Date>()
   const [showFilters, setShowFilters] = useState(false)
+  const [orders, setOrders] = useState<Order[]>([])
 
-  const orders = [
-    {
-      id: "ORD-001",
-      type: "Outgoing",
-      customer: "ABC Corporation",
-      vendor: null,
-      products: [{ name: "Laptop Dell XPS 13", quantity: 5, price: 1299.99 }],
-      totalValue: 6499.95,
-      status: "Processing",
-      priority: "High",
-      createdAt: "2024-01-15",
-      dueDate: "2024-01-18",
-    },
-    {
-      id: "ORD-002",
-      type: "Incoming",
-      customer: null,
-      vendor: "Tech Supplies Inc",
-      products: [{ name: "Wireless Mouse", quantity: 100, price: 29.99 }],
-      totalValue: 2999.0,
-      status: "Completed",
-      priority: "Medium",
-      createdAt: "2024-01-14",
-      dueDate: "2024-01-16",
-    },
-    {
-      id: "ORD-003",
-      type: "Outgoing",
-      customer: "XYZ Limited",
-      vendor: null,
-      products: [
-        { name: "Monitor 24 inch", quantity: 3, price: 299.99 },
-        { name: "Keyboard Mechanical", quantity: 3, price: 89.99 },
-      ],
-      totalValue: 1169.94,
-      status: "Pending",
-      priority: "Medium",
-      createdAt: "2024-01-15",
-      dueDate: "2024-01-20",
-    },
-    {
-      id: "ORD-004",
-      type: "Incoming",
-      customer: null,
-      vendor: "Global Electronics",
-      products: [{ name: "USB Cable", quantity: 200, price: 4.99 }],
-      totalValue: 998.0,
-      status: "In Transit",
-      priority: "Low",
-      createdAt: "2024-01-13",
-      dueDate: "2024-01-17",
-    },
-    {
-      id: "ORD-005",
-      type: "Outgoing",
-      customer: "Tech Solutions Inc",
-      vendor: null,
-      products: [{ name: "Tablet", quantity: 10, price: 399.99 }],
-      totalValue: 3999.9,
-      status: "Shipped",
-      priority: "High",
-      createdAt: "2024-01-12",
-      dueDate: "2024-01-15",
-    },
-  ]
-
-  const customers = ["ABC Corporation", "XYZ Limited", "Tech Solutions Inc"]
-  const vendors = ["Tech Supplies Inc", "Global Electronics"]
+  useEffect(() => {
+    getOrdersByCompany().then(setOrders);
+  }, [])
 
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (order.customer && order.customer.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (order.vendor && order.vendor.toLowerCase().includes(searchTerm.toLowerCase()))
+      (order.warehouseName && order.warehouseName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (order.customer && order.customer.toLowerCase().includes(searchTerm.toLowerCase()))
 
+    // Status filter (əgər status varsa)
     const matchesStatus = statusFilter === "all" || order.status === statusFilter
-    const matchesPriority = priorityFilter === "all" || order.priority === priorityFilter
-    const matchesCustomer =
-      customerFilter === "all" ||
-      (order.customer && order.customer === customerFilter) ||
-      (order.vendor && order.vendor === customerFilter)
 
-    const orderDate = new Date(order.createdAt)
+    // Tarix filterləri (opened və ya closed istifadə et)
+    const orderDate = new Date(order.opened)
     const matchesDateFrom = !dateFrom || orderDate >= dateFrom
     const matchesDateTo = !dateTo || orderDate <= dateTo
 
-    return matchesSearch && matchesStatus && matchesPriority && matchesCustomer && matchesDateFrom && matchesDateTo
+    // Prioritet və customer filterləri backend-də yoxdursa, onları filterdən çıxar
+    return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo
   })
 
-  const outgoingOrders = filteredOrders.filter((order) => order.type === "Outgoing")
-  const incomingOrders = filteredOrders.filter((order) => order.type === "Incoming")
+  const outgoingOrders = filteredOrders.filter((order) => !!order.customer)
+  const incomingOrders = filteredOrders.filter((order) => !order.customer)
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Completed":
-        return "default"
+      return "default"
       case "Processing":
-        return "secondary"
-      case "Pending":
-        return "outline"
+      return "secondary"
+      case "StockConfirmed":
+      return "outline"
       case "In Transit":
-        return "secondary"
+      return "secondary"
       case "Shipped":
-        return "default"
+      return "default"
+      case "Cancelled":
+      return "destructive"
       default:
-        return "outline"
+      return "outline"
     }
   }
 
@@ -308,10 +251,12 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
                       <SelectContent>
                         <SelectItem value="all">Bütün Statuslar</SelectItem>
                         <SelectItem value="Pending">Gözləyən</SelectItem>
-                        <SelectItem value="Processing">Emal olunur</SelectItem>
-                        <SelectItem value="In Transit">Yoldadır</SelectItem>
+                        <SelectItem value="StockConfirmed">Stok yoxlanılıb</SelectItem>
+                        {/* <SelectItem value="Processing">Emal olunur</SelectItem> */}
+                        {/* <SelectItem value="In Transit">Yoldadır</SelectItem> */}
                         <SelectItem value="Shipped">Göndərilib</SelectItem>
-                        <SelectItem value="Completed">Tamamlanıb</SelectItem>
+                        {/* <SelectItem value="Completed">Tamamlanıb</SelectItem> */}
+                        <SelectItem value="Cancelled">İmtina</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -415,7 +360,7 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
                     <TableHead>Növ</TableHead>
                     <TableHead>Müştəri/Təchizatçı</TableHead>
                     <TableHead>Dəyər</TableHead>
-                    <TableHead>Prioritet</TableHead>
+                    {/* <TableHead>Prioritet</TableHead> */}
                     <TableHead>Status</TableHead>
                     <TableHead>Yaradılıb</TableHead>
                     <TableHead>Son Tarix</TableHead>
@@ -437,15 +382,15 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
                         </Badge>
                       </TableCell>
                       <TableCell>{order.customer || order.vendor}</TableCell>
-                      <TableCell>${order.totalValue.toLocaleString()}</TableCell>
-                      <TableCell>
+                      <TableCell>₼{order.totalPrice?.toLocaleString?.() ?? "-"}</TableCell>
+                      {/* <TableCell>
                         <Badge variant={getPriorityColor(order.priority)}>{order.priority}</Badge>
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell>
                         <Badge variant={getStatusColor(order.status)}>{order.status}</Badge>
                       </TableCell>
-                      <TableCell>{order.createdAt}</TableCell>
-                      <TableCell>{order.dueDate}</TableCell>
+                      <TableCell>{formatDate(order.opened, "dd MMM yy HH:mm")}</TableCell>
+                      <TableCell>{formatDate(order.closed, "dd MMM yy HH:mm")}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button variant="outline" size="sm" onClick={() => onViewOrder?.(order)}>
@@ -469,7 +414,7 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
                     <TableHead>Sifariş ID</TableHead>
                     <TableHead>Müştəri</TableHead>
                     <TableHead>Dəyər</TableHead>
-                    <TableHead>Prioritet</TableHead>
+                    {/* <TableHead>Prioritet</TableHead> */}
                     <TableHead>Status</TableHead>
                     <TableHead>Yaradılıb</TableHead>
                     <TableHead>Son Tarix</TableHead>
@@ -481,15 +426,15 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
                     <TableRow key={order.id}>
                       <TableCell className="font-mono">{order.id}</TableCell>
                       <TableCell>{order.customer}</TableCell>
-                      <TableCell>${order.totalValue.toLocaleString()}</TableCell>
-                      <TableCell>
+                      <TableCell>₼{order.totalPrice?.toLocaleString?.() ?? "-"}</TableCell>
+                      {/* <TableCell>
                         <Badge variant={getPriorityColor(order.priority)}>{order.priority}</Badge>
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell>
                         <Badge variant={getStatusColor(order.status)}>{order.status}</Badge>
                       </TableCell>
-                      <TableCell>{order.createdAt}</TableCell>
-                      <TableCell>{order.dueDate}</TableCell>
+                      <TableCell>{formatDate(order.opened, "dd MMM yy HH:mm")}</TableCell>
+                      <TableCell>{formatDate(order.closed, "dd MMM yy HH:mm")}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button variant="outline" size="sm" onClick={() => onViewOrder?.(order)}>
@@ -525,15 +470,15 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
                     <TableRow key={order.id}>
                       <TableCell className="font-mono">{order.id}</TableCell>
                       <TableCell>{order.vendor}</TableCell>
-                      <TableCell>${order.totalValue.toLocaleString()}</TableCell>
+                        <TableCell>₼{order.totalPrice?.toLocaleString?.() ?? "-"}</TableCell>
                       <TableCell>
                         <Badge variant={getPriorityColor(order.priority)}>{order.priority}</Badge>
                       </TableCell>
                       <TableCell>
                         <Badge variant={getStatusColor(order.status)}>{order.status}</Badge>
                       </TableCell>
-                      <TableCell>{order.createdAt}</TableCell>
-                      <TableCell>{order.dueDate}</TableCell>
+                      <TableCell>{formatDate(order.opened, "dd MMM yy HH:mm")}</TableCell>
+                      <TableCell>{formatDate(order.closed, "dd MMM yy HH:mm")}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button variant="outline" size="sm" onClick={() => onViewOrder?.(order)}>

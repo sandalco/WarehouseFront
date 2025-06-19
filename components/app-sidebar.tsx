@@ -111,7 +111,7 @@ export function AppSidebar({
     },
   ]
 
-  const navigation = user?.role === "rəhbər" ? bossNavigation : warehousemanNavigation
+  const navigation = user?.role === "boss" ? bossNavigation : warehousemanNavigation
 
   return (
     <Sidebar collapsible="icon">

@@ -10,7 +10,7 @@ export default function WarehousePage() {
   const router = useRouter()
 
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== "anbarçı")) {
+    if (!isLoading && (!user || user.role !== "warehouseman")) {
       router.push("/")
     }
   }, [user, isLoading, router])
@@ -19,7 +19,7 @@ export default function WarehousePage() {
     return <div>Yüklənir...</div>
   }
 
-  if (!user || user.role !== "anbarçı") {
+  if (!user || user.role !== "warehouseman") {
     return null
   }
 

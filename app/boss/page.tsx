@@ -10,7 +10,7 @@ export default function BossPage() {
   const router = useRouter()
 
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== "rəhbər")) {
+    if (!isLoading && (!user || user.role !== "boss")) {
       router.push("/")
     }
   }, [user, isLoading, router])
@@ -19,7 +19,7 @@ export default function BossPage() {
     return <div>Yüklənir...</div>
   }
 
-  if (!user || user.role !== "rəhbər") {
+  if (!user || user.role !== "boss") {
     return null
   }
 

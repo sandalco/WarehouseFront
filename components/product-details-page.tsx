@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { use, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -21,6 +21,8 @@ import {
   AlertTriangle,
   CheckCircle,
 } from "lucide-react"
+import { Product } from "@/types/product"
+import { getProductById } from "@/lib/api/products"
 
 interface ProductDetailsPageProps {
   productId: string
@@ -29,7 +31,16 @@ interface ProductDetailsPageProps {
 
 export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProps) {
   const [isEditing, setIsEditing] = useState(false)
+  const [product1, setProduct] = useState<Product | null>(null)
 
+  useEffect(() => {
+    getProductById(productId).then((data) => {
+      setProduct(data);
+    }).catch((error) => {
+      console.error("Failed to fetch product:", error)
+      setProduct(null)
+    });
+  }, [productId])
   // Mock product data - in real app, fetch based on productId
   const product = {
     id: "PROD-001",
@@ -107,6 +118,16 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
       warranty: "1 Year Limited Warranty",
     },
   }
+
+  product.name = product1?.name || product.name;
+  product.sku = product1?.id || product.sku;
+  product.category = product1?.category || product.category;
+  //product.brand = product1?.brand || product.brand;
+  product.description = product1?.description || product.description;
+  product.price = product1?.purchasePrice || product.price;
+  product.cost = product1?.sellPrice || product.cost;
+  product.stock = product1?.quantity || product.stock;
+  product.minStock = product1?.minRequire || product.minStock;
 
   return (
     <div className="space-y-6">

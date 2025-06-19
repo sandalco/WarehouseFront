@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="az" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider defaultTheme="purple" storageKey="warehouse-ui-theme">
           <NotificationProvider>
