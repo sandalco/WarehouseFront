@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -17,6 +17,8 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Search, Edit, Trash2, User, Mail, Phone, Eye } from "lucide-react"
+import { Worker } from "@/types/worker"
+import { getWorkers } from "@/lib/api/worker"
 
 interface WorkerManagementProps {
   onViewWorker?: (workerId: string) => void
@@ -25,63 +27,16 @@ interface WorkerManagementProps {
 export function WorkerManagement({ onViewWorker }: WorkerManagementProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [workers, setWorkers] = useState<Worker[]>([])
 
-  const workers = [
-    {
-      id: "WRK-001",
-      name: "John Smith",
-      email: "john.smith@company.com",
-      phone: "+1 (555) 123-4567",
-      role: "warehouseman",
-      warehouse: "Main Distribution Center",
-      shift: "Morning",
-      status: "Active",
-      tasksCompleted: 45,
-      performance: "Excellent",
-    },
-    {
-      id: "WRK-002",
-      name: "Sarah Johnson",
-      email: "sarah.johnson@company.com",
-      phone: "+1 (555) 234-5678",
-      role: "warehouseman",
-      warehouse: "West Coast Hub",
-      shift: "Evening",
-      status: "Active",
-      tasksCompleted: 38,
-      performance: "Good",
-    },
-    {
-      id: "WRK-003",
-      name: "Mike Davis",
-      email: "mike.davis@company.com",
-      phone: "+1 (555) 345-6789",
-      role: "warehouseman",
-      warehouse: "Central Storage",
-      shift: "Night",
-      status: "Active",
-      tasksCompleted: 52,
-      performance: "Excellent",
-    },
-    {
-      id: "WRK-004",
-      name: "Lisa Wilson",
-      email: "lisa.wilson@company.com",
-      phone: "+1 (555) 456-7890",
-      role: "warehouseman",
-      warehouse: "Main Distribution Center",
-      shift: "Morning",
-      status: "On Leave",
-      tasksCompleted: 29,
-      performance: "Good",
-    },
-  ]
+  useEffect(() => {
+    getWorkers().then(setWorkers)
+  }, [])
 
   const filteredWorkers = workers.filter(
     (worker) =>
-      worker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      worker.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      worker.warehouse.toLowerCase().includes(searchTerm.toLowerCase()),
+      `${worker.firstName} ${worker.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      worker.email.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   return (
@@ -193,7 +148,9 @@ export function WorkerManagement({ onViewWorker }: WorkerManagementProps) {
                     <div className="flex items-center space-x-3">
                       <User className="h-8 w-8 text-gray-400" />
                       <div>
-                        <p className="font-medium">{worker.name}</p>
+                        <p className="font-medium">
+                          {worker.firstName} {worker.lastName}
+                        </p>
                         <p className="text-sm text-gray-500">{worker.id}</p>
                       </div>
                     </div>
@@ -206,11 +163,11 @@ export function WorkerManagement({ onViewWorker }: WorkerManagementProps) {
                       </div>
                       <div className="flex items-center space-x-1 text-sm">
                         <Phone className="h-3 w-3" />
-                        <span>{worker.phone}</span>
+                        <span>{worker.phoneNumber}</span>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>{worker.warehouse}</TableCell>
+                  <TableCell>{worker.warehouseId}</TableCell>
                   <TableCell>
                     <Badge variant="outline">{worker.shift}</Badge>
                   </TableCell>

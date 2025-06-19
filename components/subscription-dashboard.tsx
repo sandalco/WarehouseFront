@@ -17,9 +17,25 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react"
+import { useEffect, useState } from "react"
+import { getCurrentSubscription } from "@/lib/api/subscription"
+import { set } from "date-fns"
+import { ActiveSubscription } from "@/types/subscription/subscriptionhistory"
 
 export function SubscriptionDashboard() {
   const { currentSubscription, availablePlans, cancelSubscription, resumeSubscription, isLoading } = useSubscription()
+  const [subscription, setCurrentSubscription] = useState<ActiveSubscription | undefined>();
+
+  useEffect(() => {
+    getCurrentSubscription()
+      .then((result) => {
+        if (result) {
+          setCurrentSubscription(result);
+        } else {
+          setCurrentSubscription(undefined);
+        }
+      });
+  }, []);
 
   if (isLoading) {
     return (
@@ -96,7 +112,8 @@ export function SubscriptionDashboard() {
                 <span>Cari Abunəlik</span>
               </CardTitle>
               <CardDescription>
-                {currentPlan?.name} Planı - {currentSubscription.status}
+                {/* {currentPlan?.name} Planı - {currentSubscription.status} */}
+                {subscription?.packageName} Planı
               </CardDescription>
             </div>
             <Badge variant={currentSubscription.status === "active" ? "default" : "secondary"} className="capitalize">
@@ -112,7 +129,8 @@ export function SubscriptionDashboard() {
                 <CreditCard className="h-4 w-4 text-gray-500" />
                 <span className="text-sm font-medium">Plan</span>
               </div>
-              <p className="text-lg font-semibold capitalize">{currentPlan?.name}</p>
+              {/* <p className="text-lg font-semibold capitalize">{currentPlan?.name}</p> */}
+              <p className="text-lg font-semibold capitalize">{subscription?.packageName}</p>
             </div>
 
             <div className="space-y-2">
@@ -120,7 +138,10 @@ export function SubscriptionDashboard() {
                 <Calendar className="h-4 w-4 text-gray-500" />
                 <span className="text-sm font-medium">Növbəti Ödəniş</span>
               </div>
-              <p className="text-lg">{formatDate(currentSubscription.currentPeriodEnd)}</p>
+              {/* <p className="text-lg">{formatDate(currentSubscription.currentPeriodEnd)}</p> */}
+              <p className="text-lg">
+                {subscription?.expirationDate ? formatDate(subscription.expirationDate) : "-"}
+              </p>
             </div>
           </div>
 

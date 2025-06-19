@@ -25,6 +25,7 @@ import {
   Truck,
   Eye,
 } from "lucide-react"
+import { formatDate } from "@/utils/dateFormat"
 
 interface OrderDetailsPageBossProps {
   order: any
@@ -192,7 +193,7 @@ export function OrderDetailsPageBoss({ order, onBack }: OrderDetailsPageBossProp
               <Warehouse className="h-5 w-5 text-gray-400" />
               <div>
                 <p className="text-sm text-gray-600">Warehouse</p>
-                <p className="font-medium">Main Distribution Center</p>
+                <p className="font-medium">{order.warehouseName || "Main Distribution Center"}</p>
               </div>
             </div>
 
@@ -200,15 +201,15 @@ export function OrderDetailsPageBoss({ order, onBack }: OrderDetailsPageBossProp
               <Calendar className="h-5 w-5 text-gray-400" />
               <div>
                 <p className="text-sm text-gray-600">Created Date</p>
-                <p className="font-medium">{order.createdAt}</p>
+                <p className="font-medium">{formatDate(order.opened)}</p>
               </div>
             </div>
 
             <div className="flex items-center space-x-3">
               <Clock className="h-5 w-5 text-gray-400" />
               <div>
-                <p className="text-sm text-gray-600">Due Date</p>
-                <p className="font-medium">{order.dueDate}</p>
+                <p className="text-sm text-gray-600">Closed Date</p>
+                <p className="font-medium">{formatDate(order.closed)}</p>
               </div>
             </div>
           </div>
@@ -360,7 +361,7 @@ export function OrderDetailsPageBoss({ order, onBack }: OrderDetailsPageBossProp
               <CheckCircle className="h-5 w-5 text-green-600" />
               <div>
                 <p className="font-medium">Order Created</p>
-                <p className="text-sm text-gray-600">{order.createdAt}</p>
+                <p className="text-sm text-gray-600">{formatDate(order.opened)}</p>
               </div>
             </div>
 
@@ -405,7 +406,7 @@ export function OrderDetailsPageBoss({ order, onBack }: OrderDetailsPageBossProp
               rows={4}
             />
           ) : (
-            <p className="text-gray-600">{order.notes || "No additional notes for this order."}</p>
+            <p className="text-gray-600">{order.note || "No additional notes for this order."}</p>
           )}
         </CardContent>
       </Card>

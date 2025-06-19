@@ -4,6 +4,7 @@ import { SubscriptionPlans } from "./subscription-plans"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CreditCard, Package, BarChart3 } from "lucide-react"
+import { BillingHistory } from "./BillingHistory"
 
 export function SubscriptionManagement() {
   return (
@@ -52,7 +53,7 @@ export function SubscriptionManagement() {
               <CardDescription>Ödəniş tarixçənizi görün və faktura yükləyin</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-gray-500">Billing history component would go here</div>
+              <BillingHistory/>
             </CardContent>
           </Card>
         </TabsContent>
