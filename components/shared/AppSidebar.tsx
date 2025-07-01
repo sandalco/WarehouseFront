@@ -1,7 +1,8 @@
 "use client"
 
 import type * as React from "react"
-import { useAuth } from "./auth-provider"
+import { useAuth } from "../auth/AuthProvider"
+import { useRouter, usePathname } from "next/navigation"
 import {
   Sidebar,
   SidebarContent,
@@ -15,13 +16,6 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   LayoutDashboard,
@@ -32,10 +26,6 @@ import {
   Building,
   ClipboardList,
   BarChart3,
-  Settings,
-  User,
-  LogOut,
-  ChevronUp,
   CreditCard,
 } from "lucide-react"
 
@@ -46,67 +36,73 @@ type NavigationItem = {
   isActive?: boolean
 }
 
-export function AppSidebar({
-  activeTab,
-  onTabChange,
-}: {
-  activeTab: string
-  onTabChange: (tab: string) => void
-}) {
-  const { user, logout } = useAuth()
+export function AppSidebar() {
+  const { user } = useAuth()
+  const router = useRouter()
+  const pathname = usePathname()
 
   const bossNavigation: NavigationItem[] = [
     {
       title: "İdarə Paneli",
-      url: "dashboard",
+      url: "/boss",
       icon: LayoutDashboard,
     },
     {
       title: "Məhsullar",
-      url: "products",
+      url: "/boss/products",
       icon: Package,
     },
     {
       title: "Anbarlar",
-      url: "warehouses",
+      url: "/boss/warehouses",
       icon: Warehouse,
     },
     {
       title: "İşçilər",
-      url: "workers",
+      url: "/boss/workers",
       icon: Users,
     },
     {
       title: "Sifarişlər",
-      url: "orders",
+      url: "/boss/orders",
       icon: ShoppingCart,
     },
     {
       title: "Müştərilər",
-      url: "customers",
+      url: "/boss/customers",
       icon: Building,
     },
     {
       title: "Abunəlik",
-      url: "subscription",
+      url: "/boss/subscription",
       icon: CreditCard,
     },
   ]
 
   const warehousemanNavigation: NavigationItem[] = [
     {
+      title: "Dashboard",
+      url: "/warehouseman",
+      icon: LayoutDashboard,
+    },
+    {
+      title: "Məhsullar",
+      url: "/warehouseman/products",
+      icon: Package,
+    },
+    {
       title: "Mənim Tapşırıqlarım",
-      url: "tasks",
+      url: "/warehouseman/tasks",
       icon: ClipboardList,
     },
     {
       title: "İnventar",
-      url: "inventory",
+      url: "/warehouseman/inventory",
       icon: Package,
     },
     {
       title: "Tamamlanmış",
-      url: "completed",
+      url: "/warehouseman/completed",
       icon: BarChart3,
     },
   ]
@@ -134,8 +130,8 @@ export function AppSidebar({
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     tooltip={item.title}
-                    onClick={() => onTabChange(item.url)}
-                    isActive={activeTab === item.url}
+                    onClick={() => router.push(item.url)}
+                    isActive={pathname === item.url}
                   >
                     <item.icon className="h-4 w-4" />
                     <span>{item.title}</span>
@@ -150,50 +146,25 @@ export function AppSidebar({
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src="/placeholder-avatar.jpg" alt={user?.name} />
-                    <AvatarFallback className="rounded-lg">
-                      {user?.name
-                        ?.split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{user?.name}</span>
-                    <span className="truncate text-xs">{user?.email}</span>
-                  </div>
-                  <ChevronUp className="ml-auto size-4" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                side="bottom"
-                align="end"
-                sideOffset={4}
-              >
-                <DropdownMenuItem onClick={() => onTabChange("profile")}>
-                  <User className="h-4 w-4 mr-2" />
-                  Mənim Profilim
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onTabChange("settings")}>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Tənzimləmələr
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Çıxış
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <SidebarMenuButton
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            >
+              <Avatar className="h-8 w-8 rounded-lg">
+                <AvatarImage src={user?.avatar || "/placeholder-avatar.jpg"} alt={user?.name} />
+                <AvatarFallback className="rounded-lg">
+                  {user?.name
+                    ?.split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase() || 'UN'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-semibold">{user?.name || 'Unknown User'}</span>
+                <span className="truncate text-xs">{user?.email || 'user@example.com'}</span>
+              </div>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

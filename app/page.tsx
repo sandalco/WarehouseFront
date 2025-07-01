@@ -1,7 +1,7 @@
 "use client";
 
-import { useAuth } from "@/components/auth-provider";
-import { LoginForm } from "@/components/login-form";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { LoginForm } from "@/components/auth/LoginForm";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -14,7 +14,7 @@ export default function Home() {
       if (user.role === "boss") {
         router.push("/boss");
       } else {
-        router.push("/warehouse");
+        router.push("/warehouseman");
       }
     }
   }, [user, isLoading, router]);

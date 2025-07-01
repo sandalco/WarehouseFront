@@ -21,7 +21,11 @@ import { Plus, Search, Edit, Eye, ArrowUpCircle, ArrowDownCircle } from "lucide-
 import { Order } from "@/types/order"
 import { getOrdersByCompany } from "@/lib/api/order"
 
-export function OrderManagement() {
+interface OrderManagementProps {
+  onCreateOrder?: () => void
+}
+
+export function OrderManagement({ onCreateOrder }: OrderManagementProps = {}) {
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [orders, setOrders] = useState<Order[]>([])
@@ -79,13 +83,11 @@ export function OrderManagement() {
           <h2 className="text-2xl font-bold">Sifariş İdarəetməsi</h2>
           <p className="text-gray-600">Daxil olan və çıxan anbar sifarişlərini idarə edin</p>
         </div>
+        <Button onClick={onCreateOrder}>
+          <Plus className="h-4 w-4 mr-2" />
+          Sifariş Yarat
+        </Button>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Order
-            </Button>
-          </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Yeni Sifariş Yarat</DialogTitle>

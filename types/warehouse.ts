@@ -7,6 +7,8 @@ export interface Warehouse {
   state?: string;
   street?: string;
   zipCode?: string;
+  occupancyRate: number;
+  usedShelves: number;
 }
 
 export interface CreateWarehouseDto {

@@ -39,10 +39,10 @@ import {
   MapPin,
   Eye,
 } from "lucide-react";
-import { ImportExportButtons } from "./import-export-utils";
 import { useToast } from "@/hooks/use-toast";
 import { Customer } from "@/types/customer";
 import { getCustomers } from "@/lib/api/customer";
+import { ImportExportButtons } from "../import-export-utils";
 
 interface CustomerManagementProps {
   onViewCustomerOrders?: (customerId: string, customerName: string) => void;

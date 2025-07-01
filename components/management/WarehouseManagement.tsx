@@ -32,7 +32,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { Plus, Edit, Trash2, Warehouse, MapPin } from "lucide-react";
-import { ImportExportButtons } from "./import-export-utils";
+import { ImportExportButtons } from "../import-export-utils";
 import { useToast } from "@/hooks/use-toast";
 import {
   CreateWarehouseDto,
@@ -55,43 +55,12 @@ export function WarehouseManagement() {
     zipCode: "",
   });
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const warehouses = [
-    {
-      id: "ANB-001",
-      name: "Əsas Paylama Mərkəzi",
-      location: "Bakı, Azərbaycan",
-      capacity: 10000,
-      occupied: 7500,
-      shelves: 250,
-      workers: 15,
-      status: "Aktiv",
-    },
-    {
-      id: "ANB-002",
-      name: "Qərb Sahili Mərkəzi",
-      location: "Gəncə, Azərbaycan",
-      capacity: 8000,
-      occupied: 6200,
-      shelves: 200,
-      workers: 12,
-      status: "Aktiv",
-    },
-    {
-      id: "ANB-003",
-      name: "Mərkəzi Anbar",
-      location: "Sumqayıt, Azərbaycan",
-      capacity: 6000,
-      occupied: 4800,
-      shelves: 150,
-      workers: 8,
-      status: "Aktiv",
-    },
-  ];
 
   //const [warehousesList, setWarehousesList] = useState(warehouses)
 
   useEffect(() => {
     getWarehouses().then(setWarehousesList);
+    console.log("Warehouses loaded:", warehousesList);
   }, []);
 
   const handleImport = (file: File) => {
@@ -336,11 +305,10 @@ export function WarehouseManagement() {
             <CardContent className="space-y-4">
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span>Tutum İstifadəsi</span>
+                  <span>Rəf İstifadəsi</span>
                   <span>
                     {Math.round(
-                      //(warehouse.occupied / warehouse.capacity) * 100
-                      (8 / 10) * 100
+                      warehouse.occupancyRate * 100
                     )}
                     %
                   </span>
@@ -350,8 +318,7 @@ export function WarehouseManagement() {
                     className="bg-blue-600 h-2 rounded-full"
                     style={{
                       width: `${
-                        //(warehouse.occupied / warehouse.capacity) * 100
-                        (8 / 10) * 100
+                        warehouse.occupancyRate * 100
                       }%`,
                     }}
                   ></div>
@@ -359,8 +326,8 @@ export function WarehouseManagement() {
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   {/* <span>{warehouse.occupied.toLocaleString()} kv m</span>
                   <span>{warehouse.capacity.toLocaleString()} kv m</span> */}
-                  <span>{16} kv m</span>
-                  <span>{20} kv m</span>
+                  <span>{warehouse.usedShelves}</span>
+                  <span>{warehouse.shelves}</span>
                 </div>
               </div>
 

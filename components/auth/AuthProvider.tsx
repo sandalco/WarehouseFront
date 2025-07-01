@@ -17,6 +17,7 @@ type User = {
   role: string;
   companyId: string;
   warehouseId?: string;
+  avatar?: string;
 };
 
 type AuthContextType = {
@@ -123,6 +124,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    apiLogout();
+    // Router istifadə etmək əvəzinə window.location istifadə edirik
+    // çünki bu metod müxtəlif komponentlərdən çağırıla bilər
+    window.location.href = "/";
   };
 
   return (

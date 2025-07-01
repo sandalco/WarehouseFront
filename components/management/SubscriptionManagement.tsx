@@ -1,10 +1,10 @@
 "use client"
-import { SubscriptionDashboard } from "./subscription-dashboard"
-import { SubscriptionPlans } from "./subscription-plans"
+import { SubscriptionPlans } from "../subscription-plans"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CreditCard, Package, BarChart3 } from "lucide-react"
-import { BillingHistory } from "./BillingHistory"
+import { BillingHistory } from "../BillingHistory"
+import { SubscriptionDashboard } from "../dashboard/SubscriptionDashboard"
 
 export function SubscriptionManagement() {
   return (
