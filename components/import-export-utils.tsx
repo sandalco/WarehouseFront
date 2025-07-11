@@ -7,15 +7,15 @@ import { Download, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCallback, useEffect } from "react";
 import api from "@/lib/axios";
-import { getImportTemplate } from "@/lib/api/template";
+import { getImportTemplate, getExportData } from "@/lib/api/template";
 
 // Utility functions for Excel import/export
 export function downloadTemplate(
-  type: "products" | "warehouses" | "customers"
+  type: "products" | "warehouses" | "customers" | "orders" | "shelves"
 ) {
 
-  getImportTemplate(type).then((response) => {
-    const url = window.URL.createObjectURL(response);
+  getImportTemplate(type).then((blob) => {
+    const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
     link.download = `${type}_template.xlsx`;
@@ -27,98 +27,31 @@ export function downloadTemplate(
 }
 
 export function exportData(
-  type: "products" | "warehouses" | "customers",
-  data: any[]
+  type: "products" | "warehouses" | "customers" | "orders" | "shelves"
 ) {
-  const exportConfigs = {
-    products: {
-      filename: "products_export.csv",
-      headers: [
-        "ID",
-        "Name",
-        "SKU",
-        "Category",
-        "Price",
-        "Stock",
-        "Min Stock",
-        "Status",
-      ],
-      mapData: (item: any) => [
-        item.id,
-        item.name,
-        item.sku,
-        item.category,
-        item.price,
-        item.stock,
-        item.minStock,
-        item.status,
-      ],
-    },
-    warehouses: {
-      filename: "warehouses_export.csv",
-      headers: [
-        "ID",
-        "Name",
-        "Location",
-        "Capacity",
-        "Occupied",
-        "Shelves",
-        "Workers",
-        "Status",
-      ],
-      mapData: (item: any) => [
-        item.id,
-        item.name,
-        item.location,
-        item.capacity,
-        item.occupied,
-        item.shelves,
-        item.workers,
-        item.status,
-      ],
-    },
-    customers: {
-      filename: "customers_export.csv",
-      headers: [
-        "ID",
-        "Name",
-        "Email",
-        "Phone",
-        "Address",
-        "Type",
-        "Total Orders",
-        "Total Value",
-        "Status",
-      ],
-      mapData: (item: any) => [
-        item.id,
-        item.name,
-        item.email,
-        item.phone,
-        item.address,
-        item.type,
-        item.totalOrders,
-        item.totalValue,
-        item.status,
-      ],
-    },
+  // Map frontend types to backend enum values
+  const typeMapping = {
+    products: "Product",
+    warehouses: "Warehouse", 
+    customers: "Customer",
+    orders: "Order",
+    shelves: "Shelf"
   };
 
-  const config = exportConfigs[type];
-  const csvContent = [
-    config.headers.join(","),
-    ...data.map((item) => config.mapData(item).join(",")),
-  ].join("\n");
-
-  const blob = new Blob([csvContent], { type: "text/csv" });
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = config.filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(url);
+  const backendType = typeMapping[type];
+  
+  getExportData(backendType).then((blob) => {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${type}_export.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  }).catch((error) => {
+    console.error("Error exporting data:", error);
+  });
 }
 
 export function ImportExportButtons({
@@ -126,14 +59,14 @@ export function ImportExportButtons({
   data,
   onImport,
 }: {
-  type: "products" | "warehouses" | "customers";
+  type: "products" | "warehouses" | "customers" | "orders" | "shelves";
   data: any[];
   onImport: (file: File) => void;
 }) {
   const { toast } = useToast();
 
   const handleDownloadTemplate = useCallback(
-    (type: "products" | "warehouses" | "customers") => {
+    (type: "products" | "warehouses" | "customers" | "orders" | "shelves") => {
       downloadTemplate(type);
       toast({
         title: "Şablon Yükləndi",
@@ -144,11 +77,11 @@ export function ImportExportButtons({
   );
 
   const handleExportData = useCallback(
-    (type: "products" | "warehouses" | "customers", data: any[]) => {
-      exportData(type, data);
+    (type: "products" | "warehouses" | "customers" | "orders" | "shelves") => {
+      exportData(type);
       toast({
         title: "Məlumatlar İxrac Edildi",
-        description: `${type}_export.csv uğurla yükləndi.`,
+        description: `${type}_export.xlsx uğurla yükləndi.`,
       });
     },
     [toast]
@@ -196,7 +129,7 @@ export function ImportExportButtons({
       <Button
         variant="outline"
         size="sm"
-        onClick={() => handleExportData(type, data)}
+        onClick={() => handleExportData(type)}
         className="border-purple-primary text-purple-primary hover:bg-purple-primary hover:text-white"
       >
         <Download className="h-4 w-4 mr-2" />

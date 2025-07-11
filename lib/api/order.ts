@@ -39,9 +39,7 @@ export async function getOrdersByCustomer(customerId: string): Promise<Order[]> 
 
 // 6. Sifarişi id ilə al
 export async function getOrderById(id: string): Promise<Order> {
-  console.log(`Fetching order with ID: ${id}`);
   const response = await api.get(`/order/${id}`);
-  
   return response.data;
 }
 

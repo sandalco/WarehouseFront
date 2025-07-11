@@ -338,7 +338,7 @@ export function WarehouseManagement() {
                 </div>
                 <div>
                   <p className="text-gray-600">İşçilər</p>
-                  <p className="font-medium">{warehouse.workers}</p>
+                  <p className="font-medium">{warehouse.employeeCount}</p>
                 </div>
               </div>
 

@@ -9,6 +9,7 @@ export interface Warehouse {
   zipCode?: string;
   occupancyRate: number;
   usedShelves: number;
+  employeeCount: number;
 }
 
 export interface CreateWarehouseDto {
