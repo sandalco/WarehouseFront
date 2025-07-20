@@ -28,11 +28,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Package, Eye, Grid3X3, List } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Package, Eye, Grid3X3, List, PackagePlus, Minus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { createProduct, deleteProduct, getProducts } from "@/lib/api/products";
+import { createProduct, deleteProduct, getProducts, increaseProductStock, quickIncreaseProductStock } from "@/lib/api/products";
 import { createProductDto, Product } from "@/types/product";
 import { ImportExportButtons } from "../import-export-utils";
+import { useSubscription } from "../subscription-provider";
+import { BulkProductIncreasePage } from "../pages/BulkProductIncreasePage";
+import { StockReductionPage } from "../pages/StockReductionPage";
+import { ProductStockHistory } from "../ProductStockHistory";
 
 interface ProductManagementProps {
   onViewProduct?: (productId: string) => void;
@@ -42,6 +46,21 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  
+  // Subscription context
+  const { currentSubscription } = useSubscription();
+  const isBronzeUser = currentSubscription?.tier === "bronze";
+  
+  // Modal states for quantity increase
+  const [isQuantityModalOpen, setIsQuantityModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [quantityToAdd, setQuantityToAdd] = useState<number>(1);
+  
+  // Bulk increase page state
+  const [showBulkIncreasePage, setShowBulkIncreasePage] = useState(false);
+  
+  // Stock reduction page state
+  const [showStockReductionPage, setShowStockReductionPage] = useState(false);
 
   const [productsList, setProductsList] = useState<Product[]>([]);
   const { toast } = useToast();
@@ -130,8 +149,84 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
           description: "Məhsul uğurla silindi.",
         });
       })
-
   }
+
+  // Bronze istifadəçilər üçün məhsul sayını artırmaq
+  const handleOpenQuantityModal = (product: Product) => {
+    setSelectedProduct(product);
+    setQuantityToAdd(1);
+    setIsQuantityModalOpen(true);
+  };
+
+  const handleIncreaseQuantity = async () => {
+    if (!selectedProduct || quantityToAdd <= 0) {
+      toast({
+        title: "Xəta",
+        description: "Düzgün məhsul və miqdar seçin.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await increaseProductStock(selectedProduct.id, quantityToAdd);
+      
+      setProductsList((prev) => 
+        prev.map((product) => 
+          product.id === selectedProduct.id 
+            ? { ...product, quantity: product.quantity + quantityToAdd }
+            : product
+        )
+      );
+
+      toast({
+        title: "Məhsul Miqdarı Artırıldı",
+        description: `${selectedProduct.name} məhsulunun miqdarı ${quantityToAdd} ədəd artırıldı.`,
+      });
+
+      // Modal-ı bağla
+      setIsQuantityModalOpen(false);
+      setSelectedProduct(null);
+      setQuantityToAdd(1);
+      
+    } catch (error) {
+      console.error("Error increasing product quantity:", error);
+      toast({
+        title: "Xəta",
+        description: "Məhsul miqdarı artırılarkən xəta baş verdi.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Sürətli artırma (modal olmadan)
+  const handleQuickIncrease = async (productId: string, quantity: number) => {
+    try {
+      await quickIncreaseProductStock(productId, quantity);
+      
+      setProductsList((prev) => 
+        prev.map((product) => 
+          product.id === productId 
+            ? { ...product, quantity: product.quantity + quantity }
+            : product
+        )
+      );
+
+      const product = productsList.find(p => p.id === productId);
+      toast({
+        title: "Miqdar Artırıldı",
+        description: `${product?.name} məhsuluna +${quantity} ədəd əlavə edildi.`,
+      });
+      
+    } catch (error) {
+      console.error("Error quick increasing product quantity:", error);
+      toast({
+        title: "Xəta",
+        description: "Məhsul miqdarı artırılarkən xəta baş verdi.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const getProductStatusBadge = (product: Product) => {
     if (product.quantity === 0) {
@@ -144,7 +239,13 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      {showStockReductionPage ? (
+        <StockReductionPage onBack={() => setShowStockReductionPage(false)} />
+      ) : showBulkIncreasePage ? (
+        <BulkProductIncreasePage onBack={() => setShowBulkIncreasePage(false)} />
+      ) : (
+        <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-purple-primary">
@@ -160,6 +261,26 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
             data={productsList}
             onImport={handleImport}
           />
+          {isBronzeUser && (
+            <Button
+              variant="outline"
+              onClick={() => setShowBulkIncreasePage(true)}
+              className="bg-green-50 hover:bg-green-100 text-green-700"
+            >
+              <PackagePlus className="h-4 w-4 mr-2" />
+              Stok Artır
+            </Button>
+          )}
+          {isBronzeUser && (
+            <Button
+              variant="outline"
+              onClick={() => setShowStockReductionPage(true)}
+              className="bg-red-50 hover:bg-red-100 text-red-700"
+            >
+              <Minus className="h-4 w-4 mr-2" />
+              Stok Azalt
+            </Button>
+          )}
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-purple-primary hover:bg-purple-600">
@@ -366,8 +487,8 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
               <TableHeader>
                 <TableRow>
                   <TableHead>Məhsul</TableHead>
-                  <TableHead>SKU</TableHead>
-                  <TableHead>Kateqoriya</TableHead>
+                  {!isBronzeUser && <TableHead>SKU</TableHead>}
+                  {!isBronzeUser && <TableHead>Kateqoriya</TableHead>}
                   <TableHead>Alış Qiyməti</TableHead>
                   <TableHead>Satış Qiyməti</TableHead>
                   <TableHead>Stok</TableHead>
@@ -384,18 +505,44 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
                         <span className="font-medium">{product.name}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="font-mono text-sm">
-                      {product.sku}
-                    </TableCell>
-                    <TableCell>{product.category}</TableCell>
+                    {!isBronzeUser && (
+                      <TableCell className="font-mono text-sm">
+                        {product.sku}
+                      </TableCell>
+                    )}
+                    {!isBronzeUser && (
+                      <TableCell>{product.category}</TableCell>
+                    )}
                     <TableCell>{product.purchasePrice}₼</TableCell>
                     <TableCell>{product.sellPrice}₼</TableCell>
                     <TableCell>
-                      <div>
-                        <span className="font-medium">{product.quantity}</span>
-                        <span className="text-sm text-gray-500 ml-1">
-                          (min: {product.minRequire})
-                        </span>
+                      <div className="flex items-center space-x-2">
+                        <div>
+                          <span className="font-medium">{product.quantity}</span>
+                          <span className="text-sm text-gray-500 ml-1">
+                            (min: {product.minRequire})
+                          </span>
+                        </div>
+                        {isBronzeUser && (
+                          <div className="flex space-x-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleQuickIncrease(product.id, 1)}
+                              className="h-6 w-6 p-0 text-xs bg-green-50 hover:bg-green-100 text-green-700"
+                            >
+                              +1
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleQuickIncrease(product.id, 5)}
+                              className="h-6 w-6 p-0 text-xs bg-green-50 hover:bg-green-100 text-green-700"
+                            >
+                              +5
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -409,6 +556,16 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
+                        {isBronzeUser && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenQuantityModal(product)}
+                            className="bg-green-50 hover:bg-green-100 text-green-700"
+                          >
+                            <PackagePlus className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button
                           variant="outline"
                           size="sm"
@@ -416,10 +573,15 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
+                        <ProductStockHistory 
+                          productId={product.id} 
+                          productName={product.name}
+                        />
                         <Button variant="outline" size="sm">
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleDeleteProduct(product.id)}>
+                        <Button variant="outline" size="sm" onClick={() => handleDeleteProduct(product.id)} 
+                            className="bg-red-50 hover:bg-red-100 text-red-700">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -503,6 +665,19 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
                       {/* Əməliyyat düymələri */}
                       <div className="flex justify-between pt-2">
                         <div className="flex space-x-1">
+                          {isBronzeUser && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenQuantityModal(product);
+                              }}
+                              className="h-8 w-8 p-0 bg-green-50 hover:bg-green-100 text-green-700"
+                            >
+                              <PackagePlus className="h-3 w-3" />
+                            </Button>
+                          )}
                           <Button
                             variant="outline"
                             size="sm"
@@ -514,6 +689,21 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
                           >
                             <Eye className="h-3 w-3" />
                           </Button>
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <ProductStockHistory 
+                              productId={product.id} 
+                              productName={product.name}
+                              trigger={
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <PackagePlus className="h-3 w-3" />
+                                </Button>
+                              }
+                            />
+                          </div>
                           <Button
                             variant="outline"
                             size="sm"
@@ -561,6 +751,67 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
           )}
         </CardContent>
       </Card>
-    </div>
+
+      {/* Məhsul Miqdarı Artırma Modal - Yalnız Bronze istifadəçilər üçün */}
+      {isBronzeUser && (
+        <Dialog open={isQuantityModalOpen} onOpenChange={setIsQuantityModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Məhsul Miqdarı Artır</DialogTitle>
+              <DialogDescription>
+                {selectedProduct?.name} məhsulunun miqdarını artırmaq üçün ədəd daxil edin
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                <Package className="h-12 w-12 text-gray-400" />
+                <div>
+                  <h3 className="font-medium">{selectedProduct?.name}</h3>
+                  <p className="text-sm text-gray-600">
+                    Hazırki miqdar: {selectedProduct?.quantity} ədəd
+                  </p>
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="quantityToAdd">Artırılacaq Miqdar</Label>
+                <Input
+                  id="quantityToAdd"
+                  type="number"
+                  min="1"
+                  value={quantityToAdd}
+                  onChange={(e) => setQuantityToAdd(parseInt(e.target.value) || 1)}
+                  placeholder="Artırılacaq ədəd"
+                />
+              </div>
+              
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <strong>Yeni miqdar:</strong> {(selectedProduct?.quantity || 0) + quantityToAdd} ədəd
+                </p>
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsQuantityModalOpen(false)}
+                >
+                  Ləğv Et
+                </Button>
+                <Button
+                  onClick={handleIncreaseQuantity}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <PackagePlus className="h-4 w-4 mr-2" />
+                  Miqdarı Artır
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+        </div>
+      )}
+    </>
   );
 }

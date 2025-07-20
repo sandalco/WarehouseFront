@@ -4,6 +4,7 @@ export interface SubscriptionPlan {
   id: string
   name: string
   tier: SubscriptionTier
+  code: string
   price: number
   billingCycle: "monthly" | "yearly"
   features: string[]
@@ -36,6 +37,7 @@ export interface SubscriptionContextType {
   currentSubscription: UserSubscription | null
   availablePlans: SubscriptionPlan[]
   isLoading: boolean
+  subscribeToPlan: (planId: string) => Promise<void>
   upgradePlan: (planId: string) => Promise<void>
   downgradePlan: (planId: string) => Promise<void>
   cancelSubscription: () => Promise<void>

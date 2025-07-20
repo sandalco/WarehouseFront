@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useSubscription } from "./subscription-provider"
+import { useAuth } from "./auth/AuthProvider"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -11,8 +12,22 @@ import { Check, Star, Zap, Crown } from "lucide-react"
 import type { SubscriptionPlan } from "@/types/subscription"
 
 export function SubscriptionPlans() {
-  const { currentSubscription, availablePlans, upgradePlan, downgradePlan, isLoading } = useSubscription()
+  const { currentSubscription, availablePlans, subscribeToPlan, upgradePlan, downgradePlan, isLoading } = useSubscription()
+  const { user } = useAuth()
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly")
+
+  // Authentication yoxla
+  if (!user) {
+    return (
+      <div className="text-center py-8">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="pt-6">
+            <p className="text-gray-600">Subscription planlarını görmək üçün giriş edin</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   const getTierIcon = (tier: string) => {
     switch (tier) {
@@ -41,7 +56,13 @@ export function SubscriptionPlans() {
   }
 
   const handlePlanChange = async (plan: SubscriptionPlan) => {
-    if (!currentSubscription) return
+    console.log(currentSubscription);
+    
+    if (!currentSubscription) {
+      // Yeni subscription
+      await subscribeToPlan(plan.code)
+      return
+    }
 
     const currentTierOrder = ["bronze", "silver", "gold"]
     const currentIndex = currentTierOrder.indexOf(currentSubscription.tier)
@@ -164,14 +185,14 @@ export function SubscriptionPlans() {
 
               <CardContent className="space-y-6">
                 {/* Features */}
-                <ul className="space-y-3">
+                {/* <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-center space-x-3">
                       <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
                       <span className="text-sm">{feature}</span>
                     </li>
                   ))}
-                </ul>
+                </ul> */}
 
                 {/* Limits */}
                 <div className="border-t pt-4 space-y-2">

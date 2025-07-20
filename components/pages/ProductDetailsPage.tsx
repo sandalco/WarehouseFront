@@ -246,11 +246,11 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
                   <>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Selling Price:</span>
-                      <span className="font-bold text-green-600">${product.price}</span>
+                      <span className="font-bold text-green-600">₼{product.price}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Cost Price:</span>
-                      <span className="font-medium">${product.cost}</span>
+                      <span className="font-medium">₼{product.cost}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Margin:</span>
@@ -258,7 +258,7 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Profit:</span>
-                      <span className="font-bold text-purple-600">${(product.price - product.cost).toFixed(2)}</span>
+                      <span className="font-bold text-purple-600">₼{(product.price - product.cost).toFixed(2)}</span>
                     </div>
                   </>
                 )}
@@ -447,7 +447,7 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
                 <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${product.salesData.revenue.toLocaleString()}</div>
+                <div className="text-2xl font-bold">₼{product.salesData.revenue.toLocaleString()}</div>
                 <p className="text-xs text-muted-foreground">lifetime</p>
               </CardContent>
             </Card>
@@ -466,7 +466,7 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  ${(product.salesData.revenue / product.salesData.totalSold).toFixed(2)}
+                  ₼{(product.salesData.revenue / product.salesData.totalSold).toFixed(2)}
                 </div>
                 <p className="text-xs text-muted-foreground">per unit</p>
               </CardContent>
@@ -493,8 +493,8 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
                     <TableRow key={index}>
                       <TableCell className="font-medium">{customer.name}</TableCell>
                       <TableCell>{customer.quantity} units</TableCell>
-                      <TableCell className="font-medium">${customer.revenue.toLocaleString()}</TableCell>
-                      <TableCell>${(customer.revenue / customer.quantity).toFixed(2)}</TableCell>
+                      <TableCell className="font-medium">₼{customer.revenue.toLocaleString()}</TableCell>
+                      <TableCell>₼{(customer.revenue / customer.quantity).toFixed(2)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -513,7 +513,7 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {Object.entries(product.specifications).map(([key, value]) => (
                   <div key={key} className="flex justify-between py-2 border-b border-gray-100">
-                    <span className="text-gray-600 capitalize">{key.replace(/([A-Z])/g, " $1")}:</span>
+                    <span className="text-gray-600 capitalize">{key.replace(/([A-Z])/g, " ₼1")}:</span>
                     <span className="font-medium text-right max-w-xs">{value}</span>
                   </div>
                 ))}
