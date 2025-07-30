@@ -68,11 +68,12 @@ export function SubscriptionPlans() {
     const currentIndex = currentTierOrder.indexOf(currentSubscription.tier)
     const newIndex = currentTierOrder.indexOf(plan.tier)
 
-    if (newIndex > currentIndex) {
-      await upgradePlan(plan.id)
-    } else if (newIndex < currentIndex) {
-      await downgradePlan(plan.id)
-    }
+    await upgradePlan(plan.id)
+    // if (newIndex > currentIndex) {
+    //   await upgradePlan(plan.id)
+    // } else if (newIndex < currentIndex) {
+    //   await downgradePlan(plan.id)
+    // }
   }
 
   const isCurrentPlan = (planId: string) => {

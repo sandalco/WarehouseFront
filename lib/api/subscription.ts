@@ -1,5 +1,6 @@
 import { ActiveSubscription, SubscriptionHistory } from "@/types/subscription/subscriptionhistory";
 import api from "../axios";
+import { ApiResponse, handleApiResponse, handleApiError } from "./types";
 
 export interface SubscriptionPackage {
   id: number;
@@ -24,48 +25,37 @@ export interface SubscriptionPackage {
 
 export async function getCurrentSubscription(): Promise<ActiveSubscription | null> {
     try {
-        const response = await api.get("/subscription/my/active");
+        const response: ApiResponse<ActiveSubscription> = await api.get("/subscription/my/active");
         console.log("Current subscription fetched:", response);
         
-        if(response.statusCode !== 200){
+        if (!response.isSuccess || response.statusCode !== 200) {
             console.error("Failed to fetch current subscription:", response.errors);
             return null;
         }
-        if (!response.data) {
-            throw new Error("No data received from the server");
-        }
-        return response.data;
+        
+        return handleApiResponse(response);
     } catch (error) {
         console.error("Error fetching current subscription:", error);
-        throw error;
+        return null; // Bu halda null qaytarırıq
     }
 }
 
 export async function getHistory(): Promise<SubscriptionHistory[]> {
   try {
-    const response = await api.get("/subscription/my/history");
-    if (!response.data) {
-      throw new Error("No data received from the server");
-    }
-    return response.data;
+    const response: ApiResponse<SubscriptionHistory[]> = await api.get("/subscription/my/history");
+    return handleApiResponse(response);
   } catch (error) {
-    console.error("Error fetching subscriptions:", error);
-    throw error;
+    return handleApiError(error, "getHistory");
   }
 }
 
 export async function getSubscriptionPackages(): Promise<SubscriptionPackage[]> {
   try {
-    const response = await api.get("/subscriptionpackages");
+    const response: ApiResponse<SubscriptionPackage[]> = await api.get("/subscriptionpackages");
     console.log("Subscription packages fetched:", response);
-    
-    if (!response.data) {
-      throw new Error("No data received from the server");
-    }
-    return response.data;
+    return handleApiResponse(response);
   } catch (error) {
-    console.error("Error fetching subscription packages:", error);
-    throw error;
+    return handleApiError(error, "getSubscriptionPackages");
   }
 }
 
@@ -76,16 +66,11 @@ export interface SubscriptionRequest {
 
 export async function subscribeToPackage(subscriptionData: SubscriptionRequest): Promise<any> {
   try {
-    const response = await api.post("/subscription", subscriptionData);
+    const response: ApiResponse<any> = await api.post("/subscription", subscriptionData);
     console.log("Subscription created:", response);
-    
-    if (!response.data) {
-      throw new Error("No data received from the server");
-    }
-    return response.data;
+    return handleApiResponse(response);
   } catch (error) {
-    console.error("Error creating subscription:", error);
-    throw error;
+    return handleApiError(error, "subscribeToPackage");
   }
 }
 
