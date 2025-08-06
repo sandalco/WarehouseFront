@@ -36,6 +36,7 @@ import {
   ArrowUp,
   History,
   Minus,
+  Calculator,
 } from "lucide-react"
 
 type NavigationItem = {
@@ -156,6 +157,13 @@ export function AppSidebar() {
       url: "/boss/workers",
       icon: Users,
       requiredTier: "gold", // Yalnız Gold üçün
+      requiresSubscription: true,
+    },
+    {
+      title: "Maaliyyə",
+      url: "/boss/finance",
+      icon: Calculator,
+      requiredTier: "bronze", // Silver və Gold üçün
       requiresSubscription: true,
     },
     {
