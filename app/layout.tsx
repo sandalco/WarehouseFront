@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="az" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider defaultTheme="purple" storageKey="warehouse-ui-theme">
+        {/* <ThemeProvider defaultTheme="purple" storageKey="warehouse-ui-theme"> */}
           <NotificationProvider>
             <AuthProvider>
               <SubscriptionProvider>
@@ -36,7 +36,7 @@ export default function RootLayout({
               </SubscriptionProvider>
             </AuthProvider>
           </NotificationProvider>
-        </ThemeProvider>
+        {/* </ThemeProvider> */}
       </body>
     </html>
   );

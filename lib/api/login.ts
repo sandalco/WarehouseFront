@@ -4,9 +4,13 @@ import api from "../axios";
 export async function login(email: string, password: string) {
   try {
     const response = await api.post("/get-token", { email, password });
-    if (response.access_token !== null) {
-      localStorage.setItem("token", response.access_token);
-      return response.access_token;
+      console.log(response);
+    if (response.data.access_token !== null) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("token", response.data.access_token);
+      }
+      
+      return response.data.access_token;
     } else {
       throw new Error("Login failed");
     }
@@ -18,8 +22,10 @@ export async function login(email: string, password: string) {
 
 export async function logout() {
   try {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+    }
     return true;
   } catch (error) {
     console.error("Logout error:", error);
@@ -29,6 +35,8 @@ export async function logout() {
 
 export async function getCurrentUser() {
   try {
+    if (typeof window === 'undefined') return null;
+    
     const token = localStorage.getItem("token");
     if (!token) return null;
 

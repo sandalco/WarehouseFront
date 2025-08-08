@@ -67,7 +67,9 @@ export function HistoricalIncomeStatement({ onDataChange }: HistoricalIncomeStat
       console.error('Historical income statement fetch error:', err)
       
       // Backend-dən gələn mesajı yoxla
-      const backendMsg = err.response?.data?.message || err.message || null
+      const backendMsg = err.response?.data?.message || err || null
+      console.log('Backend message:', backendMsg);
+      
       
       // Əgər 404 xətası varsa və ya backend-dən xüsusi mesaj varsa
       if (err.response?.status === 404 || (backendMsg && backendMsg.includes('tapılmadı'))) {

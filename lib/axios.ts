@@ -18,8 +18,11 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (response) => response.data,
-  (error) => Promise.reject(error.response.data.Errors ? error.response.data.Errors : error.message) 
+  (response) => {
+    console.log(response);
+    return response.data;
+  },
+  (error) => Promise.reject(error.response?.data?.Errors ? error.response.data.Errors : error.message)
 );
 
 export default api;
