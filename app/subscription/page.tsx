@@ -1,4 +1,4 @@
-import { SubscriptionManagement } from "@/components/management/SubscriptionManagement"
+import { SubscriptionManagement } from "@/components/subscription-management"
 
 export default function SubscriptionPage() {
   return (

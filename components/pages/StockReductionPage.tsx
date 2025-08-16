@@ -7,13 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Package, Minus, ArrowLeft, Trash2, AlertTriangle } from "lucide-react";
 import { getProducts, bulkDecreaseProductStock } from "@/lib/api/products";
 import { Product } from "@/types/product";
@@ -32,8 +26,10 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedItems, setSelectedItems] = useState<StockReductionItem[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
-  const [quantityToReduce, setQuantityToReduce] = useState<number>(1);
+  const [quantityToReduce, setQuantityToReduce] = useState<string>("1");
   const [isLoading, setIsLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [showDropdown, setShowDropdown] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -46,6 +42,7 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
       // Yalnız stoku olan məhsulları göstər
       const availableProducts = productsData.filter((p: Product) => p.quantity > 0);
       setProducts(availableProducts);
+
     } catch (error) {
       console.error("Error loading products:", error);
       toast({
@@ -57,7 +54,8 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
   };
 
   const handleAddItem = () => {
-    if (!selectedProductId || quantityToReduce <= 0) {
+    const quantityNum = parseInt(quantityToReduce);
+    if (!selectedProductId || !quantityToReduce || isNaN(quantityNum) || quantityNum <= 0) {
       toast({
         title: "Xəta",
         description: "Məhsul və miqdar seçin",
@@ -78,7 +76,7 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
 
     // Əvvəlcə yoxla ki, stokda kifayət qədər məhsul var
     const currentSelectedQuantity = selectedItems.find(item => item.product.id === selectedProductId)?.quantity || 0;
-    const totalQuantity = currentSelectedQuantity + quantityToReduce;
+    const totalQuantity = currentSelectedQuantity + quantityNum;
 
     if (totalQuantity > product.quantity) {
       toast({
@@ -100,26 +98,32 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
       const newItem: StockReductionItem = {
         id: Date.now().toString(),
         product,
-        quantity: quantityToReduce,
+        quantity: quantityNum,
       };
       setSelectedItems([...selectedItems, newItem]);
     }
 
     // Formu sıfırla
     setSelectedProductId("");
-    setQuantityToReduce(1);
+    setQuantityToReduce("");
   };
 
   const handleRemoveItem = (itemId: string) => {
     setSelectedItems(selectedItems.filter(item => item.id !== itemId));
   };
 
-  const handleQuantityChange = (itemId: string, newQuantity: number) => {
-    if (newQuantity <= 0) return;
-    
+  const handleQuantityChange = (itemId: string, newValue: string) => {
+    // İstifadəçi istədiyi kimi silə və yaza bilər
+    if (newValue === "") {
+      setSelectedItems(selectedItems.map(item =>
+        item.id === itemId ? { ...item, quantity: 0 } : item
+      ));
+      return;
+    }
+    const newQuantity = parseInt(newValue);
+    if (isNaN(newQuantity)) return;
     const item = selectedItems.find(i => i.id === itemId);
     if (!item) return;
-
     if (newQuantity > item.product.quantity) {
       toast({
         title: "Xəta",
@@ -128,11 +132,8 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
       });
       return;
     }
-
-    setSelectedItems(selectedItems.map(item => 
-      item.id === itemId 
-        ? { ...item, quantity: newQuantity }
-        : item
+    setSelectedItems(selectedItems.map(item =>
+      item.id === itemId ? { ...item, quantity: newQuantity } : item
     ));
   };
 
@@ -141,6 +142,15 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
       toast({
         title: "Xəta",
         description: "Heç bir məhsul seçilməyib",
+        variant: "destructive",
+      });
+      return;
+    }
+    // Heç bir məhsulun miqdarı boş və ya 0 ola bilməz
+    if (selectedItems.some(item => !item.quantity || item.quantity <= 0)) {
+      toast({
+        title: "Xəta",
+        description: "Məhsul miqdarı boş və ya 0 ola bilməz",
         variant: "destructive",
       });
       return;
@@ -185,7 +195,8 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
   const getAvailableProducts = () => {
     return products.filter(product => {
       const selectedQuantity = selectedItems.find(item => item.product.id === product.id)?.quantity || 0;
-      return selectedQuantity < product.quantity;
+      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+      return selectedQuantity < product.quantity && matchesSearch;
     });
   };
 
@@ -223,25 +234,40 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="product-select">Məhsul</Label>
-              <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Məhsul seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  {getAvailableProducts().map((product) => (
-                    <SelectItem key={product.id} value={product.id}>
-                      <div className="flex items-center justify-between w-full">
-                        <span>{product.name}</span>
-                        <Badge variant="outline" className="ml-2">
-                          {product.quantity} ədəd
-                        </Badge>
-                      </div>
-                    </SelectItem>
+            <div className="relative">
+              <Label htmlFor="product-combobox">Məhsul</Label>
+              <Input
+                id="product-combobox"
+                type="text"
+                placeholder="Məhsul adı ilə axtar və ya seç..."
+                value={searchTerm}
+                autoComplete="off"
+                onFocus={() => setShowDropdown(true)}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+                onChange={e => {
+                  setSearchTerm(e.target.value);
+                  setShowDropdown(true);
+                }}
+                className="mb-2"
+              />
+              {showDropdown && getAvailableProducts().length > 0 && (
+                <div className="absolute z-10 w-full bg-white border border-gray-200 rounded shadow max-h-60 overflow-auto">
+                  {getAvailableProducts().map(product => (
+                    <div
+                      key={product.id}
+                      className={`flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100 ${selectedProductId === product.id ? 'bg-gray-100' : ''}`}
+                      onMouseDown={() => {
+                        setSelectedProductId(product.id);
+                        setSearchTerm(product.name);
+                        setShowDropdown(false);
+                      }}
+                    >
+                      <span>{product.name}</span>
+                      <Badge variant="outline" className="ml-2">{product.quantity} ədəd</Badge>
+                    </div>
                   ))}
-                </SelectContent>
-              </Select>
+                </div>
+              )}
             </div>
 
             <div>
@@ -251,7 +277,7 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
                 type="number"
                 min="1"
                 value={quantityToReduce}
-                onChange={(e) => setQuantityToReduce(parseInt(e.target.value) || 1)}
+                onChange={(e) => setQuantityToReduce(e.target.value)}
                 placeholder="Miqdar"
               />
             </div>
@@ -259,7 +285,7 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
             <Button
               onClick={handleAddItem}
               className="w-full bg-red-600 hover:bg-red-700"
-              disabled={!selectedProductId || quantityToReduce <= 0}
+              disabled={!selectedProductId || !quantityToReduce || isNaN(parseInt(quantityToReduce)) || parseInt(quantityToReduce) <= 0}
             >
               <Minus className="h-4 w-4 mr-2" />
               Siyahıya Əlavə Et
@@ -304,8 +330,8 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
                         type="number"
                         min="1"
                         max={item.product.quantity}
-                        value={item.quantity}
-                        onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value) || 1)}
+                        value={item.quantity === 0 ? "" : item.quantity}
+                        onChange={(e) => handleQuantityChange(item.id, e.target.value)}
                         className="w-20"
                       />
                       <Button
@@ -332,7 +358,7 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
             <CardTitle>Əməliyyat Xülasəsi</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div className="text-center">
                 <p className="text-2xl font-bold text-red-600">{selectedItems.length}</p>
                 <p className="text-sm text-gray-600">Məhsul növü</p>
@@ -340,12 +366,6 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
               <div className="text-center">
                 <p className="text-2xl font-bold text-red-600">{getTotalReduction()}</p>
                 <p className="text-sm text-gray-600">Ümumi çıxarılacaq</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-orange-600">
-                  {products.reduce((sum, p) => sum + p.quantity, 0) - getTotalReduction()}
-                </p>
-                <p className="text-sm text-gray-600">Qalacaq stok</p>
               </div>
             </div>
 

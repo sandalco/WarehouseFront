@@ -72,11 +72,11 @@ export function LoginForm() {
               {isLoading ? "Daxil olunur..." : "Daxil ol"}
             </Button>
           </form>
-          <div className="mt-4 text-sm text-gray-600">
+          {/* <div className="mt-4 text-sm text-gray-600">
             <p>Demo məlumatları:</p>
             <p>Rəhbər: rehber@sirket.com / password</p>
             <p>İşçi: isci@sirket.com / password</p>
-          </div>
+          </div> */}
         </CardContent>
       </Card>
     </div>

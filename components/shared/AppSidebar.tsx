@@ -160,7 +160,7 @@ export function AppSidebar() {
       requiresSubscription: true,
     },
     {
-      title: "Maaliyyə",
+      title: "Maliyyə",
       url: "/boss/finance",
       icon: Calculator,
       requiredTier: "bronze", // Silver və Gold üçün

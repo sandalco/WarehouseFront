@@ -34,12 +34,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if we're on the client side
-    if (typeof window === 'undefined') {
-      setIsLoading(false);
-      return;
-    }
-
     // Mövcud sessiyanı yoxla
     const savedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -88,9 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (user.id && user.email && user.name && user.role && user.companyId) {
           setUser(user);
-          if (typeof window !== 'undefined') {
-            localStorage.setItem("user", JSON.stringify(user));
-          }
+          localStorage.setItem("user", JSON.stringify(user));
           return true;
         } else {
           // Əgər user məlumatı natamamdırsa, login uğursuz sayılır
@@ -123,9 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const foundUser = mockUsers.find((u) => u.email === email);
     if (foundUser && password === "password") {
       setUser(foundUser);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem("user", JSON.stringify(foundUser));
-      }
+      localStorage.setItem("user", JSON.stringify(foundUser));
       return true;
     }
     return false;
@@ -133,16 +123,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
-    }
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
     apiLogout();
     // Router istifadə etmək əvəzinə window.location istifadə edirik
     // çünki bu metod müxtəlif komponentlərdən çağırıla bilər
-    if (typeof window !== 'undefined') {
-      window.location.href = "/";
-    }
+    window.location.href = "/";
   };
 
   return (
