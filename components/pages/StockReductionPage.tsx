@@ -1,5 +1,99 @@
 "use client";
 
+import { ZXingBarcodeScanner } from "@/components/shared/ZXingBarcodeScanner";
+
+function ProductSelector({ products, selectedProductId, setSelectedProductId, searchTerm, setSearchTerm, selectedItems, onBarcodeAdd }: {
+  products: Product[];
+  selectedProductId: string;
+  setSelectedProductId: (id: string) => void;
+  searchTerm: string;
+  setSearchTerm: (v: string) => void;
+  selectedItems: StockReductionItem[];
+  onBarcodeAdd: (product: Product) => void;
+}) {
+  const [showScanner, setShowScanner] = useState(false);
+  const getAvailableProducts = () => {
+    return products.filter(product => {
+      const selectedQuantity = selectedItems.find(item => item.product.id === product.id)?.quantity || 0;
+      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+      return selectedQuantity < product.quantity && matchesSearch;
+    });
+  };
+  const handleBarcodeDetected = (result: string | null) => {
+    if (!result) return;
+    const found = products.find((p) => p.id === result);
+    if (found) {
+      onBarcodeAdd(found);
+      setShowScanner(false);
+    } else {
+      alert(`Barkod üzrə məhsul tapılmadı. Oxunan barkod: ${result}`);
+      setShowScanner(false);
+    }
+  };
+  // Toast hook-u parentdən prop kimi ötürmək lazımdırsa, əlavə edin
+  // Yoxdursa, sadəcə alert istifadə edə bilərik
+  return (
+    <div className="relative space-y-2">
+      <Label htmlFor="product-combobox">Məhsul</Label>
+      <div className="flex gap-2 items-center">
+        <Input
+          id="product-combobox"
+          type="text"
+          placeholder="Məhsul adı ilə axtar və ya seç..."
+          value={searchTerm}
+          autoComplete="off"
+          onFocus={() => {}}
+          onChange={e => setSearchTerm(e.target.value)}
+          className="mb-2"
+        />
+        <Button type="button" variant="secondary" onClick={() => setShowScanner(true)}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7V5a2 2 0 012-2h2m10 0h2a2 2 0 012 2v2m0 10v2a2 2 0 01-2 2h-2m-10 0H5a2 2 0 01-2-2v-2" /></svg>
+          Barkod ilə əlavə et
+        </Button>
+      </div>
+      {getAvailableProducts().length > 0 && (
+        <div className="absolute z-10 w-full bg-white border border-gray-200 rounded shadow max-h-60 overflow-auto">
+          {getAvailableProducts().map(product => (
+            <div
+              key={product.id}
+              className={`flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100 ${selectedProductId === product.id ? 'bg-gray-100' : ''}`}
+              onMouseDown={() => {
+                setSelectedProductId(product.id);
+                setSearchTerm(product.name);
+              }}
+            >
+              <span>{product.name}</span>
+              <Badge variant="outline" className="ml-2">{product.quantity} ədəd</Badge>
+            </div>
+          ))}
+        </div>
+      )}
+      {showScanner && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-white rounded-lg p-4 shadow-lg relative w-full max-w-md">
+            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700" onClick={() => setShowScanner(false)}>&times;</button>
+            <div className="mb-2 font-semibold">Barkod oxuyucu</div>
+            <ZXingBarcodeScanner
+              onResult={(result: string | null) => {
+                if (result) handleBarcodeDetected(result);
+              }}
+              onError={(err: any) => {
+                console.error("Barkod oxuma xətası:", err);
+                // İstəsən toast və ya alert verə bilərsən
+                // alert("Barkod oxunmadı: " + (err.message || err));
+              }}
+              width={350}
+              height={250}
+              facingMode="environment"
+            />
+            <div className="text-xs text-gray-500 mt-2">Kameranı barkoda yaxınlaşdırın</div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -234,41 +328,28 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="relative">
-              <Label htmlFor="product-combobox">Məhsul</Label>
-              <Input
-                id="product-combobox"
-                type="text"
-                placeholder="Məhsul adı ilə axtar və ya seç..."
-                value={searchTerm}
-                autoComplete="off"
-                onFocus={() => setShowDropdown(true)}
-                onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
-                onChange={e => {
-                  setSearchTerm(e.target.value);
-                  setShowDropdown(true);
-                }}
-                className="mb-2"
-              />
-              {showDropdown && getAvailableProducts().length > 0 && (
-                <div className="absolute z-10 w-full bg-white border border-gray-200 rounded shadow max-h-60 overflow-auto">
-                  {getAvailableProducts().map(product => (
-                    <div
-                      key={product.id}
-                      className={`flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100 ${selectedProductId === product.id ? 'bg-gray-100' : ''}`}
-                      onMouseDown={() => {
-                        setSelectedProductId(product.id);
-                        setSearchTerm(product.name);
-                        setShowDropdown(false);
-                      }}
-                    >
-                      <span>{product.name}</span>
-                      <Badge variant="outline" className="ml-2">{product.quantity} ədəd</Badge>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <ProductSelector
+              products={products}
+              selectedProductId={selectedProductId}
+              setSelectedProductId={setSelectedProductId}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              selectedItems={selectedItems}
+              onBarcodeAdd={(product) => {
+                // Əgər artıq əlavə olunmayıbsa, siyahıya əlavə et
+                const already = selectedItems.find(item => item.product.id === product.id);
+                if (already) {
+                  toast({ title: "Artıq əlavə olunub", description: product.name });
+                } else {
+                  setSelectedItems([...selectedItems, {
+                    id: Date.now().toString(),
+                    product,
+                    quantity: 1,
+                  }]);
+                  toast({ title: "Əlavə olundu", description: product.name });
+                }
+              }}
+            />
 
             <div>
               <Label htmlFor="quantity">Çıxarılacaq Miqdar</Label>

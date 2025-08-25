@@ -2,9 +2,15 @@ import axiosInstance from '../axios'
 
 export async function getImportTemplate(type: string) {
   try {
-    const response = await axiosInstance.get(`/templates/import/${type}`, {
+    // Əgər inventory tipidirsə, stock-taking endpoint-ini istifadə et
+    const endpoint = type === 'inventory' 
+      ? '/templates/stock-taking'
+      : `/templates/import/${type}`;
+      
+    const response = await axiosInstance.get(endpoint, {
       responseType: "blob", // Excel faylı üçün blob formatında cavab alınır
     });
+    
     return response;
   } catch (error) {
     console.error("Error fetching template:", error);

@@ -22,7 +22,14 @@ api.interceptors.response.use(
     console.log(response);
     return response.data;
   },
-  (error) => Promise.reject(error.response?.data?.Errors ? error.response.data.Errors : error.message)
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
+    }
+    return Promise.reject(error.response?.data?.Errors ? error.response.data.Errors : error.message);
+  }
 );
 
 export default api;

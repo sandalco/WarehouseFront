@@ -5,9 +5,9 @@ import type React from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useCallback, useEffect } from "react";
-import api from "@/lib/axios";
+import { useCallback, useState } from "react";
 import { getImportTemplate, getExportData } from "@/lib/api/template";
+import { ImportModal } from "@/components/modals/ImportModal";
 
 // Utility functions for Excel import/export
 export function downloadTemplate(
@@ -64,6 +64,7 @@ export function ImportExportButtons({
   onImport: (file: File) => void;
 }) {
   const { toast } = useToast();
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const handleDownloadTemplate = useCallback(
     (type: "products" | "warehouses" | "customers" | "orders" | "shelves") => {
@@ -87,44 +88,17 @@ export function ImportExportButtons({
     [toast]
   );
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      onImport(file);
-    }
-  };
-
   return (
     <div className="flex space-x-2">
       <Button
         variant="outline"
         size="sm"
-        onClick={() => handleDownloadTemplate(type)}
+        onClick={() => setIsImportModalOpen(true)}
         className="border-purple-primary text-purple-primary hover:bg-purple-primary hover:text-white"
       >
-        <Download className="h-4 w-4 mr-2" />
-        Şablon
+        <Upload className="h-4 w-4 mr-2" />
+        İdxal
       </Button>
-
-      <label className="cursor-pointer">
-        <Button
-          variant="outline"
-          size="sm"
-          asChild
-          className="border-purple-primary text-purple-primary hover:bg-purple-primary hover:text-white"
-        >
-          <span>
-            <Upload className="h-4 w-4 mr-2" />
-            İdxal
-          </span>
-        </Button>
-        <input
-          type="file"
-          accept=".xlsx,.xls,.csv"
-          onChange={handleFileUpload}
-          className="hidden"
-        />
-      </label>
 
       <Button
         variant="outline"
@@ -135,6 +109,14 @@ export function ImportExportButtons({
         <Download className="h-4 w-4 mr-2" />
         İxrac
       </Button>
+
+      <ImportModal
+        open={isImportModalOpen}
+        onOpenChange={setIsImportModalOpen}
+        type={type}
+        onDownloadTemplate={() => handleDownloadTemplate(type)}
+        onImport={onImport}
+      />
     </div>
   );
 }

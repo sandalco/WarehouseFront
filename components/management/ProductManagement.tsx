@@ -28,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search, Edit, Trash2, Package, Eye, Grid3X3, List, PackagePlus, Minus } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Package, Eye, Grid3X3, List, PackagePlus, Minus, Calculator } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { createProduct, deleteProduct, getProducts, increaseProductStock, quickIncreaseProductStock } from "@/lib/api/products";
 import { createProductDto, Product } from "@/types/product";
@@ -37,6 +37,7 @@ import { useSubscription } from "../subscription-provider";
 import { BulkProductIncreasePage } from "../pages/BulkProductIncreasePage";
 import { StockReductionPage } from "../pages/StockReductionPage";
 import { ProductStockHistory } from "../ProductStockHistory";
+import { InventoryModal } from "../modals/InventoryModal";
 
 interface ProductManagementProps {
   onViewProduct?: (productId: string) => void;
@@ -55,12 +56,14 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
   const [isQuantityModalOpen, setIsQuantityModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [quantityToAdd, setQuantityToAdd] = useState<number>(1);
+  const [pricePerUnit, setPricePerUnit] = useState<number>(0);
   
   // Bulk increase page state
   const [showBulkIncreasePage, setShowBulkIncreasePage] = useState(false);
   
   // Stock reduction page state
   const [showStockReductionPage, setShowStockReductionPage] = useState(false);
+  const [isInventoryModalOpen, setIsInventoryModalOpen] = useState(false);
 
   const [productsList, setProductsList] = useState<Product[]>([]);
   const { toast } = useToast();
@@ -155,21 +158,22 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
   const handleOpenQuantityModal = (product: Product) => {
     setSelectedProduct(product);
     setQuantityToAdd(1);
+    setPricePerUnit(product.purchasePrice);
     setIsQuantityModalOpen(true);
   };
 
   const handleIncreaseQuantity = async () => {
-    if (!selectedProduct || quantityToAdd <= 0) {
+    if (!selectedProduct || quantityToAdd <= 0 || pricePerUnit < 0) {
       toast({
         title: "Xəta",
-        description: "Düzgün məhsul və miqdar seçin.",
+        description: "Düzgün məhsul, miqdar və qiymət seçin.",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      await increaseProductStock(selectedProduct.id, quantityToAdd);
+      await increaseProductStock(selectedProduct.id, quantityToAdd, pricePerUnit);
       
       setProductsList((prev) => 
         prev.map((product) => 
@@ -202,13 +206,23 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
   // Sürətli artırma (modal olmadan)
   const handleQuickIncrease = async (productId: string, quantity: number) => {
     try {
-      await quickIncreaseProductStock(productId, quantity);
+      const targetProduct = productsList.find(p => p.id === productId);
+      if (!targetProduct) {
+        toast({
+          title: "Xəta",
+          description: "Məhsul tapılmadı",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      await increaseProductStock(productId, quantity, targetProduct.purchasePrice);
       
       setProductsList((prev) => 
-        prev.map((product) => 
-          product.id === productId 
-            ? { ...product, quantity: product.quantity + quantity }
-            : product
+        prev.map((p) => 
+          p.id === productId 
+            ? { ...p, quantity: p.quantity + quantity }
+            : p
         )
       );
 
@@ -261,6 +275,14 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
             data={productsList}
             onImport={handleImport}
           />
+          <Button
+            variant="outline"
+            onClick={() => setIsInventoryModalOpen(true)}
+            className="bg-blue-50 hover:bg-blue-100 text-blue-700"
+          >
+            <Calculator className="h-4 w-4 mr-2" />
+            Sayım
+          </Button>
           {isBronzeUser && (
             <Button
               variant="outline"
@@ -752,6 +774,13 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
         </CardContent>
       </Card>
 
+      {/* Anbar Sayımı Modalı */}
+      <InventoryModal 
+        open={isInventoryModalOpen}
+        onOpenChange={setIsInventoryModalOpen}
+        onImport={handleImport}
+      />
+
       {/* Məhsul Miqdarı Artırma Modal - Yalnız Bronze istifadəçilər üçün */}
       {isBronzeUser && (
         <Dialog open={isQuantityModalOpen} onOpenChange={setIsQuantityModalOpen}>
@@ -773,22 +802,40 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
                 </div>
               </div>
               
-              <div>
-                <Label htmlFor="quantityToAdd">Artırılacaq Miqdar</Label>
-                <Input
-                  id="quantityToAdd"
-                  type="number"
-                  min="1"
-                  value={quantityToAdd}
-                  onChange={(e) => setQuantityToAdd(parseInt(e.target.value) || 1)}
-                  placeholder="Artırılacaq ədəd"
-                />
-              </div>
-              
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-blue-800">
-                  <strong>Yeni miqdar:</strong> {(selectedProduct?.quantity || 0) + quantityToAdd} ədəd
-                </p>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="quantityToAdd">Artırılacaq Miqdar</Label>
+                  <Input
+                    id="quantityToAdd"
+                    type="number"
+                    min="1"
+                    value={quantityToAdd}
+                    onChange={(e) => setQuantityToAdd(parseInt(e.target.value) || 1)}
+                    placeholder="Artırılacaq ədəd"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="pricePerUnit">Alış Qiyməti (₼)</Label>
+                  <Input
+                    id="pricePerUnit"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    defaultValue={selectedProduct?.purchasePrice || 0}
+                    onChange={(e) => setPricePerUnit(parseFloat(e.target.value) || 0)}
+                    placeholder="Məhsulun alış qiyməti"
+                  />
+                </div>
+                
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <strong>Yeni miqdar:</strong> {(selectedProduct?.quantity || 0) + quantityToAdd} ədəd
+                  </p>
+                  <p className="text-sm text-blue-800 mt-1">
+                    <strong>Cari alış qiyməti:</strong> {selectedProduct?.purchasePrice} ₼
+                  </p>
+                </div>
               </div>
               
               <div className="flex justify-end space-x-2">

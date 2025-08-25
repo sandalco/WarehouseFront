@@ -4,9 +4,9 @@ import api from "../axios";
 export async function login(email: string, password: string) {
   try {
     const response = await api.post("/get-token", { email, password });
-    if (response.access_token !== null) {
-      localStorage.setItem("token", response.access_token);
-      return response.access_token;
+    if (response.data.access_token !== null) {
+      localStorage.setItem("token", response.data.access_token);
+      return response.data.access_token;
     } else {
       throw new Error("Login failed");
     }

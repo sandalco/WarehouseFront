@@ -72,9 +72,14 @@ export async function deleteProduct(productId: string) {
   }
 }
 
-export async function increaseProductStock(productId: string, quantity: number) {
+export async function increaseProductStock(productId: string, quantity: number, price: number) {
   try {
-    const response = await api.post(`/product/${productId}/increase`, quantity) as ApiResponse;
+    const requestBody = {
+      productId,
+      quantity,
+      price
+    };
+    const response = await api.post(`/product/${productId}/increase`, requestBody) as ApiResponse;
     console.log("Increase product stock response:", response);
     
     if (!response) {
@@ -91,7 +96,7 @@ export async function increaseProductStock(productId: string, quantity: number) 
 }
 
 // Kütləvi məhsul artırma funksiyası
-export async function bulkIncreaseProductStock(increaseProductDtos: Array<{ productId: string; quantity: number }>) {
+export async function bulkIncreaseProductStock(increaseProductDtos: Array<{ productId: string; quantity: number; price: number }>) {
   try {
     const response = await api.post("/product/bulk-increase", { increaseProductDtos }) as ApiResponse;
     console.log("Bulk increase product stock response:", response);

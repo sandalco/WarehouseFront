@@ -23,6 +23,7 @@ interface ProductIncrease {
   sku: string
   currentStock: number
   increaseQuantity: number
+  price: number
 }
 
 export function BulkProductIncreasePage({ onBack }: BulkProductIncreasePageProps) {
@@ -31,6 +32,7 @@ export function BulkProductIncreasePage({ onBack }: BulkProductIncreasePageProps
   const [selectedProducts, setSelectedProducts] = useState<ProductIncrease[]>([])
   const [selectedProductId, setSelectedProductId] = useState("")
   const [increaseQuantity, setIncreaseQuantity] = useState(1)
+  const [initialPrice, setInitialPrice] = useState<number | undefined>(undefined)
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -61,7 +63,7 @@ export function BulkProductIncreasePage({ onBack }: BulkProductIncreasePageProps
       return
     }
 
-    if (increaseQuantity <= 0) {
+    if (!increaseQuantity || increaseQuantity <= 0) {
       toast({
         title: "Xəta",
         description: "Artırma miqdarı 0-dan böyük olmalıdır",
@@ -90,6 +92,7 @@ export function BulkProductIncreasePage({ onBack }: BulkProductIncreasePageProps
       sku: selectedProduct.sku,
       currentStock: selectedProduct.quantity,
       increaseQuantity: increaseQuantity,
+      price: initialPrice || selectedProduct.purchasePrice
     }
 
     setSelectedProducts([...selectedProducts, newProduct])
@@ -111,6 +114,16 @@ export function BulkProductIncreasePage({ onBack }: BulkProductIncreasePageProps
     ))
   }
 
+  const updateProductPrice = (productId: string, price: number) => {
+    if (price < 0) return
+    
+    setSelectedProducts(selectedProducts.map(p => 
+      p.id === productId 
+        ? { ...p, price: price }
+        : p
+    ))
+  }
+
   const handleBulkIncrease = async () => {
     if (selectedProducts.length === 0) {
       toast({
@@ -126,7 +139,8 @@ export function BulkProductIncreasePage({ onBack }: BulkProductIncreasePageProps
     try {
       const increaseProductDtos = selectedProducts.map(product => ({
         productId: product.id,
-        quantity: product.increaseQuantity
+        quantity: product.increaseQuantity,
+        price: product.price
       }))
 
       await bulkIncreaseProductStock(increaseProductDtos)
@@ -205,7 +219,15 @@ export function BulkProductIncreasePage({ onBack }: BulkProductIncreasePageProps
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="product">Məhsul</Label>
-              <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+              <Select 
+                value={selectedProductId} 
+                onValueChange={(value) => {
+                  setSelectedProductId(value);
+                  const product = availableProducts.find(p => p.id === value);
+                  if (product && initialPrice === undefined) {
+                    setInitialPrice(product.purchasePrice);
+                  }
+                }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Məhsul seçin" />
                 </SelectTrigger>
@@ -220,6 +242,9 @@ export function BulkProductIncreasePage({ onBack }: BulkProductIncreasePageProps
                             <Badge variant="secondary">
                               Stok: {product.quantity}
                             </Badge>
+                            <Badge variant="outline">
+                              Alış: {product.purchasePrice}₼
+                            </Badge>
                             <span className="text-sm text-gray-500">SKU: {product.sku}</span>
                           </div>
                         </div>
@@ -229,19 +254,39 @@ export function BulkProductIncreasePage({ onBack }: BulkProductIncreasePageProps
               </Select>
             </div>
 
-            <div>
-              <Label htmlFor="quantity">Artırma Miqdarı</Label>
-              <div className="flex items-center space-x-2">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="quantity">Artırma Miqdarı</Label>
                 <Input
                   id="quantity"
                   type="number"
                   min="1"
-                  value={increaseQuantity}
-                  onChange={(e) => setIncreaseQuantity(Math.max(1, Number.parseInt(e.target.value) || 1))}
+                  value={increaseQuantity || ''}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? undefined : Number(e.target.value);
+                    setIncreaseQuantity(value || 0);
+                  }}
                 />
-                <Button onClick={addProduct} className="bg-purple-primary hover:bg-purple-600">
-                  <Plus className="h-4 w-4" />
-                </Button>
+              </div>
+              <div>
+                <Label htmlFor="initialPrice">Alış Qiyməti (₼)</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    id="initialPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={initialPrice || ''}
+                    onChange={(e) => {
+                      const value = e.target.value === '' ? undefined : Number(e.target.value);
+                      setInitialPrice(value || 0);
+                    }}
+                    placeholder="Məhsulun alış qiyməti"
+                  />
+                  <Button onClick={addProduct} className="bg-purple-primary hover:bg-purple-600">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -288,6 +333,20 @@ export function BulkProductIncreasePage({ onBack }: BulkProductIncreasePageProps
                           value={product.increaseQuantity}
                           onChange={(e) => updateProductQuantity(product.id, Math.max(1, Number.parseInt(e.target.value) || 1))}
                           className="w-20"
+                        />
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Label htmlFor={`price-${product.id}`} className="text-sm">
+                          Alış Qiyməti (₼):
+                        </Label>
+                        <Input
+                          id={`price-${product.id}`}
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={product.price}
+                          onChange={(e) => updateProductPrice(product.id, Math.max(0, parseFloat(e.target.value) || 0))}
+                          className="w-24"
                         />
                       </div>
                       <Button
