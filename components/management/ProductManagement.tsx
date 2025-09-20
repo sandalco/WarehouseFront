@@ -31,6 +31,7 @@ import {
 import { Plus, Search, Edit, Trash2, Package, Eye, Grid3X3, List, PackagePlus, Minus, Calculator } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { createProduct, deleteProduct, getProducts, increaseProductStock, quickIncreaseProductStock } from "@/lib/api/products";
+import { importData } from "@/lib/api/import";
 import { createProductDto, Product } from "@/types/product";
 import { ImportExportButtons } from "../import-export-utils";
 import { useSubscription } from "../subscription-provider";
@@ -74,18 +75,33 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
     });
   }, []);
 
-  const handleImport = (file: File) => {
-    toast({
-      title: "İdxal Başladı",
-      description: `${file.name} işlənir. Bu bir neçə dəqiqə çəkə bilər.`,
-    });
-
-    setTimeout(() => {
+  const handleImport = async (file: File) => {
+    try {
       toast({
-        title: "İdxal Tamamlandı",
-        description: "Məhsullar uğurla idxal edildi.",
+        title: "İmport Başladı",
+        description: `${file.name} işlənir. Bu bir neçə dəqiqə çəkə bilər.`,
       });
-    }, 2000);
+
+      // Real API call to backend
+      await importData('products', file);
+
+      // Refresh products after import
+      const products = await getProducts();
+      setProductsList(products);
+
+      toast({
+        title: "İmport Tamamlandı",
+        description: "Məhsullar uğurla import edildi.",
+      });
+    } catch (error) {
+      console.error("Import error:", error);
+      toast({
+        title: "İmport Xətası",
+        description: "Məhsullar import edilərkən xəta baş verdi.",
+        variant: "destructive",
+      });
+      throw error; // Re-throw to handle in modal
+    }
   };
 
   const filteredProducts = productsList.filter(

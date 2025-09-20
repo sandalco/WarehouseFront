@@ -1,7 +1,8 @@
 "use client"
 
-import { useAuth } from "@/components/auth-provider"
-import { WarehousemanDashboard } from "@/components/warehouseman-dashboard"
+import { useAuth } from "@/components/auth/AuthProvider"
+import WarehousemanDashboard from "@/components/dashboard/WarehousemanDashboard-new"
+//import { WarehousemanDashboard } from "@/components/warehouseman-dashboard"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 

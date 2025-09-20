@@ -93,31 +93,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error("Login failed:", error);
       return false;
     }
-
-    const mockUsers = [
-      {
-        id: "1",
-        email: "rehber@sirket.com",
-        name: "Əli Rəhbər",
-        role: "rəhbər" as const,
-        companyId: "comp1",
-      },
-      {
-        id: "2",
-        email: "isci@sirket.com",
-        name: "Ayşə İşçi",
-        role: "anbarçı" as const,
-        companyId: "comp1",
-        warehouseId: "wh1",
-      },
-    ];
-
-    const foundUser = mockUsers.find((u) => u.email === email);
-    if (foundUser && password === "password") {
-      setUser(foundUser);
-      localStorage.setItem("user", JSON.stringify(foundUser));
-      return true;
-    }
     return false;
   };
 

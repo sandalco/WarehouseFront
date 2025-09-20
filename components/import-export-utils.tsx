@@ -8,14 +8,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useCallback, useState } from "react";
 import { getImportTemplate, getExportData } from "@/lib/api/template";
 import { ImportModal } from "@/components/modals/ImportModal";
+import { importData } from "@/lib/api/import";
 
 // Utility functions for Excel import/export
 export function downloadTemplate(
   type: "products" | "warehouses" | "customers" | "orders" | "shelves"
 ) {
 
-  getImportTemplate(type).then((blob) => {
-    const url = window.URL.createObjectURL(blob);
+  getImportTemplate(type).then((response) => {
+    const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement("a");
     link.href = url;
     link.download = `${type}_template.xlsx`;
@@ -40,8 +41,8 @@ export function exportData(
 
   const backendType = typeMapping[type];
   
-  getExportData(backendType).then((blob) => {
-    const url = window.URL.createObjectURL(blob);
+  getExportData(backendType).then((response) => {
+    const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement("a");
     link.href = url;
     link.download = `${type}_export.xlsx`;
@@ -61,7 +62,7 @@ export function ImportExportButtons({
 }: {
   type: "products" | "warehouses" | "customers" | "orders" | "shelves";
   data: any[];
-  onImport: (file: File) => void;
+  onImport?: (file: File) => Promise<void>; // Optional for flexibility
 }) {
   const { toast } = useToast();
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -87,6 +88,37 @@ export function ImportExportButtons({
     },
     [toast]
   );
+
+  // Default import handler if no custom one provided
+  const handleImport = async (file: File) => {
+    if (onImport) {
+      // Use custom import handler
+      return await onImport(file);
+    } else {
+      // Use generic import handler
+      try {
+        toast({
+          title: "İmport Başladı",
+          description: `${file.name} işlənir. Bu bir neçə dəqiqə çəkə bilər.`,
+        });
+
+        await importData(type, file);
+
+        toast({
+          title: "İmport Tamamlandı",
+          description: "Məlumatlar uğurla import edildi.",
+        });
+      } catch (error) {
+        console.error("Import error:", error);
+        toast({
+          title: "İmport Xətası",
+          description: "Məlumatlar import edilərkən xəta baş verdi.",
+          variant: "destructive",
+        });
+        throw error;
+      }
+    }
+  };
 
   return (
     <div className="flex space-x-2">
@@ -115,7 +147,7 @@ export function ImportExportButtons({
         onOpenChange={setIsImportModalOpen}
         type={type}
         onDownloadTemplate={() => handleDownloadTemplate(type)}
-        onImport={onImport}
+        onImport={handleImport}
       />
     </div>
   );
