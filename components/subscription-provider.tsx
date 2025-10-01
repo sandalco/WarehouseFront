@@ -3,7 +3,6 @@
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
 import type { SubscriptionPlan, UserSubscription, SubscriptionContextType } from "@/types/subscription"
-import { useNotifications } from "./notification-provider"
 import { getSubscriptionPackages, getCurrentSubscription, subscribeToPackage, type SubscriptionPackage } from "@/lib/api/subscription"
 import { useAuth } from "./auth/AuthProvider"
 
@@ -61,8 +60,13 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   const [currentSubscription, setCurrentSubscription] = useState<UserSubscription | null>(null)
   const [availablePlans, setAvailablePlans] = useState<SubscriptionPlan[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const { addNotification } = useNotifications()
   const { user } = useAuth() // Assuming you have a useAuth hook to get company ID
+
+  // Placeholder notification function - notifications will come from SignalR
+  const addNotification = (notification: any) => {
+    // This is just a placeholder - actual notifications come via SignalR
+    console.log('Subscription notification:', notification)
+  }
 
   const fetchSubscriptionData = async () => {
     setIsLoading(true)

@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Plus, Building2, Search, Edit, Trash2, AlertCircle, User } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import axios from "@/lib/axios"
+import api from "@/lib/axios"
 
 interface Company {
   id: string
@@ -51,7 +52,7 @@ export default function CompanyManagement() {
   const fetchCompanies = async () => {
     try {
       setLoading(true)
-      const response = await axios.get("/company")
+      const response = await api.get("/company")
       if (response.isSuccess) {
         setCompanies(response.data)
       }
@@ -70,7 +71,7 @@ export default function CompanyManagement() {
   const createCompany = async () => {
     setFormError("") // Clear previous errors
     try {
-      const response = await axios.post("/company", createFormData)
+      const response = await api.post("/company", createFormData)
       if (response.isSuccess) {
         toast({
           title: "Uğurla əlavə edildi",

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { NotificationProvider } from "@/components/notification-provider";
+import { NotificationProvider } from "@/components/NotificationProvider";
 import { SubscriptionProvider } from "@/components/subscription-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/components/auth/AuthProvider";
@@ -28,14 +28,14 @@ export default function RootLayout({
     <html lang="az" suppressHydrationWarning>
       <body className={inter.className}>
         {/* <ThemeProvider defaultTheme="purple" storageKey="warehouse-ui-theme"> */}
-          <NotificationProvider>
-            <AuthProvider>
+          <AuthProvider>
+            <NotificationProvider>
               <SubscriptionProvider>
                 {children}
                 <Toaster />
               </SubscriptionProvider>
-            </AuthProvider>
-          </NotificationProvider>
+            </NotificationProvider>
+          </AuthProvider>
         {/* </ThemeProvider> */}
       </body>
     </html>
