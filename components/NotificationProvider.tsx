@@ -44,9 +44,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
 
       try {
         // Set up event handlers before starting connection
-        hubConnection.on('ReceiveNotification', (payload: NotificationType) => {
-          console.log('RECV Notification:', payload)
-          
+        hubConnection.on('ReceiveNotification', (payload: NotificationType) => {          
           // Create notification with unique ID and timestamp
           const notification: NotificationType = {
             ...payload,
@@ -76,23 +74,19 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
 
         // Connection state handlers
         hubConnection.onreconnecting(() => {
-          console.log('SignalR Reconnecting...')
           setIsConnected(false)
         })
 
         hubConnection.onreconnected(() => {
-          console.log('SignalR Reconnected')
           setIsConnected(true)
         })
 
         hubConnection.onclose(() => {
-          console.log('SignalR Disconnected')
           setIsConnected(false)
         })
 
         // Start connection
         await hubConnection.start()
-        console.log('SignalR Connected')
         setIsConnected(true)
         setConnection(hubConnection)
 

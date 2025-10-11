@@ -33,7 +33,6 @@ export function OrderHeader({
 }: OrderHeaderProps) {
     useEffect(() => {
         // This effect can be used for any side effects related to order changes
-        console.log("Order updated:", order);
     }, [order]);
 
     // Safety check to prevent errors when order is not yet loaded

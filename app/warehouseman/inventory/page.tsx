@@ -25,9 +25,7 @@ export default function InventoryPage() {
     const loadShelves = async () => {
       try {
         setLoading(true)
-        const response = await shelfApi.getAllShelves()
-        console.log('Rəflər yükləndi:', response);
-        
+        const response = await shelfApi.getAllShelves()        
         if (response.isSuccess) {
           setShelves(response.data)
         }

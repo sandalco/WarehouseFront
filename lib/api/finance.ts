@@ -26,11 +26,7 @@ export class FinanceAPI {
    */
   static async getCurrentIncomeStatement(): Promise<IncomeStatementData> {
     try {
-      console.log('FinanceAPI: API çağrışı başladı')
-      console.log('Base URL:', process.env.NEXT_PUBLIC_API_BASE_URL)
-      const response: ApiResponse<IncomeStatementData> = await api.get('/finance/current-income-statement')
-      console.log('FinanceAPI: API cavabı:', response)
-      
+      const response: ApiResponse<IncomeStatementData> = await api.get('/finance/current-income-statement')      
       if (response.isSuccess) {
         return response.data
       } else {
@@ -55,12 +51,10 @@ export class FinanceAPI {
    */
   static async getIncomeStatementByMonth(year: number, month: number): Promise<IncomeStatementData | null> {
     try {
-      console.log('FinanceAPI: Monthly income statement API çağrışı başladı', { year, month })
       const response: ApiResponse<IncomeStatementData> = await api.post('/finance/income-statement', {
         year,
         month
       })
-      console.log('FinanceAPI: Monthly income statement API cavabı:', response)
       
       if (response.isSuccess) {
         return response.data
@@ -72,8 +66,6 @@ export class FinanceAPI {
       
       // Əgər server cavab vermirsə və ya 404 xətası varsa, bu həqiqi xətadır
       if (error.response?.status === 404) {
-        // 404 o deməkdir ki, bu tarix üçün məlumat yoxdur
-        console.log('No data found for this period (404)')
         // Backend-dən gələn mesajı da at
         const backendMessage = error.response?.data?.message || 'Verilən tarixə uyğun məlumat tapılmadı'
         const customError: any = new Error(backendMessage)
@@ -137,9 +129,7 @@ export class FinanceAPI {
     otherExpenses: number
   }): Promise<void> {
     try {
-      console.log('FinanceAPI: Operating expenses update başladı', expenses)
       const response: ApiResponse<any> = await api.patch('/finance/operating-expenses', expenses)
-      console.log('FinanceAPI: Operating expenses update cavabı:', response)
       
       if (!response.isSuccess) {
         throw new Error(response.errors?.join(', ') || 'Failed to update operating expenses')
@@ -149,7 +139,6 @@ export class FinanceAPI {
       
       // API olmadığı halda mock uğurlu cavab qaytar
       if (error.code === 'ECONNREFUSED' || error.response?.status >= 500) {
-        console.log('Backend server not available, simulating successful update')
         return // Mock success
       }
       

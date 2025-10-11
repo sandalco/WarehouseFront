@@ -79,9 +79,7 @@ export async function increaseProductStock(productId: string, quantity: number, 
       quantity,
       price
     };
-    const response = await api.post(`/product/${productId}/increase`, requestBody) as ApiResponse;
-    console.log("Increase product stock response:", response);
-    
+    const response = await api.post(`/product/${productId}/increase`, requestBody) as ApiResponse;    
     if (!response) {
       throw new Error("No data received from the server");
     }
@@ -98,9 +96,7 @@ export async function increaseProductStock(productId: string, quantity: number, 
 // Kütləvi məhsul artırma funksiyası
 export async function bulkIncreaseProductStock(increaseProductDtos: Array<{ productId: string; quantity: number; price: number }>) {
   try {
-    const response = await api.post("/product/bulk-increase", { increaseProductDtos }) as ApiResponse;
-    console.log("Bulk increase product stock response:", response);
-    
+    const response = await api.post("/product/bulk-increase", { increaseProductDtos }) as ApiResponse;    
     if (!response) {
       throw new Error("No data received from the server");
     }
@@ -118,9 +114,7 @@ export async function bulkIncreaseProductStock(increaseProductDtos: Array<{ prod
 // Sürətli artırma funksiyası (modal olmadan)
 export async function quickIncreaseProductStock(productId: string, quantity: number) {
   try {
-    const response = await api.post(`/product/${productId}/increase`,  quantity ) as ApiResponse;
-    console.log("Quick increase product stock response:", response);
-    
+    const response = await api.post(`/product/${productId}/increase`,  quantity ) as ApiResponse;    
     if (!response) {
       throw new Error("No data received from the server");
     }
@@ -138,9 +132,7 @@ export async function quickIncreaseProductStock(productId: string, quantity: num
 // Kütləvi məhsul stok azaltma funksiyası
 export async function bulkDecreaseProductStock(decreaseProductDtos: Array<{ productId: string; quantity: number }>) {
   try {
-    const response = await api.post("/product/bulk-decrease", { decreaseProductDtos }) as ApiResponse;
-    console.log("Bulk decrease product stock response:", response);
-    
+    const response = await api.post("/product/bulk-decrease", { decreaseProductDtos }) as ApiResponse;    
     if (!response) {
       throw new Error("No data received from the server");
     }

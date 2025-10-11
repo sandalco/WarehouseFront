@@ -25,9 +25,7 @@ export interface SubscriptionPackage {
 
 export async function getCurrentSubscription(): Promise<ActiveSubscription | null> {
     try {
-        const response: ApiResponse<ActiveSubscription> = await api.get("/subscription/my/active");
-        console.log("Current subscription fetched:", response);
-        
+        const response: ApiResponse<ActiveSubscription> = await api.get("/subscription/my/active");        
         if (!response.isSuccess || response.statusCode !== 200) {
             console.error("Failed to fetch current subscription:", response.errors);
             return null;
@@ -52,7 +50,6 @@ export async function getHistory(): Promise<SubscriptionHistory[]> {
 export async function getSubscriptionPackages(): Promise<SubscriptionPackage[]> {
   try {
     const response: ApiResponse<SubscriptionPackage[]> = await api.get("/subscriptionpackages");
-    console.log("Subscription packages fetched:", response);
     return handleApiResponse(response);
   } catch (error) {
     return handleApiError(error, "getSubscriptionPackages");
@@ -67,7 +64,6 @@ export interface SubscriptionRequest {
 export async function subscribeToPackage(subscriptionData: SubscriptionRequest): Promise<any> {
   try {
     const response: ApiResponse<any> = await api.post("/subscription", subscriptionData);
-    console.log("Subscription created:", response);
     return handleApiResponse(response);
   } catch (error) {
     return handleApiError(error, "subscribeToPackage");

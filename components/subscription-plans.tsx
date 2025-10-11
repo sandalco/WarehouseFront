@@ -55,9 +55,7 @@ export function SubscriptionPlans() {
     }
   }
 
-  const handlePlanChange = async (plan: SubscriptionPlan) => {
-    console.log(currentSubscription);
-    
+  const handlePlanChange = async (plan: SubscriptionPlan) => {    
     if (!currentSubscription) {
       // Yeni subscription
       await subscribeToPlan(plan.code)

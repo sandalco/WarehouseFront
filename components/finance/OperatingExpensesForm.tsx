@@ -53,9 +53,6 @@ export function OperatingExpensesForm({ currentData, onSuccess }: OperatingExpen
       setError(null)
       setSuccess(false)
 
-      console.log('FinanceAPI object:', FinanceAPI)
-      console.log('updateOperatingExpenses method:', FinanceAPI.updateOperatingExpenses)
-
       // Cari dəyərlərin üzərinə əlavə et
       const updatedExpenses = {
         salaries: calculateNewTotal(currentData.salaries, formData.salaries),
@@ -64,8 +61,6 @@ export function OperatingExpensesForm({ currentData, onSuccess }: OperatingExpen
         marketing: calculateNewTotal(currentData.marketing, formData.marketing),
         otherExpenses: calculateNewTotal(currentData.otherExpenses, formData.otherExpenses)
       }
-
-      console.log('Sending expenses:', updatedExpenses)
       await FinanceAPI.updateOperatingExpenses(updatedExpenses)
       
       setSuccess(true)

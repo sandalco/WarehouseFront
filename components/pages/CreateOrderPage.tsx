@@ -204,8 +204,6 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
       orderItems,
     }
 
-    console.log("Creating order with data:", orderData)
-
     try {
       await createOrder(orderData)
       toast({

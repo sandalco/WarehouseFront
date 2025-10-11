@@ -65,7 +65,6 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   // Placeholder notification function - notifications will come from SignalR
   const addNotification = (notification: any) => {
     // This is just a placeholder - actual notifications come via SignalR
-    console.log('Subscription notification:', notification)
   }
 
   const fetchSubscriptionData = async () => {
@@ -126,9 +125,6 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
         CompanyId: companyId,
         PackageCode: packageCode
       })
-
-      console.log("Subscription result:", result)
-
       // Fetch updated subscription data after successful subscription
       await fetchSubscriptionData()
       

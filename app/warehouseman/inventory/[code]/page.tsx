@@ -101,7 +101,6 @@ export default function ShelfDetailsPage() {
       setAdding(true)
       const productIds = { [productId.trim()]: quantityNum }
       const response = await shelfApi.addProductsToShelf(shelfCode, productIds)
-      console.log('Məhsul əlavə etmə cavabı:', response)
       if (response.isSuccess) {
         toast({
           title: "Uğurlu",

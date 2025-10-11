@@ -119,9 +119,7 @@ export function ProductManagement({ onViewProduct }: ProductManagementProps) {
     minRequire: 0,
   });
 
-  const handleAddProduct = () => {
-    console.log(newProduct);
-    
+  const handleAddProduct = () => {    
     if (!newProduct.name) {
       toast({
         title: "Xəta",

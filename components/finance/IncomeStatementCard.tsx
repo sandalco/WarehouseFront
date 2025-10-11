@@ -13,13 +13,8 @@ export function IncomeStatementCard() {
   const { data, loading, error, refetch } = useIncomeStatement()
 
   const formatCurrency = (amount: number) => {
-    console.log('formatCurrency called with:', amount, typeof amount)
-    // Sadə format istifadə et
     return `₼${amount.toFixed(2)}`
   }
-
-  console.log('IncomeStatementCard render - data:', data, 'loading:', loading, 'error:', error)
-
   const calculateGrossProfit = (revenue: number, cogs: number) => {
     return revenue - cogs
   }

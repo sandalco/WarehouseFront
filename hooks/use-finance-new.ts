@@ -12,9 +12,7 @@ export function useIncomeStatement() {
     try {
       setLoading(true)
       setError(null)
-      console.log('useIncomeStatement: başladı')
       const result = await FinanceAPI.getCurrentIncomeStatement()
-      console.log('useIncomeStatement: API nəticəsi:', result)
       setData(result)
     } catch (err: any) {
       console.error('useIncomeStatement error:', err)
@@ -63,9 +61,7 @@ export function useHistoricalIncomeStatement() {
     try {
       setLoading(true)
       setError(null)
-      console.log('useHistoricalIncomeStatement: başladı', { year, month })
       const result = await FinanceAPI.getIncomeStatementByMonth(year, month)
-      console.log('useHistoricalIncomeStatement: API nəticəsi:', result)
       setData(result)
       
       const months = ['', 'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun', 

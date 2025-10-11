@@ -43,44 +43,6 @@ export default function TasksPage() {
       }
     } catch (err) {
       console.error('Network Error Details:', err)
-      
-      // For now, let's use mock data to test the UI
-      console.log('Using mock data for testing...')
-      const mockTasks = [
-        {
-          id: "TASK-001",
-          warehouse: "Main Warehouse", 
-          customer: "Test Customer",
-          opened: new Date().toISOString(),
-          openedBy: "System",
-          closed: null,
-          closedBy: null,
-          status: "stockconfirmed",
-          quantity: 5,
-          totalPrice: 150.00,
-          note: "Test task for UI",
-          products: [
-            {
-              id: "1",
-              name: "Product 1",
-              quantity: 2,
-              unitPrice: 25.00,
-              totalPrice: 50.00,
-              shelfCode: "A1-01"
-            },
-            {
-              id: "2", 
-              name: "Product 2",
-              quantity: 3,
-              unitPrice: 33.33,
-              totalPrice: 100.00,
-              shelfCode: "B2-05"
-            }
-          ]
-        }
-      ]
-      
-      setTasks(mockTasks)
       setError(`API Error (using mock data): Backend not available at ${process.env.NEXT_PUBLIC_API_BASE_URL}`)
     } finally {
       setLoading(false)

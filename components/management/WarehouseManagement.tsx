@@ -60,7 +60,6 @@ export function WarehouseManagement() {
 
   useEffect(() => {
     getWarehouses().then(setWarehousesList);
-    console.log("Warehouses loaded:", warehousesList);
   }, []);
 
   const handleImport = (file: File) => {
