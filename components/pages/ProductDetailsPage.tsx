@@ -1,6 +1,7 @@
 "use client"
 
-import { use, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -20,9 +21,39 @@ import {
   TrendingDown,
   AlertTriangle,
   CheckCircle,
+  XCircle,
+  DollarSign,
+  Eye,
+  Warehouse,
 } from "lucide-react"
-import { Product } from "@/types/product"
-import { getProductById } from "@/lib/api/products"
+import { useToast } from "@/hooks/use-toast"
+import axios from "@/lib/axios"
+
+interface ProductDetail {
+  id: string
+  name: string
+  description: string
+  imageUrl: string
+  purchasePrice: number
+  sellPrice: number
+  profit: number
+  quantity: number
+  minRequire: number
+  totalSold: number
+  totalPurchasedQuantity: number
+  totalPurchasedCost: number
+  averagePurchasePrice: number
+  stockDetails: Array<{
+    warehouse: string
+    shelfName: string
+    quantity: number
+  }>
+  stockHistories: Array<{
+    date: string
+    quantity: number
+    actionType: "Increase" | "Decrease"
+  }>
+}
 
 interface ProductDetailsPageProps {
   productId: string
@@ -31,103 +62,80 @@ interface ProductDetailsPageProps {
 
 export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProps) {
   const [isEditing, setIsEditing] = useState(false)
-  const [product1, setProduct] = useState<Product | null>(null)
+  const [product, setProduct] = useState<ProductDetail | null>(null)
+  const [loading, setLoading] = useState(true)
+  const { toast } = useToast()
 
-  useEffect(() => {
-    getProductById(productId).then((data) => {
-      setProduct(data);
-    }).catch((error) => {
-      console.error("Failed to fetch product:", error)
-      setProduct(null)
-    });
-  }, [productId])
-  // Mock product data - in real app, fetch based on productId
-  const product = {
-    id: "PROD-001",
-    name: "Laptop Dell XPS 13",
-    sku: "DELL-XPS13-001",
-    barcode: "1234567890123",
-    category: "Electronics",
-    subcategory: "Laptops",
-    brand: "Dell",
-    model: "XPS 13",
-    description:
-      "High-performance ultrabook with 13-inch display, Intel Core i7 processor, 16GB RAM, and 512GB SSD storage.",
-    price: 1299.99,
-    cost: 899.99,
-    margin: 30.8,
-    stock: 45,
-    minStock: 10,
-    maxStock: 100,
-    status: "Active",
-    weight: 1.2,
-    dimensions: "30.2 x 19.9 x 1.4 cm",
-    supplier: "Dell Technologies",
-    createdDate: "2023-06-15",
-    lastUpdated: "2024-01-10",
-    locations: [
-      { warehouse: "Main Distribution Center", zone: "A", shelf: "A-12-3", quantity: 25 },
-      { warehouse: "West Coast Hub", zone: "B", shelf: "B-08-1", quantity: 20 },
-    ],
-    recentMovements: [
-      {
-        id: "MOV-001",
-        type: "Inbound",
-        quantity: 10,
-        date: "2024-01-15",
-        reference: "PO-2024-001",
-        warehouse: "Main Distribution Center",
-      },
-      {
-        id: "MOV-002",
-        type: "Outbound",
-        quantity: -5,
-        date: "2024-01-14",
-        reference: "ORD-2024-045",
-        warehouse: "Main Distribution Center",
-      },
-      {
-        id: "MOV-003",
-        type: "Transfer",
-        quantity: -3,
-        date: "2024-01-13",
-        reference: "TRF-2024-012",
-        warehouse: "Main Distribution Center",
-      },
-    ],
-    salesData: {
-      totalSold: 156,
-      revenue: 202740,
-      avgMonthlySales: 12,
-      topCustomers: [
-        { name: "ABC Corporation", quantity: 25, revenue: 32499.75 },
-        { name: "Tech Solutions Inc", quantity: 18, revenue: 23399.82 },
-        { name: "XYZ Limited", quantity: 15, revenue: 19499.85 },
-      ],
-    },
-    specifications: {
-      processor: "Intel Core i7-1165G7",
-      memory: "16GB LPDDR4x",
-      storage: "512GB PCIe NVMe SSD",
-      display: "13.3-inch FHD+ (1920x1200)",
-      graphics: "Intel Iris Xe Graphics",
-      battery: "52WHr, up to 12 hours",
-      connectivity: "Wi-Fi 6, Bluetooth 5.1",
-      ports: "2x Thunderbolt 4, 1x microSD",
-      os: "Windows 11 Home",
-      warranty: "1 Year Limited Warranty",
-    },
+  // Manat formatı
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("az-AZ", {
+      style: "currency", 
+      currency: "AZN",
+    }).format(value)
   }
 
-  product.name = product1?.name || product.name;
-  product.sku = product1?.id || product.sku;
-  product.category = product1?.category || product.category;
-  //product.brand = product1?.brand || product.brand;
-  product.description = product1?.description || product.description;
-  product.price = product1?.purchasePrice || product.price;
-  product.cost = product1?.sellPrice || product.cost;
-  product.stock = product1?.quantity || product.stock;
-  product.minStock = product1?.minRequire || product.minStock;
+  // Tarix formatı
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleString("az-AZ", {
+      year: "numeric",
+      month: "2-digit", 
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  }
+
+  // Məhsul məlumatlarını yüklə
+  const fetchProductDetail = async () => {
+    try {
+      setLoading(true)
+      const response = await axios.get(`/product/detailed/${productId}`)
+      if (response.isSuccess) {
+        setProduct(response.data)
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Xəta",
+          description: "Məhsul məlumatları yüklənə bilmədi",
+        })
+      }
+    } catch (error) {
+      console.error("Product detail fetch error:", error)
+      toast({
+        variant: "destructive", 
+        title: "Xəta",
+        description: "Məhsul məlumatları yüklənərkən xəta baş verdi",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchProductDetail()
+  }, [productId])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-2">Yüklənir...</span>
+      </div>
+    )
+  }
+
+  if (!product) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">Məhsul tapılmadı</p>
+        <Button variant="outline" onClick={onBack} className="mt-4">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Geri
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -138,9 +146,9 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
             Məhsullara Qayıt
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-purple-primary">{product.name}</h1>
-            <p className="text-gray-600">
-              {product.sku} • {product.category}
+            <h1 className="text-2xl font-bold">{product.name}</h1>
+            <p className="text-muted-foreground">
+              {product.id} • Məhsul Detayları
             </p>
           </div>
         </div>
@@ -170,11 +178,29 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
           <TabsTrigger value="overview">Ümumi</TabsTrigger>
           <TabsTrigger value="inventory">İnventar</TabsTrigger>
           <TabsTrigger value="sales">Satış Məlumatları</TabsTrigger>
-          <TabsTrigger value="specifications">Xüsusiyyətlər</TabsTrigger>
+          <TabsTrigger value="history">Stok Tarixçəsi</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Məhsul Şəkli */}
+            <Card className="md:col-span-1">
+              <CardHeader>
+                <CardTitle>Məhsul Şəkli</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <img 
+                  src={product.imageUrl} 
+                  alt={product.name}
+                  className="w-full h-48 object-cover rounded-lg border"
+                  onError={(e) => {
+                    e.currentTarget.src = "/placeholder.jpg"
+                  }}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Məhsul Məlumatı */}
             <Card>
               <CardHeader>
                 <CardTitle>Məhsul Məlumatı</CardTitle>
@@ -187,166 +213,125 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
                       <Input id="name" defaultValue={product.name} />
                     </div>
                     <div>
-                      <Label htmlFor="sku">SKU</Label>
-                      <Input id="sku" defaultValue={product.sku} />
-                    </div>
-                    <div>
-                      <Label htmlFor="category">Kateqoriya</Label>
-                      <Input id="category" defaultValue={product.category} />
-                    </div>
-                    <div>
-                      <Label htmlFor="brand">Marka</Label>
-                      <Input id="brand" defaultValue={product.brand} />
+                      <Label htmlFor="description">Təsvir</Label>
+                      <Textarea id="description" defaultValue={product.description} />
                     </div>
                   </>
                 ) : (
                   <>
                     <div className="flex items-center space-x-3">
-                      <Package className="h-5 w-5 text-gray-400" />
+                      <Package className="h-5 w-5 text-muted-foreground" />
                       <span className="font-medium">{product.name}</span>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <Barcode className="h-5 w-5 text-gray-400" />
-                      <span className="font-mono text-sm">{product.sku}</span>
+                      <Barcode className="h-5 w-5 text-muted-foreground" />
+                      <span className="font-mono text-sm">{product.id}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Category:</span>
-                      <Badge variant="outline">{product.category}</Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Brand:</span>
-                      <span className="font-medium">{product.brand}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Model:</span>
-                      <span className="font-medium">{product.model}</span>
+                    <div>
+                      <span className="text-muted-foreground text-sm">Təsvir:</span>
+                      <p className="text-sm mt-1">{product.description}</p>
                     </div>
                   </>
                 )}
               </CardContent>
             </Card>
 
+            {/* Qiymət və Mənfəət */}
             <Card>
               <CardHeader>
-                <CardTitle>Qiymət və Xərclər</CardTitle>
+                <CardTitle>Qiymət və Mənfəət</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {isEditing ? (
-                  <>
-                    <div>
-                      <Label htmlFor="price">Satış Qiyməti</Label>
-                      <Input id="price" type="number" defaultValue={product.price} />
-                    </div>
-                    <div>
-                      <Label htmlFor="cost">Maya Dəyəri</Label>
-                      <Input id="cost" type="number" defaultValue={product.cost} />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Selling Price:</span>
-                      <span className="font-bold text-green-600">₼{product.price}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Cost Price:</span>
-                      <span className="font-medium">₼{product.cost}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Margin:</span>
-                      <span className="font-bold text-blue-600">{product.margin}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Profit:</span>
-                      <span className="font-bold text-purple-600">₼{(product.price - product.cost).toFixed(2)}</span>
-                    </div>
-                  </>
-                )}
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Alış Qiyməti:</span>
+                  <span className="font-medium">{formatCurrency(product.purchasePrice)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Satış Qiyməti:</span>
+                  <span className="font-bold text-green-600">{formatCurrency(product.sellPrice)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Mənfəət:</span>
+                  <span className="font-bold text-blue-600">{formatCurrency(product.profit)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Orta Alış:</span>
+                  <span className="font-medium">{formatCurrency(product.averagePurchasePrice)}</span>
+                </div>
               </CardContent>
             </Card>
 
+            {/* Stok Statusu */}
             <Card>
               <CardHeader>
                 <CardTitle>Stok Statusu</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Current Stock:</span>
-                  <span className="font-bold text-2xl">{product.stock}</span>
+                  <span className="text-muted-foreground">Mövcud Stok:</span>
+                  <span className="font-bold text-2xl">{product.quantity}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Min Stock:</span>
-                  <span className="font-medium">{product.minStock}</span>
+                  <span className="text-muted-foreground">Min Tələb:</span>
+                  <span className="font-medium">{product.minRequire}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Max Stock:</span>
-                  <span className="font-medium">{product.maxStock}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Status:</span>
-                  <Badge variant={product.stock > product.minStock ? "default" : "destructive"}>
-                    {product.stock > product.minStock ? (
+                  <span className="text-muted-foreground">Status:</span>
+                  <Badge variant={product.quantity > product.minRequire ? "default" : "destructive"}>
+                    {product.quantity > product.minRequire ? (
                       <CheckCircle className="h-3 w-3 mr-1" />
                     ) : (
                       <AlertTriangle className="h-3 w-3 mr-1" />
                     )}
-                    {product.stock > product.minStock ? "In Stock" : "Low Stock"}
+                    {product.quantity > product.minRequire ? "Stokda" : "Az Stok"}
                   </Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Ümumi Satılan:</span>
+                  <span className="font-medium">{product.totalSold}</span>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Məhsul Təsviri</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isEditing ? (
-                <Textarea defaultValue={product.description} rows={4} />
-              ) : (
-                <p className="text-gray-700">{product.description}</p>
-              )}
-            </CardContent>
-          </Card>
-
+          {/* Ümumi Məlumatlar */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Fiziki Xüsusiyyətlər</CardTitle>
+                <CardTitle>Alış Məlumatları</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Weight:</span>
-                  <span className="font-medium">{product.weight} kg</span>
+                  <span className="text-muted-foreground">Ümumi Alınan:</span>
+                  <span className="font-medium">{product.totalPurchasedQuantity} ədəd</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Dimensions:</span>
-                  <span className="font-medium">{product.dimensions}</span>
+                  <span className="text-muted-foreground">Ümumi Xərc:</span>
+                  <span className="font-medium">{formatCurrency(product.totalPurchasedCost)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Barcode:</span>
-                  <span className="font-mono text-sm">{product.barcode}</span>
+                  <span className="text-muted-foreground">Orta Alış Qiyməti:</span>
+                  <span className="font-medium">{formatCurrency(product.averagePurchasePrice)}</span>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Təchizatçı Məlumatı</CardTitle>
+                <CardTitle>Satış Məlumatları</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Supplier:</span>
-                  <span className="font-medium">{product.supplier}</span>
+                  <span className="text-muted-foreground">Ümumi Satılan:</span>
+                  <span className="font-medium">{product.totalSold} ədəd</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Created:</span>
-                  <span className="font-medium">{product.createdDate}</span>
+                  <span className="text-muted-foreground">Ümumi Gəlir:</span>
+                  <span className="font-medium">{formatCurrency(product.totalSold * product.sellPrice)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Last Updated:</span>
-                  <span className="font-medium">{product.lastUpdated}</span>
+                  <span className="text-muted-foreground">Ümumi Mənfəət:</span>
+                  <span className="font-bold text-green-600">{formatCurrency(product.totalSold * product.profit)}</span>
                 </div>
               </CardContent>
             </Card>
@@ -354,170 +339,183 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
         </TabsContent>
 
         <TabsContent value="inventory" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Stok Yerləri</CardTitle>
-                <CardDescription>Anbarlar üzrə cari stok paylanması</CardDescription>
-              </CardHeader>
-              <CardContent>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Warehouse className="h-5 w-5" />
+                Stok Yerləri
+              </CardTitle>
+              <CardDescription>Anbarlar üzrə cari stok paylanması</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {product.stockDetails && product.stockDetails.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Anbar</TableHead>
-                      <TableHead>Zona</TableHead>
                       <TableHead>Rəf</TableHead>
                       <TableHead>Miqdar</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {product.locations.map((location, index) => (
+                    {product.stockDetails.map((stock, index) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium">{location.warehouse}</TableCell>
-                        <TableCell>{location.zone}</TableCell>
-                        <TableCell className="font-mono text-sm">{location.shelf}</TableCell>
+                        <TableCell className="font-medium">{stock.warehouse}</TableCell>
+                        <TableCell className="font-mono text-sm">{stock.shelfName}</TableCell>
                         <TableCell>
-                          <span className="font-bold">{location.quantity}</span>
+                          <span className="font-bold">{stock.quantity} ədəd</span>
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
+              ) : (
+                <p className="text-muted-foreground text-center py-4">Stok məlumatı tapılmadı</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="sales" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Ümumi Satılan</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{product.totalSold}</div>
+                <p className="text-xs text-muted-foreground">ədəd</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Ümumi Gəlir</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{formatCurrency(product.totalSold * product.sellPrice)}</div>
+                <p className="text-xs text-muted-foreground">ömürlük</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Ümumi Mənfəət</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{formatCurrency(product.totalSold * product.profit)}</div>
+                <p className="text-xs text-muted-foreground">ömürlük</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Satış Performansı</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Orta Satış Qiyməti:</span>
+                  <span className="font-medium">{formatCurrency(product.sellPrice)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Vahid Mənfəət:</span>
+                  <span className="font-medium text-green-600">{formatCurrency(product.profit)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Mənfəət Dərəcəsi:</span>
+                  <span className="font-medium text-blue-600">
+                    {((product.profit / product.sellPrice) * 100).toFixed(1)}%
+                  </span>
+                </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Son Hərəkətlər</CardTitle>
-                <CardDescription>Son inventar hərəkətləri</CardDescription>
+                <CardTitle>Stok Dövriyyəsi</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Mövcud Stok:</span>
+                  <span className="font-medium">{product.quantity} ədəd</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Satılan/Alınan:</span>
+                  <span className="font-medium">
+                    {product.totalPurchasedQuantity > 0 
+                      ? ((product.totalSold / product.totalPurchasedQuantity) * 100).toFixed(1)
+                      : 0}%
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Qalan Stok:</span>
+                  <span className="font-medium">
+                    {product.totalPurchasedQuantity - product.totalSold} ədəd
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="history" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Son Hərəkətlər
+                  </CardTitle>
+                  <CardDescription>Son 5 stok hərəkəti</CardDescription>
+                </div>
+                <Link href={`/boss/stock-history?productId=${product.id}`}>
+                  <Button variant="outline" size="sm">
+                    <Eye className="h-4 w-4 mr-2" />
+                    Bütün Tarixçəni Gör
+                  </Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {product.stockHistories && product.stockHistories.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Növ</TableHead>
+                      <TableHead>Əməliyyat</TableHead>
                       <TableHead>Miqdar</TableHead>
                       <TableHead>Tarix</TableHead>
-                      <TableHead>İstinad</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {product.recentMovements.map((movement) => (
-                      <TableRow key={movement.id}>
+                    {product.stockHistories.slice(0, 5).map((history, index) => (
+                      <TableRow key={index}>
                         <TableCell>
-                          <Badge variant={movement.type === "Inbound" ? "default" : "outline"}>
-                            {movement.type === "Inbound" ? (
+                          <Badge variant={history.actionType === "Increase" ? "default" : "destructive"}>
+                            {history.actionType === "Increase" ? (
                               <TrendingUp className="h-3 w-3 mr-1" />
                             ) : (
                               <TrendingDown className="h-3 w-3 mr-1" />
                             )}
-                            {movement.type}
+                            {history.actionType === "Increase" ? "Artırma" : "Azaltma"}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <span className={movement.quantity > 0 ? "text-green-600" : "text-red-600"}>
-                            {movement.quantity > 0 ? "+" : ""}
-                            {movement.quantity}
+                          <span className={history.actionType === "Increase" ? "text-green-600" : "text-red-600"}>
+                            {history.actionType === "Increase" ? "+" : "-"}
+                            {history.quantity} ədəd
                           </span>
                         </TableCell>
-                        <TableCell>{movement.date}</TableCell>
-                        <TableCell className="font-mono text-sm">{movement.reference}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDate(history.date)}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="sales" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total Sold</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{product.salesData.totalSold}</div>
-                <p className="text-xs text-muted-foreground">units</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">₼{product.salesData.revenue.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">lifetime</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Avg Monthly Sales</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{product.salesData.avgMonthlySales}</div>
-                <p className="text-xs text-muted-foreground">units/month</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Avg Revenue/Unit</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  ₼{(product.salesData.revenue / product.salesData.totalSold).toFixed(2)}
-                </div>
-                <p className="text-xs text-muted-foreground">per unit</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Top Customers</CardTitle>
-              <CardDescription>Customers with highest purchase volume</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Müştəri</TableHead>
-                    <TableHead>Alınmış Miqdar</TableHead>
-                    <TableHead>Yaradılmış Gəlir</TableHead>
-                    <TableHead>Orta Qiymət</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {product.salesData.topCustomers.map((customer, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">{customer.name}</TableCell>
-                      <TableCell>{customer.quantity} units</TableCell>
-                      <TableCell className="font-medium">₼{customer.revenue.toLocaleString()}</TableCell>
-                      <TableCell>₼{(customer.revenue / customer.quantity).toFixed(2)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="specifications" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Texniki Xüsusiyyətlər</CardTitle>
-              <CardDescription>Ətraflı məhsul xüsusiyyətləri və funksiyaları</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {Object.entries(product.specifications).map(([key, value]) => (
-                  <div key={key} className="flex justify-between py-2 border-b border-gray-100">
-                    <span className="text-gray-600 capitalize">{key.replace(/([A-Z])/g, " ₼1")}:</span>
-                    <span className="font-medium text-right max-w-xs">{value}</span>
-                  </div>
-                ))}
-              </div>
+              ) : (
+                <p className="text-muted-foreground text-center py-4">Stok hərəkəti tapılmadı</p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

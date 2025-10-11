@@ -69,4 +69,3 @@ export async function subscribeToPackage(subscriptionData: SubscriptionRequest):
     return handleApiError(error, "subscribeToPackage");
   }
 }
-
