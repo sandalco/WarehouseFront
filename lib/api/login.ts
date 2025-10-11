@@ -1,18 +1,26 @@
-import { log } from "console";
 import api from "../axios";
+import { ApiResponse } from "@/types/api-response";
+import { safeJoinErrors } from "@/lib/api-helpers";
 
-export async function login(email: string, password: string) {
+interface LoginResponse {
+  access_token: string;
+}
+
+export async function login(email: string, password: string): Promise<string> {
   try {
-    const response = await api.post("/get-token", { email, password });
-    if (response.data.access_token !== null) {
+    const response: ApiResponse<LoginResponse> = await api.post("/get-token", { email, password });
+    
+    if (response.isSuccess && response.data.access_token) {
       localStorage.setItem("token", response.data.access_token);
       return response.data.access_token;
     } else {
-      throw new Error("Login failed");
+      throw new Error(safeJoinErrors(response.errors) || "Login failed");
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Login error:", error);
-    throw error;
+    // error artıq ApiResponse formatındadır
+    const errorMessage = safeJoinErrors(error.errors) || error.message || "Giriş xətası";
+    throw new Error(errorMessage);
   }
 }
 
@@ -32,12 +40,16 @@ export async function getCurrentUser() {
     const token = localStorage.getItem("token");
     if (!token) return null;
 
-    const response = await api.get("/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.data.data;
-  } catch (error) {
+    const response: ApiResponse<any> = await api.get("/auth/me");
+    
+    if (response.isSuccess) {
+      return response.data;
+    } else {
+      throw new Error(safeJoinErrors(response.errors));
+    }
+  } catch (error: any) {
     console.error("Get current user error:", error);
-    throw error;
+    const errorMessage = safeJoinErrors(error.errors) || error.message || "İstifadəçi məlumatları alına bilmədi";
+    throw new Error(errorMessage);
   }
 }

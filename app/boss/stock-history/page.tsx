@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   Card,
   CardContent,
@@ -42,6 +43,8 @@ import { cn } from "@/lib/utils";
 import { getStockHistory } from "@/lib/api/products";
 import { useToast } from "@/hooks/use-toast";
 import axios from "@/lib/axios";
+import { ApiResponse } from "@/types/api-response";
+import { createApiCall } from "@/lib/api-helpers";
 
 interface StockHistoryItem {
   companyId: string;
@@ -89,6 +92,7 @@ export default function StockHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [productDetail, setProductDetail] = useState<ProductDetail | null>(null);
   const [loadingProduct, setLoadingProduct] = useState(false);
+  const [mounted, setMounted] = useState(false); // Hydration üçün
 
   // Filter states
   const [dateFrom, setDateFrom] = useState<string>("");
@@ -96,8 +100,30 @@ export default function StockHistoryPage() {
   const [actionTypeFilter, setActionTypeFilter] = useState<string>("all");
   const [productFilter, setProductFilter] = useState<string>("");
 
+  // Mount olduqdan sonra data fetch et
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return; // Hydration bitənə qədər gözlə
+    
+    if (productId) {
+      // Spesifik məhsul üçün detailed API-ni çağır
+      fetchProductDetail(productId);
+    } else {
+      // Ümumi stok tarixçəsi
+      fetchStockHistory();
+    }
+  }, [productId, mounted]);
+
   // Manat formatı
   const formatCurrency = (value: number) => {
+    // Hydration məsələsini həll etmək üçün client-side check
+    if (typeof window === 'undefined') {
+      return `${value} AZN`; // Server-side sadə format
+    }
+    
     return new Intl.NumberFormat("az-AZ", {
       style: "currency",
       currency: "AZN",
@@ -106,16 +132,17 @@ export default function StockHistoryPage() {
 
   // Məhsul detaylı məlumatlarını al
   const fetchProductDetail = async (id: string) => {
-    try {
-      setLoadingProduct(true);
-      const response = await axios.get(`/product/detailed/${id}`);
-      if (response.data.isSuccess) {
-        setProductDetail(response.data.data);
+    await createApiCall(
+      () => axios.get(`/product/detailed/${id}`),
+      setLoadingProduct,
+      (response: ProductDetail) => {
+        // Axios interceptor artıq tam ApiResponse qaytarır
+        setProductDetail(response);
         // Məhsulun stok tarixçəsini local state-ə ötür
-        const histories = response.data.data.stockHistories.map((h: any, index: number) => ({
+        const histories = response.stockHistories.map((h: any, index: number) => ({
           companyId: "",
           productId: id,
-          productName: response.data.data.name,
+          productName: response.name,
           quantity: h.quantity,
           actionType: h.actionType === "Increase" ? 1 : 2,
           actionTypeText: h.actionType,
@@ -123,61 +150,36 @@ export default function StockHistoryPage() {
         }));
         setStockHistory(histories);
         setFilteredHistory(histories);
-      } else {
+      },
+      (message: string) => {
         toast({
           variant: "destructive",
           title: "Xəta",
-          description: "Məhsul məlumatları yüklənə bilmədi",
+          description: message,
         });
       }
-    } catch (error) {
-      console.error("Product detail fetch error:", error);
-      toast({
-        variant: "destructive",
-        title: "Xəta",
-        description: "Məhsul məlumatları yüklənərkən xəta baş verdi",
-      });
-    } finally {
-      setLoadingProduct(false);
-    }
+    );
   };
 
   const fetchStockHistory = async () => {
-    try {
-      setLoading(true);
-      const response = (await getStockHistory()) as any;
-      if (response?.isSuccess) {
-        setStockHistory(response.data);
-        setFilteredHistory(response.data);
-      } else {
+    await createApiCall(
+      async () => await getStockHistory(),
+      setLoading,
+      (data: any) => {
+        setStockHistory(data);
+        setFilteredHistory(data);
+      },
+      (message: string) => {
         toast({
           variant: "destructive",
           title: "Xəta",
-          description: "Stok tarixçəsi yüklənə bilmədi",
+          description: message,
         });
       }
-    } catch (error) {
-      console.error("Stock history fetch error:", error);
-      toast({
-        variant: "destructive",
-        title: "Xəta",
-        description: "Stok tarixçəsi yüklənərkən xəta baş verdi",
-      });
-    } finally {
-      setLoading(false);
-    }
+    );
   };
 
-  useEffect(() => {
-    if (productId) {
-      // Spesifik məhsul üçün detailed API-ni çağır
-      fetchProductDetail(productId);
-    } else {
-      // Ümumi stok tarixçəsi
-      fetchStockHistory();
-    }
-  }, [productId]);
-
+  // Filter effects...
   useEffect(() => {
     let filtered = [...stockHistory];
 
@@ -250,7 +252,12 @@ export default function StockHistoryPage() {
   };
 
   const formatDate = (dateString: string) => {
-    // Backend-dən gələn tarixi olduğu kimi göstər
+    // Hydration məsələsini həll etmək üçün client-side check
+    if (typeof window === 'undefined') {
+      return dateString; // Server-side sadə string qaytarır
+    }
+    
+    // Client-side formatlanmış tarix
     const date = new Date(dateString);
     return date.toLocaleString("az-AZ", {
       year: "numeric",
@@ -260,6 +267,11 @@ export default function StockHistoryPage() {
       minute: "2-digit",
     });
   };
+
+  // Hydration bitənə qədər loading göstər  
+  if (!mounted) {
+    return null; // Server-side heç nə render etmə
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">

@@ -19,6 +19,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Search, Edit, Trash2, User, Mail, Phone, Eye } from "lucide-react"
 import { Worker } from "@/types/worker"
 import { getWorkers } from "@/lib/api/worker"
+import { createApiCall } from "@/lib/api-helpers"
+import { toast } from "@/hooks/use-toast"
 
 interface WorkerManagementProps {
   onViewWorker?: (workerId: string) => void
@@ -28,10 +30,20 @@ export function WorkerManagement({ onViewWorker }: WorkerManagementProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [workers, setWorkers] = useState<Worker[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    getWorkers().then(setWorkers)
+    loadWorkers()
   }, [])
+
+  const loadWorkers = () => {
+    createApiCall(
+      getWorkers,
+      setIsLoading,
+      (data) => setWorkers(data),
+      (error) => toast({ title: "Xəta", description: error, variant: "destructive" })
+    )
+  }
 
   const filteredWorkers = workers.filter(
     (worker) =>

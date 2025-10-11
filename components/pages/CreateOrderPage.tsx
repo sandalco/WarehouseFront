@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { getWarehouses } from "@/lib/api/warehouse"
 import { getCustomers } from "@/lib/api/customer"
 import { getProducts } from "@/lib/api/products"
+import { createApiCall } from "@/lib/api-helpers"
 import { Product } from "@/types/product"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -46,18 +47,40 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
   const [warehouses, setWarehouses] = useState<WarehouseType[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [availableProducts, setAvailableProducts] = useState<Product[]>([])
-  const [address, setAddress] = useState<OrderAddress>({
+  const [address, setAddress] = useState({
     city: "",
     district: "",
     street: "",
     zipCode: "",
   })
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    getWarehouses().then(setWarehouses)
-    getCustomers().then(setCustomers)
-    getProducts().then(setAvailableProducts)
+    loadData()
   }, [])
+
+  const loadData = () => {
+    createApiCall(
+      getWarehouses,
+      setIsLoading,
+      (data) => setWarehouses(data),
+      (error) => toast({ title: "Xəta", description: error, variant: "destructive" })
+    )
+    
+    createApiCall(
+      getCustomers,
+      () => {},
+      (data) => setCustomers(data),
+      (error) => toast({ title: "Xəta", description: error, variant: "destructive" })
+    )
+    
+    createApiCall(
+      getProducts,
+      () => {},
+      (data) => setAvailableProducts(data),
+      (error) => toast({ title: "Xəta", description: error, variant: "destructive" })
+    )
+  }
 
   // Customer seçiləndə address-i doldur
   useEffect(() => {

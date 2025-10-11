@@ -1,4 +1,5 @@
 import axiosInstance from '../axios'
+import { ApiResponse } from "@/types/api-response";
 
 export interface TaskProduct {
   id: string
@@ -25,43 +26,30 @@ export interface Task {
   products: TaskProduct[]
 }
 
-export interface TasksResponse {
-  data: Task[]
-  isSuccess: boolean
-  statusCode: number
-  errors: string[] | null
-}
-
 export const tasksApi = {
-  getTasks: async (): Promise<TasksResponse> => {
-    const response = await axiosInstance.get('/Task')
-    return response
+  getTasks: async (): Promise<ApiResponse<Task[]>> => {
+    return await axiosInstance.get('/Task')
   },
   
-  getTaskById: async (taskId: string): Promise<{ data: Task; isSuccess: boolean; errors: string[] | null }> => {
-    const response = await axiosInstance.get(`/Task/${taskId}`)
-    return response
+  getTaskById: async (taskId: string): Promise<ApiResponse<Task>> => {
+    return await axiosInstance.get(`/Task/${taskId}`)
   },
   
-  updateTaskStatus: async (taskId: string, status: string): Promise<{ isSuccess: boolean; errors: string[] | null }> => {
-    const response = await axiosInstance.put(`/Task/${taskId}/status`, { status })
-    return response
+  updateTaskStatus: async (taskId: string, status: string): Promise<ApiResponse<any>> => {
+    return await axiosInstance.put(`/Task/${taskId}/status`, { status })
   },
 
-  startTask: async (taskId: string): Promise<{ isSuccess: boolean; errors: string[] | null }> => {
-    const response = await axiosInstance.put(`/Task/${taskId}/start`)
-    return response
+  startTask: async (taskId: string): Promise<ApiResponse<any>> => {
+    return await axiosInstance.put(`/Task/${taskId}/start`)
   },
 
-  completeTask: async (taskId: string, products: Record<string, number>): Promise<{ isSuccess: boolean; errors: string[] | null }> => {
-    const response = await axiosInstance.put(`/Task/${taskId}/complete`, { 
+  completeTask: async (taskId: string, products: Record<string, number>): Promise<ApiResponse<any>> => {
+    return await axiosInstance.put(`/Task/${taskId}/complete`, { 
       products 
     })
-    return response
   },
 
-  getCompletedTasks: async (): Promise<TasksResponse> => {
-    const response = await axiosInstance.get('/Task/completed')
-    return response
+  getCompletedTasks: async (): Promise<ApiResponse<Task[]>> => {
+    return await axiosInstance.get('/Task/completed')
   }
 }

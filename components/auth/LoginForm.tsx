@@ -22,11 +22,16 @@ export function LoginForm() {
     setIsLoading(true)
     setError("")
 
-    const success = await login(email, password)
-    if (!success) {
-      setError("Yanlış məlumatlar")
+    try {
+      const success = await login(email, password)
+      if (!success) {
+        setError("E-poçt və ya şifrə yanlışdır")
+      }
+    } catch (error: any) {
+      setError(error.message || "Giriş zamanı xəta baş verdi")
+    } finally {
+      setIsLoading(false)
     }
-    setIsLoading(false)
   }
 
   return (

@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Clock, Package, MapPin, User, AlertCircle, CheckCircle, PlayCircle, RefreshCw, ExternalLink } from "lucide-react"
 import { tasksApi } from '@/lib/api/tasks'
+import { createApiCall } from '@/lib/api-helpers'
+import { toast } from '@/hooks/use-toast'
 import { Task } from '@/types/task'
 import { useToast } from '@/hooks/use-toast'
 
@@ -22,39 +24,32 @@ export default function TasksPage() {
 
   useEffect(() => {
     fetchTasks()
+  useEffect(() => {
+    fetchTasks()
   }, [])
 
-  const fetchTasks = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      // Test if we can reach the API at all
-      const response = await tasksApi.getTasks()
-      
-      if (response && response.isSuccess) {
-        setTasks(response.data || [])
-      } else if (response) {
-        console.error('API Error:', response.errors)
-        setError(response.errors?.join(', ') || 'API returned unsuccessful response')
-      } else {
-        console.error('No response received')
-        setError('No response received from server')
+  const fetchTasks = () => {
+    createApiCall(
+      tasksApi.getTasks,
+      setLoading,
+      (data) => {
+        setTasks(data || [])
+        setError(null)
+      },
+      (errorMessage) => {
+        setError(errorMessage)
+        toast({ title: "Xəta", description: errorMessage, variant: "destructive" })
       }
-    } catch (err) {
-      console.error('Network Error Details:', err)
-      setError(`API Error (using mock data): Backend not available at ${process.env.NEXT_PUBLIC_API_BASE_URL}`)
-    } finally {
-      setLoading(false)
-    }
+    )
   }
 
-  const updateTaskStatus = async (taskId: string, newStatus: string) => {
-    try {
-      setUpdatingTaskId(taskId)
-      const response = await tasksApi.updateTaskStatus(taskId, newStatus)
-      
-      if (response.isSuccess) {
+  const updateTaskStatus = (taskId: string, newStatus: string) => {
+    setUpdatingTaskId(taskId)
+    
+    createApiCall(
+      () => tasksApi.updateTaskStatus(taskId, newStatus),
+      () => {}, // No loading state for this operation
+      () => {
         // Update local state
         setTasks(prevTasks => 
           prevTasks.map(task => 
@@ -65,15 +60,22 @@ export default function TasksPage() {
         )
         
         toast({
-          title: "Success",
-          description: `Task status updated to ${newStatus}`,
+          title: "Uğur",
+          description: `Task statusu ${newStatus} olaraq yeniləndi`,
         })
-      } else {
+        
+        setUpdatingTaskId(null)
+      },
+      (errorMessage) => {
         toast({
-          title: "Error", 
-          description: response.errors?.join(', ') || 'Failed to update task status',
+          title: "Xəta", 
+          description: errorMessage,
           variant: "destructive"
         })
+        setUpdatingTaskId(null)
+      }
+    )
+  }
       }
     } catch (err) {
       console.error('Error updating task status:', err)
@@ -87,12 +89,13 @@ export default function TasksPage() {
     }
   }
 
-  const startTask = async (taskId: string) => {
-    try {
-      setUpdatingTaskId(taskId)
-      const response = await tasksApi.startTask(taskId)
-      
-      if (response.isSuccess) {
+  const startTask = (taskId: string) => {
+    setUpdatingTaskId(taskId)
+    
+    createApiCall(
+      () => tasksApi.startTask(taskId),
+      () => {}, // No loading state for this operation
+      () => {
         // Update local state
         setTasks(prevTasks => 
           prevTasks.map(task => 
@@ -103,9 +106,22 @@ export default function TasksPage() {
         )
         
         toast({
-          title: "Task Started",
-          description: "Task has been started successfully",
+          title: "Task Başladı",
+          description: "Task uğurla başladıldı",
         })
+        
+        setUpdatingTaskId(null)
+      },
+      (errorMessage) => {
+        toast({
+          title: "Xəta",
+          description: errorMessage,
+          variant: "destructive"
+        })
+        setUpdatingTaskId(null)
+      }
+    )
+  }
       } else {
         toast({
           title: "Error", 

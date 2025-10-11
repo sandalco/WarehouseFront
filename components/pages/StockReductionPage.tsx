@@ -104,6 +104,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import { Package, Minus, ArrowLeft, Trash2, AlertTriangle } from "lucide-react";
 import { getProducts, bulkDecreaseProductStock } from "@/lib/api/products";
+import { createApiCall } from "@/lib/api-helpers";
 import { Product } from "@/types/product";
 
 interface StockReductionItem {
@@ -121,6 +122,7 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
   const [selectedItems, setSelectedItems] = useState<StockReductionItem[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [quantityToReduce, setQuantityToReduce] = useState<string>("1");
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -130,21 +132,23 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
     loadProducts();
   }, []);
 
-  const loadProducts = async () => {
-    try {
-      const productsData = await getProducts();
-      // Yalnız stoku olan məhsulları göstər
-      const availableProducts = productsData.filter((p: Product) => p.quantity > 0);
-      setProducts(availableProducts);
-
-    } catch (error) {
-      console.error("Error loading products:", error);
-      toast({
-        title: "Xəta",
-        description: "Məhsullar yüklənərkən xəta baş verdi",
-        variant: "destructive",
-      });
-    }
+  const loadProducts = () => {
+    createApiCall(
+      getProducts,
+      setIsLoadingProducts,
+      (data) => {
+        // Yalnız stoku olan məhsulları göstər
+        const availableProducts = data.filter((p: Product) => p.quantity > 0);
+        setProducts(availableProducts);
+      },
+      (error) => {
+        toast({
+          title: "Xəta",
+          description: error,
+          variant: "destructive",
+        });
+      }
+    );
   };
 
   const handleAddItem = () => {
@@ -250,36 +254,38 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
       return;
     }
 
-    setIsLoading(true);
-    try {
+    const decreaseStock = () => {
       const decreaseData = selectedItems.map(item => ({
         productId: item.product.id,
         quantity: item.quantity,
       }));
 
-      await bulkDecreaseProductStock(decreaseData);
+      createApiCall(
+        () => bulkDecreaseProductStock(decreaseData),
+        setIsLoading,
+        (data) => {
+          toast({
+            title: "Stok Azaldıldı",
+            description: `${selectedItems.length} məhsulun stoku uğurla azaldıldı`,
+          });
 
-      toast({
-        title: "Stok Azaldıldı",
-        description: `${selectedItems.length} məhsulun stoku uğurla azaldıldı`,
-      });
+          // Formu təmizlə
+          setSelectedItems([]);
+          
+          // Məhsulları yenilə
+          loadProducts();
+        },
+        (error) => {
+          toast({
+            title: "Xəta",
+            description: error,
+            variant: "destructive",
+          });
+        }
+      );
+    };
 
-      // Formu təmizlə
-      setSelectedItems([]);
-      
-      // Məhsulları yenilə
-      await loadProducts();
-      
-    } catch (error) {
-      console.error("Error decreasing stock:", error);
-      toast({
-        title: "Xəta",
-        description: "Stok azaldılarkən xəta baş verdi",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    decreaseStock();
   };
 
   const getTotalReduction = () => {
@@ -328,49 +334,58 @@ export function StockReductionPage({ onBack }: StockReductionPageProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <ProductSelector
-              products={products}
-              selectedProductId={selectedProductId}
-              setSelectedProductId={setSelectedProductId}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              selectedItems={selectedItems}
-              onBarcodeAdd={(product) => {
-                // Əgər artıq əlavə olunmayıbsa, siyahıya əlavə et
-                const already = selectedItems.find(item => item.product.id === product.id);
-                if (already) {
-                  toast({ title: "Artıq əlavə olunub", description: product.name });
-                } else {
-                  setSelectedItems([...selectedItems, {
-                    id: Date.now().toString(),
-                    product,
-                    quantity: 1,
-                  }]);
-                  toast({ title: "Əlavə olundu", description: product.name });
-                }
-              }}
-            />
+            {isLoadingProducts ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+                <p className="text-gray-500 mt-2">Məhsullar yüklənir...</p>
+              </div>
+            ) : (
+              <>
+                <ProductSelector
+                  products={products}
+                  selectedProductId={selectedProductId}
+                  setSelectedProductId={setSelectedProductId}
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  selectedItems={selectedItems}
+                  onBarcodeAdd={(product) => {
+                    // Əgər artıq əlavə olunmayıbsa, siyahıya əlavə et
+                    const already = selectedItems.find(item => item.product.id === product.id);
+                    if (already) {
+                      toast({ title: "Artıq əlavə olunub", description: product.name });
+                    } else {
+                      setSelectedItems([...selectedItems, {
+                        id: Date.now().toString(),
+                        product,
+                        quantity: 1,
+                      }]);
+                      toast({ title: "Əlavə olundu", description: product.name });
+                    }
+                  }}
+                />
 
-            <div>
-              <Label htmlFor="quantity">Çıxarılacaq Miqdar</Label>
-              <Input
-                id="quantity"
-                type="number"
-                min="1"
-                value={quantityToReduce}
-                onChange={(e) => setQuantityToReduce(e.target.value)}
-                placeholder="Miqdar"
-              />
-            </div>
+                <div>
+                  <Label htmlFor="quantity">Çıxarılacaq Miqdar</Label>
+                  <Input
+                    id="quantity"
+                    type="number"
+                    min="1"
+                    value={quantityToReduce}
+                    onChange={(e) => setQuantityToReduce(e.target.value)}
+                    placeholder="Miqdar"
+                  />
+                </div>
 
-            <Button
-              onClick={handleAddItem}
-              className="w-full bg-red-600 hover:bg-red-700"
-              disabled={!selectedProductId || !quantityToReduce || isNaN(parseInt(quantityToReduce)) || parseInt(quantityToReduce) <= 0}
-            >
-              <Minus className="h-4 w-4 mr-2" />
-              Siyahıya Əlavə Et
-            </Button>
+                <Button
+                  onClick={handleAddItem}
+                  className="w-full bg-red-600 hover:bg-red-700"
+                  disabled={!selectedProductId || !quantityToReduce || isNaN(parseInt(quantityToReduce)) || parseInt(quantityToReduce) <= 0}
+                >
+                  <Minus className="h-4 w-4 mr-2" />
+                  Siyahıya Əlavə Et
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
 

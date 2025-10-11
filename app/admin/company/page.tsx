@@ -11,8 +11,10 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Plus, Building2, Search, Edit, Trash2, AlertCircle, User } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import axios from "@/lib/axios"
 import api from "@/lib/axios"
+import { createApiCall } from "@/lib/api-helpers"
+import { CompanyAPI } from "@/lib/api/company"
+import { ApiResponse } from "@/types/api-response"
 
 interface Company {
   id: string
@@ -49,30 +51,31 @@ export default function CompanyManagement() {
   const { toast } = useToast()
 
   // Fetch companies
-  const fetchCompanies = async () => {
-    try {
-      setLoading(true)
-      const response = await api.get("/company")
-      if (response.isSuccess) {
-        setCompanies(response.data)
+  const fetchCompanies = () => {
+    createApiCall(
+      CompanyAPI.getCompanies,
+      setLoading,
+      (data) => {
+        setCompanies(data)
+      },
+      (errorMessage) => {
+        toast({
+          title: "Xəta",
+          description: errorMessage,
+          variant: "destructive",
+        })
       }
-    } catch (error: any) {
-      toast({
-        title: "Xəta",
-        description: error.message || "Şirkətlər yüklənərkən xəta baş verdi",
-        variant: "destructive",
-      })
-    } finally {
-      setLoading(false)
-    }
+    )
   }
 
   // Create company
-  const createCompany = async () => {
+  const createCompany = () => {
     setFormError("") // Clear previous errors
-    try {
-      const response = await api.post("/company", createFormData)
-      if (response.isSuccess) {
+    
+    createApiCall(
+      () => CompanyAPI.createCompany(createFormData),
+      () => {}, // No loading state for this operation
+      () => {
         toast({
           title: "Uğurla əlavə edildi",
           description: "Şirkət uğurla yaradıldı",
@@ -88,16 +91,17 @@ export default function CompanyManagement() {
           phoneNumber: ""
         })
         fetchCompanies()
+      },
+      (errorMessage) => {
+        setFormError(errorMessage)
+        toast({
+          title: "Xəta",
+          description: errorMessage,
+          variant: "destructive",
+        })
       }
-    } catch (error: any) {
-      const errorMessage = error || "Şirkət yaradılarkən xəta baş verdi"
-      setFormError(errorMessage)
-      toast({
-        title: "Xəta",
-        description: errorMessage,
-        variant: "destructive",
-      })
-    }
+    )
+  }
   }
 
   useEffect(() => {

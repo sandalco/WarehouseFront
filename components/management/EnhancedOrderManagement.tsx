@@ -4,6 +4,8 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getOrdersByCompany } from "@/lib/api/order"
 import { getCustomers } from "@/lib/api/customer"
+import { createApiCall } from "@/lib/api-helpers"
+import { toast } from "@/hooks/use-toast"
 import { getExportDataWithDateRange } from "@/lib/api/template"
 import { Order } from "@/types/order"
 import { Customer } from "@/types/customer"
@@ -27,6 +29,7 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
   // State
   const [orders, setOrders] = useState<Order[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const vendors: string[] = []
 
   // Filter state
@@ -38,9 +41,24 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
 
   // Load data
   useEffect(() => {
-    getOrdersByCompany().then(setOrders)
-    getCustomers().then(setCustomers)
+    loadData()
   }, [])
+
+  const loadData = () => {
+    createApiCall(
+      getOrdersByCompany,
+      setIsLoading,
+      (data) => setOrders(data),
+      (error) => toast({ title: "Xəta", description: error, variant: "destructive" })
+    )
+    
+    createApiCall(
+      getCustomers,
+      () => {}, // No separate loading state for customers
+      (data) => setCustomers(data),
+      (error) => toast({ title: "Xəta", description: error, variant: "destructive" })
+    )
+  }
 
   // Export handler
   const handleExportOrders = async () => {

@@ -20,6 +20,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Plus, Search, Edit, Eye, ArrowUpCircle, ArrowDownCircle } from "lucide-react"
 import { Order } from "@/types/order"
 import { getOrdersByCompany } from "@/lib/api/order"
+import { createApiCall } from "@/lib/api-helpers"
+import { toast } from "@/hooks/use-toast"
 
 interface OrderManagementProps {
   onCreateOrder?: () => void
@@ -29,10 +31,20 @@ export function OrderManagement({ onCreateOrder }: OrderManagementProps = {}) {
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [orders, setOrders] = useState<Order[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    getOrdersByCompany().then(setOrders);
+    loadOrders();
   }, []);
+
+  const loadOrders = () => {
+    createApiCall(
+      getOrdersByCompany,
+      setIsLoading,
+      (data) => setOrders(data),
+      (error) => toast({ title: "Xəta", description: error, variant: "destructive" })
+    )
+  }
 
   const filteredOrders = orders.filter(
     (order) =>

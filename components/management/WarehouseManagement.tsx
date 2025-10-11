@@ -39,12 +39,14 @@ import {
   Warehouse as WarehouseType,
 } from "@/types/warehouse";
 import { createWarehouse, deleteWarehouse, getWarehouses } from "@/lib/api/warehouse";
+import { createApiCall } from "@/lib/api-helpers";
 
 export function WarehouseManagement() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [warehousesList, setWarehousesList] = useState<WarehouseType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [newWarehouse, setNewWarehouse] = useState<CreateWarehouseDto>({
     name: "",
     shelves: 0,
@@ -59,8 +61,17 @@ export function WarehouseManagement() {
   //const [warehousesList, setWarehousesList] = useState(warehouses)
 
   useEffect(() => {
-    getWarehouses().then(setWarehousesList);
+    loadWarehouses();
   }, []);
+
+  const loadWarehouses = () => {
+    createApiCall(
+      getWarehouses,
+      setIsLoading,
+      (data) => setWarehousesList(data),
+      (error) => toast({ title: "Xəta", description: error, variant: "destructive" })
+    )
+  }
 
   const handleImport = (file: File) => {
     toast({

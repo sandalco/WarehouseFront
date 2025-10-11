@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import FinanceAPI from '@/lib/api/finance'
+import { createApiCall } from '@/lib/api-helpers'
 import type { IncomeStatementData } from '@/lib/api'
 
 export function useIncomeStatement() {
@@ -9,18 +10,19 @@ export function useIncomeStatement() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchIncomeStatement = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const result = await FinanceAPI.getCurrentIncomeStatement()
-      setData(result)
-    } catch (err: any) {
-      console.error('useIncomeStatement error:', err)
-      setError(typeof err === 'string' ? err : err.message || 'Məlumat yüklənməsi zamanı xəta baş verdi')
-    } finally {
-      setLoading(false)
-    }
+  const fetchIncomeStatement = () => {
+    createApiCall(
+      FinanceAPI.getCurrentIncomeStatement,
+      setLoading,
+      (result) => {
+        setData(result)
+        setError(null)
+      },
+      (errorMessage) => {
+        setError(errorMessage)
+        setData(null)
+      }
+    )
   }
 
   useEffect(() => {
@@ -31,16 +33,24 @@ export function useIncomeStatement() {
     fetchIncomeStatement()
   }
 
-  const updateOperatingExpenses = async (expenses: {
+  const updateOperatingExpenses = (expenses: {
     salaries: number
     rent: number
     utilities: number
     marketing: number
     otherExpenses: number
   }) => {
-    await FinanceAPI.updateOperatingExpenses(expenses)
-    // Update sonrası data-nı yenilə
-    await fetchIncomeStatement()
+    createApiCall(
+      () => FinanceAPI.updateOperatingExpenses(expenses),
+      () => {}, // No separate loading for this
+      () => {
+        // Update sonrası data-nı yenilə
+        fetchIncomeStatement()
+      },
+      (errorMessage) => {
+        setError(errorMessage)
+      }
+    )
   }
 
   return {
@@ -58,41 +68,21 @@ export function useHistoricalIncomeStatement() {
   const [error, setError] = useState<string | null>(null)
   const [currentPeriod, setCurrentPeriod] = useState<string>('')
 
-  const fetchHistoricalData = async (year: number, month: number) => {
-    try {
-      setLoading(true)
-      setError(null)
-      const result = await FinanceAPI.getIncomeStatementByMonth(year, month)      
-      // Əgər result null-dursa, data-nı da null et
-      if (result === null || result === undefined) {
-        setData(null)
-      } else {
+  const fetchHistoricalData = (year: number, month: number) => {
+    createApiCall(
+      () => FinanceAPI.getIncomeStatementByMonth(year, month),
+      setLoading,
+      (result) => {
         setData(result)
-      }
-      
-      const months = ['', 'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun', 
-                     'İyul', 'Avqust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr']
-      setCurrentPeriod(`${months[month]} ${year}`)
-    } catch (err: any) {
-      console.error('useHistoricalIncomeStatement error:', err)
-      
-      // Backend-dən gələn mesajı yoxla
-      const backendMsg = err.response?.data?.message || err.message || null
-      
-      // Əgər 404 xətası varsa və ya backend-dən xüsusi mesaj varsa
-      if (err.response?.status === 404 || (backendMsg && backendMsg.includes('tapılmadı'))) {
-        setError(null) // Error göstərmə
-        setData(null)  // Sadəcə data yoxdur
-      } else {
-        // Digər xətalar üçün error mesajı göstər
-        setError(backendMsg || 'Tarixi məlumat yüklənməsi zamanı xəta baş verdi')
+        setError(null)
+        setCurrentPeriod(`${year}-${month.toString().padStart(2, '0')}`)
+      },
+      (errorMessage) => {
+        setError(errorMessage)
         setData(null)
       }
-    } finally {
-      setLoading(false)
-    }
+    )
   }
-
   return {
     data,
     loading,
@@ -112,18 +102,19 @@ export function useFinancialTrends(period: 'week' | 'month' | 'quarter' | 'year'
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchTrends = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const result = await FinanceAPI.getFinancialTrends(period)
-      setData(result)
-    } catch (err: any) {
-      console.error('useFinancialTrends error:', err)
-      setError(typeof err === 'string' ? err : err.message || 'Trend məlumatları yüklənməsi zamanı xəta baş verdi')
-    } finally {
-      setLoading(false)
-    }
+  const fetchTrends = () => {
+    createApiCall(
+      () => FinanceAPI.getFinancialTrends(period),
+      setLoading,
+      (result) => {
+        setData(result)
+        setError(null)
+      },
+      (errorMessage) => {
+        setError(errorMessage)
+        setData(null)
+      }
+    )
   }
 
   useEffect(() => {

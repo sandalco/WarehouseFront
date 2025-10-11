@@ -42,6 +42,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Customer } from "@/types/customer";
 import { getCustomers } from "@/lib/api/customer";
+import { createApiCall } from "@/lib/api-helpers";
 import { ImportExportButtons } from "../import-export-utils";
 
 interface CustomerManagementProps {
@@ -55,10 +56,20 @@ export function CustomerManagement({
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [customersList, setCustomersList] = useState<Customer[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    getCustomers().then(setCustomersList);
+    loadCustomers();
   }, []);
+
+  const loadCustomers = () => {
+    createApiCall(
+      getCustomers,
+      setIsLoading,
+      (data) => setCustomersList(data),
+      (error) => toast({ title: "Xəta", description: error, variant: "destructive" })
+    )
+  }
 
   const handleImport = (file: File) => {
     toast({

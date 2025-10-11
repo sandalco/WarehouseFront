@@ -28,6 +28,8 @@ import {
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import axios from "@/lib/axios"
+import { ApiResponse } from "@/types/api-response"
+import { createApiCall } from "@/lib/api-helpers"
 
 interface ProductDetail {
   id: string
@@ -88,28 +90,18 @@ export function ProductDetailsPage({ productId, onBack }: ProductDetailsPageProp
 
   // Məhsul məlumatlarını yüklə
   const fetchProductDetail = async () => {
-    try {
-      setLoading(true)
-      const response = await axios.get(`/product/detailed/${productId}`)
-      if (response.isSuccess) {
-        setProduct(response.data)
-      } else {
+    await createApiCall(
+      () => axios.get(`/product/detailed/${productId}`),
+      setLoading,
+      (data: ProductDetail) => setProduct(data),
+      (message: string) => {
         toast({
           variant: "destructive",
           title: "Xəta",
-          description: "Məhsul məlumatları yüklənə bilmədi",
+          description: message,
         })
       }
-    } catch (error) {
-      console.error("Product detail fetch error:", error)
-      toast({
-        variant: "destructive", 
-        title: "Xəta",
-        description: "Məhsul məlumatları yüklənərkən xəta baş verdi",
-      })
-    } finally {
-      setLoading(false)
-    }
+    )
   }
 
   useEffect(() => {

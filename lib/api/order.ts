@@ -1,68 +1,55 @@
 import api from "../axios";
 import { Order, OrderCreate } from "@/types/order";
+import { ApiResponse } from "@/types/api-response";
 
 // 1. Sifarişin statusunu al
-export async function getOrderStatus(id: string): Promise<string> {
-  const response = await api.get(`/order/${id}/status`);
-  return response.data;
+export async function getOrderStatus(id: string): Promise<ApiResponse<string>> {
+  return await api.get(`/order/${id}/status`);
 }
 
 // 2. Şirkət üzrə bütün sifarişlər
-export async function getOrdersByCompany(): Promise<Order[]> {
-  const response = await api.get("/order/company");
-  if (response.isSuccess) return response.data;
-  throw new Error("Failed to fetch orders by company");
+export async function getOrdersByCompany(): Promise<ApiResponse<Order[]>> {
+  return await api.get("/order/company");
 }
 
 // 3. Anbar üzrə bütün sifarişlər
-export async function getOrdersByWarehouse(warehouseId?: string): Promise<Order[]> {
-  const response = await api.get("/order/warehouse", {
+export async function getOrdersByWarehouse(warehouseId?: string): Promise<ApiResponse<Order[]>> {
+  return await api.get("/order/warehouse", {
     params: warehouseId ? { warehouseId } : {},
   });
-  if (response.isSuccess) return response.data;
-  throw new Error("Failed to fetch orders by warehouse");
 }
 
 // 4. Statusa görə sifarişlər
-export async function getOrdersByStatus(status: string): Promise<Order[]> {
-  const response = await api.get(`/order/ByStatus/${status}`);
-  if (response.isSuccess) return response.data;
-  throw new Error("Failed to fetch orders by status");
+export async function getOrdersByStatus(status: string): Promise<ApiResponse<Order[]>> {
+  return await api.get(`/order/ByStatus/${status}`);
 }
 
 // 5. Müştəriyə görə sifarişlər
-export async function getOrdersByCustomer(customerId: string): Promise<Order[]> {
-  const response = await api.get(`/order/ByCustomer/${customerId}`);
-  if (response.isSuccess) return response.data;
-  throw new Error("Failed to fetch orders by customer");
+export async function getOrdersByCustomer(customerId: string): Promise<ApiResponse<Order[]>> {
+  return await api.get(`/order/ByCustomer/${customerId}`);
 }
 
 // 6. Sifarişi id ilə al
-export async function getOrderById(id: string): Promise<Order> {
-  const response = await api.get(`/order/${id}`);
-  return response.data;
+export async function getOrderById(id: string): Promise<ApiResponse<Order>> {
+  return await api.get(`/order/${id}`);
 }
 
 // 7. Sifarişin məhsullarını id ilə al
-export async function getOrderProductsById(id: string) {
-  const response = await api.get(`/order/${id}/products`);
-  return response.data;
+export async function getOrderProductsById(id: string): Promise<ApiResponse<any>> {
+  return await api.get(`/order/${id}/products`);
 }
 
 // 8. Yeni sifariş yarat
-export async function createOrder(orderData: OrderCreate): Promise<Order> {
-  const response = await api.post("/order", orderData);
-  return response.data;
+export async function createOrder(orderData: OrderCreate): Promise<ApiResponse<Order>> {
+  return await api.post("/order", orderData);
 }
 
 // 9. Sifarişi tamamla
-export async function completeOrder(id: string, products: any[]): Promise<any> {
-  const response = await api.post(`/order/${id}/complete`, { products });
-  return response.data;
+export async function completeOrder(id: string, products: any[]): Promise<ApiResponse<any>> {
+  return await api.post(`/order/${id}/complete`, { products });
 }
 
 // 10. Sifarişi yenidən yoxla (retry)
-export async function retryOrder(id: string): Promise<any> {
-  const response = await api.post(`/order/${id}/retry`);
-  return response.data;
+export async function retryOrder(id: string): Promise<ApiResponse<any>> {
+  return await api.post(`/order/${id}/retry`);
 }

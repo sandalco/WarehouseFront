@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Clock, Package, MapPin, User, AlertCircle, CheckCircle, Eye } from "lucide-react"
 import { tasksApi } from '@/lib/api/tasks'
+import { createApiCall } from '@/lib/api-helpers'
 import { Task } from '@/lib/api/tasks'
 import { useRouter } from 'next/navigation'
 
@@ -22,23 +23,18 @@ export default function CompletedPage() {
     fetchCompletedTasks()
   }, [])
 
-  const fetchCompletedTasks = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await tasksApi.getCompletedTasks()
-      
-      if (response.isSuccess) {
-        setCompletedTasks(response.data)
-      } else {
-        setError(response.errors?.join(', ') || 'Failed to fetch completed tasks')
+  const fetchCompletedTasks = () => {
+    createApiCall(
+      tasksApi.getCompletedTasks,
+      setLoading,
+      (data) => {
+        setCompletedTasks(data)
+        setError(null)
+      },
+      (errorMessage) => {
+        setError(errorMessage)
       }
-    } catch (err) {
-      console.error('Error fetching completed tasks:', err)
-      setError('Failed to fetch completed tasks. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+    )
   }
 
   const formatDate = (dateString: string) => {
