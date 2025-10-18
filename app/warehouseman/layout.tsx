@@ -31,6 +31,8 @@ export default function WarehousemanLayout({
 }: {
   children: React.ReactNode
 }) {
+  console.log('WarehousemanLayout rendering...')
+  
   const pathname = usePathname()
   const pageTitle = getPageTitle(pathname)
   const { user, logout } = useAuth()

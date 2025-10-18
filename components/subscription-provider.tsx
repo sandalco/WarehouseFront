@@ -70,7 +70,6 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   const fetchSubscriptionData = async () => {
     setIsLoading(true)
     try {
-      // Fetch subscription packages from backend
       const backendPackages = await getSubscriptionPackages()
       const frontendPlans = backendPackages.map(transformSubscriptionPackageToFrontend)
       setAvailablePlans(frontendPlans)

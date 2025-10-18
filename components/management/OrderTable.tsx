@@ -35,7 +35,7 @@ export function OrderTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Sifariş ID</TableHead>
+              <TableHead>№</TableHead>
               <TableHead>Növ</TableHead>
               <TableHead>Müştəri/Təchizatçı</TableHead>
               <TableHead>Dəyər</TableHead>
@@ -46,9 +46,9 @@ export function OrderTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {orders.map((order) => (
+            {orders.map((order, index) => (
               <TableRow key={order.id}>
-                <TableCell className="font-medium">{order.id}</TableCell>
+                <TableCell className="font-medium">{index + 1}</TableCell>
                 <TableCell>
                   <Badge variant="outline" className="flex items-center w-fit">
                     {order.customer ? (
@@ -86,7 +86,7 @@ export function OrderTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Sifariş ID</TableHead>
+              <TableHead>№</TableHead>
               <TableHead>Müştəri</TableHead>
               <TableHead>Dəyər</TableHead>
               <TableHead>Status</TableHead>
@@ -96,9 +96,9 @@ export function OrderTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {outgoingOrders.map((order) => (
+            {outgoingOrders.map((order, index) => (
               <TableRow key={order.id}>
-                <TableCell className="font-medium">{order.id}</TableCell>
+                <TableCell className="font-medium">{index + 1}</TableCell>
                 <TableCell>{order.customer}</TableCell>
                 <TableCell>₼{order.totalPrice?.toLocaleString?.() ?? "-"}</TableCell>
                 <TableCell>
@@ -126,7 +126,7 @@ export function OrderTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Sifariş ID</TableHead>
+              <TableHead>№</TableHead>
               <TableHead>Müştəri</TableHead>
               <TableHead>Dəyər</TableHead>
               <TableHead>Status</TableHead>
@@ -136,9 +136,9 @@ export function OrderTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {incomingOrders.map((order) => (
+            {incomingOrders.map((order, index) => (
               <TableRow key={order.id}>
-                <TableCell className="font-medium">{order.id}</TableCell>
+                <TableCell className="font-medium">{index + 1}</TableCell>
                 <TableCell>{order.customer || "-"}</TableCell>
                 <TableCell>₼{order.totalPrice?.toLocaleString?.() ?? "-"}</TableCell>
                 <TableCell>

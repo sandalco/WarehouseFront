@@ -100,8 +100,8 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
   const addProduct = () => {
     if (!selectedProduct) {
       toast({
-        title: "Error",
-        description: "Please select a product",
+        title: "Xəta",
+        description: "Zəhmət olmasa məhsul seçin",
         variant: "destructive",
       })
       return
@@ -113,8 +113,8 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
     const existingProduct = orderProducts.find((p) => p.id === selectedProduct)
     if (existingProduct) {
       toast({
-        title: "Error",
-        description: "This product is already added to the order",
+        title: "Xəta",
+        description: "Bu məhsul artıq sifarişə əlavə edilib",
         variant: "destructive",
       })
       return
@@ -122,8 +122,8 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
 
     if (orderType === "outgoing" && productQuantity > product.availableStock) {
       toast({
-        title: "Error",
-        description: `Only ${product.availableStock} units available in stock`,
+        title: "Xəta",
+        description: `Anbarda yalnız ${product.availableStock} ədəd mövcuddur`,
         variant: "destructive",
       })
       return
@@ -139,16 +139,16 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
     setProductQuantity(1)
 
     toast({
-      title: "Product Added",
-      description: `${product.name} added to order`,
+      title: "Məhsul Əlavə Edildi",
+      description: `${product.name} sifarişə əlavə edildi`,
     })
   }
 
   const removeProduct = (productId: string) => {
     setOrderProducts(orderProducts.filter((p) => p.id !== productId))
     toast({
-      title: "Product Removed",
-      description: "Product removed from order",
+      title: "Məhsul Silindi",
+      description: "Məhsul sifarişdən silindi",
     })
   }
 
@@ -158,8 +158,8 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
 
     if (orderType === "outgoing" && newQuantity > product.availableStock) {
       toast({
-        title: "Error",
-        description: `Only ${product.availableStock} units available in stock`,
+        title: "Xəta",
+        description: `Anbarda yalnız ${product.availableStock} ədəd mövcuddur`,
         variant: "destructive",
       })
       return
@@ -175,8 +175,8 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
   const handleCreateOrder = async () => {
     if (!orderType) {
       toast({
-        title: "Error",
-        description: "Please select order type",
+        title: "Xəta",
+        description: "Zəhmət olmasa sifariş növünü seçin",
         variant: "destructive",
       })
       return
@@ -184,8 +184,8 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
 
     if (!selectedWarehouse) {
       toast({
-        title: "Error",
-        description: "Please select a warehouse",
+        title: "Xəta",
+        description: "Zəhmət olmasa anbar seçin",
         variant: "destructive",
       })
       return
@@ -193,8 +193,8 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
 
     if (orderType === "outgoing" && !selectedCustomer) {
       toast({
-        title: "Error",
-        description: "Please select a customer",
+        title: "Xəta",
+        description: "Zəhmət olmasa müştəri seçin",
         variant: "destructive",
       })
       return
@@ -202,8 +202,8 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
 
     if (orderProducts.length === 0) {
       toast({
-        title: "Error",
-        description: "Please add at least one product",
+        title: "Xəta",
+        description: "Zəhmət olmasa ən azı bir məhsul əlavə edin",
         variant: "destructive",
       })
       return
@@ -223,6 +223,7 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
       warehouseId: selectedWarehouse,
       warehouseName: warehouse?.name || "",
       customerId: selectedCustomer,
+      note: notes,
       address,
       orderItems,
     }
@@ -230,14 +231,14 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
     try {
       await createOrder(orderData)
       toast({
-        title: "Order Created",
-        description: "Order has been created successfully",
+        title: "Sifariş Yaradıldı",
+        description: "Sifariş uğurla yaradıldı",
       })
       onBack()
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Order could not be created",
+        title: "Xəta",
+        description: "Sifariş yaradıla bilmədi",
         variant: "destructive",
       })
     }
@@ -405,10 +406,10 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
                               <span>{product.name}</span>
                             </div>
                             <div className="flex items-center space-x-2 text-sm text-gray-500">
-                              <span>${product.sellPrice}</span>
+                              <span>₼{product.sellPrice}</span>
                               {orderType === "outgoing" && (
                                 <Badge variant={product.quantity < 10 ? "destructive" : "outline"}>
-                                  Stock: {product.quantity}
+                                  Anbar: {product.quantity}
                                 </Badge>
                               )}
                             </div>
@@ -455,7 +456,7 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
                           <div>
                             <h3 className="font-medium">{product.name}</h3>
                             <p className="text-sm text-gray-600">SKU: {product.sku}</p>
-                            <p className="text-sm text-gray-600">Price: {product.sellPrice}₼</p>
+                            <p className="text-sm text-gray-600">Qiymət: {product.sellPrice}₼</p>
                           </div>
                         </div>
 
@@ -479,7 +480,7 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
                             {orderType === "outgoing" && product.quantity > product.availableStock && (
                               <p className="text-xs text-red-600 flex items-center">
                                 <AlertTriangle className="h-3 w-3 mr-1" />
-                                Insufficient stock
+                                Kifayət qədər anbar yoxdur
                               </p>
                             )}
                           </div>
@@ -511,59 +512,59 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Order Type:</span>
+                  <span>Sifariş Növü:</span>
                   <Badge variant={orderType === "outgoing" ? "default" : "secondary"}>
-                    {orderType || "Not selected"}
+                    {orderType === "outgoing" ? "Çıxan" : orderType === "incoming" ? "Daxil olan" : "Seçilməyib"}
                   </Badge>
                 </div>
 
                 <div className="flex justify-between text-sm">
-                  <span>Warehouse:</span>
+                  <span>Anbar:</span>
                   <span className="text-right">
-                    {selectedWarehouse ? warehouses.find((w) => w.id === selectedWarehouse)?.name : "Not selected"}
+                    {selectedWarehouse ? warehouses.find((w) => w.id === selectedWarehouse)?.name : "Seçilməyib"}
                   </span>
                 </div>
 
                 <div className="flex justify-between text-sm">
-                  <span>{orderType === "outgoing" ? "Customer:" : "Vendor:"}</span>
+                  <span>{orderType === "outgoing" ? "Müştəri:" : "Təchizatçı:"}</span>
                   <span className="text-right">
                     {orderType === "outgoing"
                       ? selectedCustomer
-                        ? customers.find((c) => c.id === selectedCustomer)?.name
-                        : "Not selected"
-                      : "Vendor seçimi yoxdur"}
+                        ? customers.find((c) => c.id === selectedCustomer)?.fullName
+                        : "Seçilməyib"
+                      : "Təchizatçı seçimi yoxdur"}
                   </span>
                 </div>
 
                 <div className="flex justify-between text-sm">
-                  <span>Priority:</span>
+                  <span>Prioritet:</span>
                   <Badge
                     variant={priority === "high" ? "destructive" : priority === "medium" ? "secondary" : "outline"}
                   >
-                    {priority || "Not selected"}
+                    {priority || "Seçilməyib"}
                   </Badge>
                 </div>
 
                 <div className="flex justify-between text-sm">
-                  <span>Due Date:</span>
-                  <span>{dueDate || "Not selected"}</span>
+                  <span>Son Tarix:</span>
+                  <span>{dueDate || "Seçilməyib"}</span>
                 </div>
               </div>
 
               <div className="border-t pt-4">
                 <div className="flex justify-between text-sm mb-2">
-                  <span>Total Products:</span>
+                  <span>Ümumi Məhsul:</span>
                   <span>{orderProducts.length}</span>
                 </div>
 
                 <div className="flex justify-between text-sm mb-2">
-                  <span>Total Quantity:</span>
+                  <span>Ümumi Miqdar:</span>
                   <span>{orderProducts.reduce((sum, p) => sum + p.quantity, 0)}</span>
                 </div>
 
                 <div className="flex justify-between font-medium text-lg">
-                  <span>Total Value:</span>
-                  <span>${calculateTotal().toFixed(2)}</span>
+                  <span>Ümumi Dəyər:</span>
+                  <span>₼{calculateTotal().toFixed(2)}</span>
                 </div>
               </div>
 
@@ -582,12 +583,12 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
             <CardContent className="space-y-2">
               <div className="flex items-center space-x-2 text-sm">
                 <CheckCircle className={`h-4 w-4 ${orderType ? "text-green-600" : "text-gray-400"}`} />
-                <span>Order type selected</span>
+                <span>Sifariş növü seçildi</span>
               </div>
 
               <div className="flex items-center space-x-2 text-sm">
                 <CheckCircle className={`h-4 w-4 ${selectedWarehouse ? "text-green-600" : "text-gray-400"}`} />
-                <span>Warehouse selected</span>
+                <span>Anbar seçildi</span>
               </div>
 
               <div className="flex items-center space-x-2 text-sm">
@@ -598,17 +599,17 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
                       : "text-gray-400"
                   }`}
                 />
-                <span>{orderType === "outgoing" ? "Customer" : "Vendor"} selected</span>
+                <span>{orderType === "outgoing" ? "Müştəri" : "Təchizatçı"} seçildi</span>
               </div>
 
               <div className="flex items-center space-x-2 text-sm">
                 <CheckCircle className={`h-4 w-4 ${orderProducts.length > 0 ? "text-green-600" : "text-gray-400"}`} />
-                <span>Products added</span>
+                <span>Məhsullar əlavə edildi</span>
               </div>
 
               <div className="flex items-center space-x-2 text-sm">
                 <CheckCircle className={`h-4 w-4 ${priority && dueDate ? "text-green-600" : "text-gray-400"}`} />
-                <span>Priority & due date set</span>
+                <span>Prioritet və son tarix təyin edildi</span>
               </div>
             </CardContent>
           </Card>

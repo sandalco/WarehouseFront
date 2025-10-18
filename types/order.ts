@@ -46,6 +46,7 @@ export interface OrderCreate {
   warehouseId: string;
   warehouseName: string;
   customerId: string;
+  note: string;
   address: OrderAddress;
   orderItems: OrderCreateItem[];
 }

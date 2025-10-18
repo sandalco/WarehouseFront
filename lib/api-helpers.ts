@@ -49,15 +49,20 @@ export const createApiCall = async <T>(
 ) => {
   try {
     setLoading(true)
+    console.log('Making API call...')
     const response = await apiCall()
+    console.log('Raw API response:', response)
     
     if (response && response.isSuccess) {
+      console.log('Success response data:', response.data)
       onSuccess(response.data)
     } else {
+      console.log('Error response:', response)
       const errorMessage = safeJoinErrors(response?.errors) || "API sorğusu uğursuz oldu"
       onError(errorMessage)
     }
   } catch (error: any) {
+    console.log('Caught error:', error)
     onError(handleApiError(error))
   } finally {
     setLoading(false)

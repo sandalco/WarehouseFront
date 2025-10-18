@@ -10,11 +10,17 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Clock, Package, MapPin, User, AlertCircle, CheckCircle, PlayCircle, RefreshCw, ExternalLink } from "lucide-react"
 import { tasksApi } from '@/lib/api/tasks'
 import { createApiCall } from '@/lib/api-helpers'
-import { toast } from '@/hooks/use-toast'
 import { Task } from '@/types/task'
 import { useToast } from '@/hooks/use-toast'
 
 export default function TasksPage() {
+  console.log('TasksPage component rendering...')
+  console.log('Current environment:', {
+    NODE_ENV: process.env.NODE_ENV,
+    API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
+    ALL_ENV_VARS: Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC'))
+  })
+  
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -23,24 +29,27 @@ export default function TasksPage() {
   const router = useRouter()
 
   useEffect(() => {
-    fetchTasks()
-  useEffect(() => {
+    console.log('useEffect running, calling fetchTasks...')
     fetchTasks()
   }, [])
 
   const fetchTasks = () => {
-    createApiCall(
-      tasksApi.getTasks,
-      setLoading,
-      (data) => {
-        setTasks(data || [])
-        setError(null)
-      },
-      (errorMessage) => {
-        setError(errorMessage)
-        toast({ title: "Xəta", description: errorMessage, variant: "destructive" })
-      }
-    )
+    try {
+      createApiCall(
+        tasksApi.getTasks,
+        setLoading,
+        (data) => {
+          setTasks(data || [])
+          setError(null)
+        },
+        (errorMessage) => {
+          setError(errorMessage)
+          toast({ title: "Xəta", description: errorMessage, variant: "destructive" })
+        }
+      )
+    } catch (err) {
+      console.error('Error in fetchTasks:', err)
+    }
   }
 
   const updateTaskStatus = (taskId: string, newStatus: string) => {
@@ -61,7 +70,7 @@ export default function TasksPage() {
         
         toast({
           title: "Uğur",
-          description: `Task statusu ${newStatus} olaraq yeniləndi`,
+          description: `Tapşırıq statusu ${newStatus === 'completed' ? 'tamamlandı' : 'yeniləndi'} olaraq dəyişdirildi`,
         })
         
         setUpdatingTaskId(null)
@@ -75,18 +84,6 @@ export default function TasksPage() {
         setUpdatingTaskId(null)
       }
     )
-  }
-      }
-    } catch (err) {
-      console.error('Error updating task status:', err)
-      toast({
-        title: "Error",
-        description: 'Failed to update task status. Please try again.',
-        variant: "destructive"
-      })
-    } finally {
-      setUpdatingTaskId(null)
-    }
   }
 
   const startTask = (taskId: string) => {
@@ -106,8 +103,8 @@ export default function TasksPage() {
         )
         
         toast({
-          title: "Task Başladı",
-          description: "Task uğurla başladıldı",
+          title: "Tapşırıq Başladı",
+          description: "Tapşırıq uğurla başladıldı",
         })
         
         setUpdatingTaskId(null)
@@ -121,24 +118,6 @@ export default function TasksPage() {
         setUpdatingTaskId(null)
       }
     )
-  }
-      } else {
-        toast({
-          title: "Error", 
-          description: response.errors?.join(', ') || 'Failed to start task',
-          variant: "destructive"
-        })
-      }
-    } catch (err) {
-      console.error('Error starting task:', err)
-      toast({
-        title: "Error",
-        description: 'Failed to start task. Please try again.',
-        variant: "destructive"
-      })
-    } finally {
-      setUpdatingTaskId(null)
-    }
   }
 
   const fetchTaskDetail = async (taskId: string) => {
@@ -167,20 +146,41 @@ export default function TasksPage() {
 
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+      const date = new Date(dateString)
+      const monthNames = [
+        'yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun',
+        'iyul', 'avqust', 'sentyabr', 'oktyabr', 'noyabr', 'dekabr'
+      ]
+      
+      const year = date.getFullYear()
+      const month = monthNames[date.getMonth()]
+      const day = date.getDate()
+      const hours = date.getHours().toString().padStart(2, '0')
+      const minutes = date.getMinutes().toString().padStart(2, '0')
+
+      return `${hours}:${minutes} ${day} ${month} ${year}`
     } catch {
       return dateString
     }
   }
 
   const getStatusText = (status: string | null) => {
-    return status || 'Unknown'
+    if (!status) return 'Naməlum'
+    
+    switch (status.toLowerCase()) {
+      case 'pending':
+      case 'new':
+        return 'Gözləyir'
+      case 'in-progress':
+      case 'in progress':
+        return 'İcra olunur'
+      case 'stockconfirmed':
+        return 'Anbar təsdiqləndi'
+      case 'completed':
+        return 'Tamamlandı'
+      default:
+        return status
+    }
   }
 
   const canStartTask = (status: string | null) => {
@@ -197,9 +197,9 @@ export default function TasksPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Tasks</h1>
+          <h1 className="text-3xl font-bold">Tapşırıqlar</h1>
           <p className="text-muted-foreground">
-            View and manage your assigned warehouse tasks
+            Sizə təyin edilmiş anbar tapşırıqlarını görün və idarə edin
           </p>
         </div>
 
@@ -241,9 +241,9 @@ export default function TasksPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Tasks</h1>
+          <h1 className="text-3xl font-bold">Tapşırıqlar</h1>
           <p className="text-muted-foreground">
-            View and manage your assigned warehouse tasks
+            Sizə təyin edilmiş anbar tapşırıqlarını görün və idarə edin
           </p>
         </div>
 
@@ -259,18 +259,18 @@ export default function TasksPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Tasks</h1>
+          <h1 className="text-3xl font-bold">Tapşırıqlar</h1>
           <p className="text-muted-foreground">
-            View and manage your assigned warehouse tasks
+            Sizə təyin edilmiş anbar tapşırıqlarını görün və idarə edin
           </p>
         </div>
 
         <Card className="w-full">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Package className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No tasks assigned</h3>
+            <h3 className="text-lg font-medium mb-2">Heç bir tapşırıq təyin edilməyib</h3>
             <p className="text-muted-foreground text-center">
-              You don't have any tasks assigned at the moment. Check back later for new assignments.
+              Hazırda sizə heç bir tapşırıq təyin edilməyib. Yeni tapşırıqlar üçün daha sonra yoxlayın.
             </p>
           </CardContent>
         </Card>
@@ -282,9 +282,9 @@ export default function TasksPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Tasks</h1>
+          <h1 className="text-3xl font-bold">Tapşırıqlar</h1>
           <p className="text-muted-foreground">
-            View and manage your assigned warehouse tasks
+            Sizə təyin edilmiş anbar tapşırıqlarını görün və idarə edin
           </p>
         </div>
         <Button
@@ -293,7 +293,7 @@ export default function TasksPage() {
           variant="outline"
         >
           <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
+          Yenilə
         </Button>
       </div>
 
@@ -321,7 +321,7 @@ export default function TasksPage() {
                     }}
                   >
                     <ExternalLink className="h-4 w-4 mr-1" />
-                    Open
+                    Aç
                   </Button>
                   
                   {canStartTask(task.status) && (
@@ -334,7 +334,7 @@ export default function TasksPage() {
                       disabled={updatingTaskId === task.id}
                     >
                       <PlayCircle className="h-4 w-4 mr-1" />
-                      Start
+                      Başla
                     </Button>
                   )}
                   
@@ -349,7 +349,7 @@ export default function TasksPage() {
                       disabled={updatingTaskId === task.id}
                     >
                       <CheckCircle className="h-4 w-4 mr-1" />
-                      Complete
+                      Tamamla
                     </Button>
                   )}
                 </div>
@@ -374,10 +374,10 @@ export default function TasksPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Package className="h-4 w-4" />
-                    <span className="font-medium">{task.quantity} items</span>
+                    <span className="font-medium">{task.quantity} məhsul</span>
                   </div>
                   <div className="text-lg font-semibold">
-                    ${task.totalPrice.toFixed(2)}
+                    ₼{task.totalPrice.toFixed(2)}
                   </div>
                 </div>
 

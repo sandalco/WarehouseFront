@@ -41,11 +41,11 @@ export default function TaskDetailPage() {
         setTask(response.data)
 
       } else {
-        setError(response.errors?.join(', ') || 'Failed to fetch task details')
+        setError(response.errors?.join(', ') || 'Tapşırıq təfərrüatlarını əldə etmək mümkün olmadı')
       }
     } catch (err) {
       console.error('Error fetching task detail:', err)
-      setError('Failed to fetch task details. Please try again.')
+      setError('Tapşırıq təfərrüatlarını əldə etmək mümkün olmadı. Yenidən cəhd edin.')
     } finally {
       setLoading(false)
     }
@@ -66,8 +66,8 @@ export default function TaskDetailPage() {
         } : null)
         
         toast({
-          title: "Success",
-          description: `Task status updated to ${newStatus}`,
+          title: "Uğur",
+          description: `Tapşırıq statusu ${newStatus} olaraq yeniləndi`,
         })
 
         // If completed, redirect back to tasks list
@@ -78,16 +78,16 @@ export default function TaskDetailPage() {
         }
       } else {
         toast({
-          title: "Error", 
-          description: response.errors?.join(', ') || 'Failed to update task status',
+          title: "Xəta", 
+          description: response.errors?.join(', ') || 'Tapşırıq statusunu yeniləmək mümkün olmadı',
           variant: "destructive"
         })
       }
     } catch (err) {
       console.error('Error updating task status:', err)
       toast({
-        title: "Error",
-        description: 'Failed to update task status. Please try again.',
+        title: "Xəta",
+        description: 'Tapşırıq statusunu yeniləmək mümkün olmadı. Yenidən cəhd edin.',
         variant: "destructive"
       })
     } finally {
@@ -109,21 +109,21 @@ export default function TaskDetailPage() {
         } : null)
         
         toast({
-          title: "Task Started",
-          description: "Task has been started successfully",
+          title: "Tapşırıq Başladı",
+          description: "Tapşırıq uğurla başladıldı",
         })
       } else {
         toast({
-          title: "Error", 
-          description: response.errors?.join(', ') || 'Failed to start task',
+          title: "Xəta", 
+          description: response.errors?.join(', ') || 'Tapşırığı başlatmaq mümkün olmadı',
           variant: "destructive"
         })
       }
     } catch (err) {
       console.error('Error starting task:', err)
       toast({
-        title: "Error",
-        description: 'Failed to start task. Please try again.',
+        title: "Xəta",
+        description: 'Tapşırığı başlatmaq mümkün olmadı. Yenidən cəhd edin.',
         variant: "destructive"
       })
     } finally {
@@ -160,18 +160,38 @@ export default function TaskDetailPage() {
   }
 
   const getStatusText = (status: string | null) => {
-    return status || 'Unknown'
+    if (!status) return 'Naməlum'
+    
+    switch (status.toLowerCase()) {
+      case 'pending':
+      case 'new':
+        return 'Gözləyir'
+      case 'inprogress':
+        return 'İcra olunur'
+      case 'stockconfirmed':
+        return 'Anbar təsdiqləndi'
+      case 'completed':
+        return 'Tamamlandı'
+      default:
+        return status
+    }
   }
 
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+      const date = new Date(dateString)
+      const monthNames = [
+        'yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun',
+        'iyul', 'avqust', 'sentyabr', 'oktyabr', 'noyabr', 'dekabr'
+      ]
+      
+      const year = date.getFullYear()
+      const month = monthNames[date.getMonth()]
+      const day = date.getDate()
+      const hours = date.getHours().toString().padStart(2, '0')
+      const minutes = date.getMinutes().toString().padStart(2, '0')
+      
+      return `${year} ${day} ${month} ${hours}:${minutes}`
     } catch {
       return dateString
     }
@@ -198,8 +218,8 @@ export default function TaskDetailPage() {
       
       if (response.isSuccess) {
         toast({
-          title: "Collection Complete",
-          description: "Products collection has been submitted successfully",
+          title: "Kolleksiya Tamamlandı",
+          description: "Məhsul kolleksiyası uğurla təqdim edildi",
         })
         
         // Update task status to completed
@@ -216,8 +236,8 @@ export default function TaskDetailPage() {
         
       } else {
         toast({
-          title: "Error", 
-          description: response.errors?.join(', ') || 'Failed to complete collection',
+          title: "Xəta", 
+          description: response.errors?.join(', ') || 'Kolleksiyanı tamamlamaq mümkün olmadı',
           variant: "destructive"
         })
       }
@@ -225,8 +245,8 @@ export default function TaskDetailPage() {
     } catch (err) {
       console.error('Error completing collection:', err)
       toast({
-        title: "Error",
-        description: 'Failed to complete collection. Please try again.',
+        title: "Xəta",
+        description: 'Kolleksiyanı tamamlamaq mümkün olmadı. Yenidən cəhd edin.',
         variant: "destructive"
       })
     } finally {
@@ -293,8 +313,8 @@ export default function TaskDetailPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Task Details</h1>
-            <p className="text-muted-foreground">Unable to load task information</p>
+            <h1 className="text-3xl font-bold">Tapşırıq Təfərrüatları</h1>
+            <p className="text-muted-foreground">Tapşırıq məlumatları yüklənə bilmir</p>
           </div>
         </div>
 
@@ -314,8 +334,8 @@ export default function TaskDetailPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Task Details</h1>
-            <p className="text-muted-foreground">Task not found</p>
+            <h1 className="text-3xl font-bold">Tapşırıq Təfərrüatları</h1>
+            <p className="text-muted-foreground">Tapşırıq tapılmadı</p>
           </div>
         </div>
       </div>
@@ -331,7 +351,7 @@ export default function TaskDetailPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Task Details</h1>
+            <h1 className="text-3xl font-bold">Tapşırıq Təfərrüatları</h1>
             <p className="text-muted-foreground">ID: {task.id}</p>
           </div>
         </div>
@@ -347,7 +367,7 @@ export default function TaskDetailPage() {
               disabled={updatingStatus}
             >
               <PlayCircle className="h-4 w-4 mr-2" />
-              Start Task
+              Tapşırığı Başlat
             </Button>
           )}
         </div>
@@ -357,33 +377,33 @@ export default function TaskDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Task Information</CardTitle>
+            <CardTitle>Tapşırıq Məlumatları</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground">Warehouse</h4>
+                <h4 className="font-medium text-sm text-muted-foreground">Anbar</h4>
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
                   <p>{task.warehouse}</p>
                 </div>
               </div>
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground">Customer</h4>
+                <h4 className="font-medium text-sm text-muted-foreground">Müştəri</h4>
                 <div className="flex items-center gap-1">
                   <User className="h-4 w-4" />
                   <p>{task.customer}</p>
                 </div>
               </div>
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground">Opened</h4>
+                <h4 className="font-medium text-sm text-muted-foreground">Açılıb</h4>
                 <div className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
                   <p>{formatDate(task.opened)}</p>
                 </div>
               </div>
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground">Total Items</h4>
+                <h4 className="font-medium text-sm text-muted-foreground">Ümumi Əşyalar</h4>
                 <div className="flex items-center gap-1">
                   <Package className="h-4 w-4" />
                   <p>{task.quantity}</p>
@@ -392,13 +412,13 @@ export default function TaskDetailPage() {
             </div>
             
             <div>
-              <h4 className="font-medium text-sm text-muted-foreground">Total Price</h4>
-              <p className="text-2xl font-bold">${task.totalPrice.toFixed(2)}</p>
+              <h4 className="font-medium text-sm text-muted-foreground">Ümumi Qiymət</h4>
+              <p className="text-2xl font-bold">₼{task.totalPrice.toFixed(2)}</p>
             </div>
 
             {task.note && (
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground mb-2">Note</h4>
+                <h4 className="font-medium text-sm text-muted-foreground mb-2">Qeyd</h4>
                 <div className="p-3 bg-muted rounded-lg">
                   <p className="text-sm">{task.note}</p>
                 </div>
@@ -410,12 +430,12 @@ export default function TaskDetailPage() {
         {/* Collection Progress */}
         <Card>
           <CardHeader>
-            <CardTitle>Collection Progress</CardTitle>
+            <CardTitle>Kolleksiya İrəliləyişi</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Products Collected</span>
+                <span className="text-sm text-muted-foreground">Toplanmış Məhsullar</span>
                 <span className="text-lg font-semibold">
                   {collectedProducts.size} / {task.products.length}
                 </span>
@@ -431,7 +451,7 @@ export default function TaskDetailPage() {
               {allProductsCollected && (
                 <div className="flex items-center gap-2 text-green-600">
                   <CheckCircle className="h-4 w-4" />
-                  <span className="text-sm font-medium">All products collected!</span>
+                  <span className="text-sm font-medium">Bütün məhsullar toplandı!</span>
                 </div>
               )}
 
@@ -445,12 +465,12 @@ export default function TaskDetailPage() {
                     variant={allProductsCollected ? "default" : "secondary"}
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    {updatingStatus ? 'Submitting...' : 'Complete Collection'}
+                    {updatingStatus ? 'Göndərilir...' : 'Kolleksiyanı Tamamla'}
                   </Button>
                   <p className="text-xs text-muted-foreground mt-2 text-center">
                     {allProductsCollected 
-                      ? "Submit the collection to complete this task"
-                      : `Collect all ${task.products.length} products to enable submission`
+                      ? "Bu tapşırığı tamamlamaq üçün kolleksiyanı təqdim edin"
+                      : `Təqdim etməyi aktivləşdirmək üçün bütün ${task.products.length} məhsulu toplayın`
                     }
                   </p>
                 </div>
@@ -464,10 +484,10 @@ export default function TaskDetailPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Products to Collect ({task.products.length})</CardTitle>
+            <CardTitle>Toplanacaq Məhsullar ({task.products.length})</CardTitle>
             {task.status?.toLowerCase() !== 'inprogress' && (
               <div className="text-sm text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
-                Start task to begin collection
+                Kolleksiyaya başlamaq üçün tapşırığı başladın
               </div>
             )}
           </div>
@@ -498,16 +518,16 @@ export default function TaskDetailPage() {
                       {product.name}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      Shelf: {product.shelfCode || 'Not assigned'} • Quantity: {product.quantity}
+                      Rəf: {product.shelfCode || 'Təyin edilməyib'} • Miqdar: {product.quantity}
                     </div>
                   </div>
                   
                   <div className="text-right">
                     <div className="font-medium">
-                      {product.quantity} × ${product.unitPrice.toFixed(2)}
+                      {product.quantity} × ₼{product.unitPrice.toFixed(2)}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      Total: ${product.totalPrice.toFixed(2)}
+                      Ümumi: ₼{product.totalPrice.toFixed(2)}
                     </div>
                   </div>
                   
@@ -525,13 +545,13 @@ export default function TaskDetailPage() {
       {task.openedBy && (
         <Card>
           <CardHeader>
-            <CardTitle>Task History</CardTitle>
+            <CardTitle>Tapşırıq Tarixçəsi</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm text-muted-foreground">
-              <p>Opened by: {task.openedBy} on {formatDate(task.opened)}</p>
+              <p>Açan: {task.openedBy} - {formatDate(task.opened)}</p>
               {task.closed && task.closedBy && (
-                <p>Closed by: {task.closedBy} on {formatDate(task.closed)}</p>
+                <p>Bağlayan: {task.closedBy} - {formatDate(task.closed)}</p>
               )}
             </div>
           </CardContent>

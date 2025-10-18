@@ -10,12 +10,13 @@ import { getExportDataWithDateRange } from "@/lib/api/template"
 import { Order } from "@/types/order"
 import { Customer } from "@/types/customer"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
+import { Plus } from "lucide-react"
 import { OrderFilters } from "./OrderFilters"
 import { OrderTable } from "./OrderTable"
 import { OrderExportDialog } from "./OrderExportDialog"
-import { OrderCreateDialog } from "./OrderCreateDialog"
 
 interface EnhancedOrderManagementProps {
   onViewOrder?: (order: any) => void
@@ -158,11 +159,13 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
             setDateTo={setDateTo}
             onExport={handleExportOrders}
           />
-          <OrderCreateDialog
-            customers={customers}
-            vendors={vendors}
-            onCreateOrder={onCreateOrder}
-          />
+          <Button 
+            className="bg-purple-primary hover:bg-purple-600"
+            onClick={onCreateOrder}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Sifariş Yarat
+          </Button>
         </div>
       </div>
 
