@@ -32,6 +32,7 @@ api.interceptors.response.use(
   (error) => {
     console.log('API Error:', error)
     console.log('Error response:', error.response)
+    console.log('Error response data:', error.response?.data)
     
     // Mərkəzi 401 yoxlaması
     if (error.response?.status === 401) {
@@ -43,12 +44,22 @@ api.interceptors.response.use(
       }
     }
     
+    // Backend-dən gələn errors array-ini düzgün oxuyuruq
+    let errors = []
+    if (error.response?.data?.errors) {
+      errors = error.response.data.errors
+    } else if (error.response?.data?.Errors) {
+      errors = error.response.data.Errors
+    } else {
+      errors = [error.message || 'Bilinməyən xəta baş verdi']
+    }
+    
     // Error response-u da standart formatda qaytarırıq
     const errorResponse: ApiResponse = {
       data: null,
       isSuccess: false,
       statusCode: error.response?.status || 500,
-      errors: error.response?.data?.errors || [error.message || 'Bilinməyən xəta baş verdi']
+      errors: errors
     };
     
     console.log('Formatted error response:', errorResponse)
