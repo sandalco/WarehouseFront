@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,6 +22,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -30,7 +38,6 @@ import {
 } from "@/components/ui/table";
 import {
   Plus,
-  Search,
   Edit,
   Trash2,
   Building,
@@ -38,12 +45,14 @@ import {
   Phone,
   MapPin,
   Eye,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Customer } from "@/types/customer";
-import { getCustomers } from "@/lib/api/customer";
-import { createApiCall } from "@/lib/api-helpers";
+import { Customer, CustomerSortBy } from "@/types/customer";
+import { getPaginatedCustomers, CustomerFiltersRequest } from "@/lib/api/customer";
 import { ImportExportButtons } from "../import-export-utils";
+import { CustomerFilters } from "./CustomerFilters";
 
 interface CustomerManagementProps {
   onViewCustomerOrders?: (customerId: string, customerName: string) => void;
@@ -52,26 +61,98 @@ interface CustomerManagementProps {
 export function CustomerManagement({
   onViewCustomerOrders,
 }: CustomerManagementProps) {
+  const router = useRouter();
   const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [customersList, setCustomersList] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [hasPreviousPage, setHasPreviousPage] = useState(false);
+  const [hasNextPage, setHasNextPage] = useState(false);
+
+  // Filter state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [cityFilter, setCityFilter] = useState("all");
+  const [sortBy, setSortBy] = useState<CustomerSortBy>(CustomerSortBy.Name);
+  const [sortDescending, setSortDescending] = useState(false);
+
+  // Cities list for filter (extracted from data)
+  const [cities, setCities] = useState<string[]>([]);
+
+  // Load data
   useEffect(() => {
     loadCustomers();
-  }, []);
+  }, [currentPage, pageSize, cityFilter, sortBy, sortDescending]);
 
-  const loadCustomers = () => {
-    createApiCall(
-      getCustomers,
-      setIsLoading,
-      (data) => setCustomersList(data),
-      (error) => toast({ title: "Xəta", description: error, variant: "destructive" })
-    )
-  }
+  // Filter dəyişəndə səhifəni 1-ə qaytır
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [cityFilter, sortBy, sortDescending]);
 
-  const handleImport = (file: File) => {
+  // Search with debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (currentPage !== 1) {
+        setCurrentPage(1);
+      } else {
+        loadCustomers();
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const loadCustomers = async () => {
+    setIsLoading(true);
+    try {
+      const filters: CustomerFiltersRequest = {
+        city: cityFilter !== "all" ? cityFilter : null,
+        search: searchTerm || null,
+        sortBy: sortBy,
+        sortDescending: sortDescending,
+      };
+
+      const response = await getPaginatedCustomers(currentPage, pageSize, filters);
+
+      if (response.isSuccess && response.data) {
+        setCustomersList(response.data);
+        setTotalPages(response.totalPages);
+        setTotalCount(response.totalCount);
+        setHasPreviousPage(response.hasPreviousPage);
+        setHasNextPage(response.hasNextPage);
+
+        // Extract unique cities from data
+        const uniqueCities = Array.from(
+          new Set(response.data.map((c) => c.address.city))
+        ).sort();
+        setCities(uniqueCities);
+      } else {
+        toast({
+          title: "Xəta",
+          description: response.errors?.[0] || "Müştərilər yüklənə bilmədi.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error loading customers:", error);
+      toast({
+        title: "Xəta",
+        description: "Müştəriləri yükləyərkən xəta baş verdi.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleImport = async (file: File) => {
     toast({
       title: "Import Started",
       description: `Processing ${file.name}. This may take a few moments.`,
@@ -82,15 +163,9 @@ export function CustomerManagement({
         title: "Import Completed",
         description: "Customers have been imported successfully.",
       });
+      loadCustomers();
     }, 2000);
   };
-
-  const filteredCustomers = customersList.filter(
-    (customer) =>
-      customer.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.phone.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div className="space-y-6">
@@ -185,89 +260,96 @@ export function CustomerManagement({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{customersList.length}</div>
+            <div className="text-2xl font-bold">{totalCount}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+2</span> from last month
+              Cəmi müştəri sayı
             </p>
           </CardContent>
         </Card>
-        {/* <Card>
+        <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Aktiv Müştərilər</CardTitle>
+            <CardTitle className="text-sm font-medium">Səhifədəki Müştərilər</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{customersList.filter((c) => c.status === "Active").length}</div>
+            <div className="text-2xl font-bold">{customersList.length}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+1</span> from last month
+              Cari səhifədə göstərilir
             </p>
           </CardContent>
-        </Card> */}
-        {/* <Card>
+        </Card>
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Ümumi Sifarişlər</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{customersList.reduce((sum, c) => sum + c.totalOrders, 0)}</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+15%</span> from last month
-            </p>
-          </CardContent>
-        </Card> */}
-        {/* <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Ümumi Gəlir</CardTitle>
-          </CardHeader>
-          <CardContent>
             <div className="text-2xl font-bold">
-              ${customersList.reduce((sum, c) => sum + c.totalValue, 0).toLocaleString()}
+              {customersList.reduce((sum, c) => sum + c.orderCount, 0)}
             </div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+23%</span> from last month
+              Bütün müştərilərin sifarişləri
             </p>
           </CardContent>
-        </Card> */}
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Şəhər Sayı</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{cities.length}</div>
+            <p className="text-xs text-muted-foreground">
+              Fərqli şəhər sayı
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Müştərilər</CardTitle>
           <CardDescription>
-            <div className="flex items-center space-x-4">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Müştəriləri axtar..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
+            <CustomerFilters
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              cityFilter={cityFilter}
+              setCityFilter={setCityFilter}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              sortDescending={sortDescending}
+              setSortDescending={setSortDescending}
+            />
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[60px]">#</TableHead>
                 <TableHead>Müştəri</TableHead>
                 <TableHead>Əlaqə</TableHead>
-                <TableHead>Növ</TableHead>
+                <TableHead>Ünvan</TableHead>
                 <TableHead>Sifarişlər</TableHead>
-                {/* <TableHead>Ümumi Dəyər</TableHead> */}
                 <TableHead>Son Sifariş</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead>Əməliyyatlar</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCustomers.map((customer) => (
+              {customersList.length === 0 && !isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                    Müştəri tapılmadı
+                  </TableCell>
+                </TableRow>
+              ) : null}
+              {customersList.map((customer, index) => (
                 <TableRow key={customer.id}>
+                  <TableCell className="font-medium text-muted-foreground">
+                    {(currentPage - 1) * pageSize + index + 1}
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-3">
                       <Building className="h-8 w-8 text-gray-400" />
                       <div>
                         <p className="font-medium">{customer.fullName}</p>
-                        <p className="text-sm text-gray-500">{customer.id}</p>
                       </div>
                     </div>
                   </TableCell>
@@ -281,45 +363,33 @@ export function CustomerManagement({
                         <Phone className="h-3 w-3" />
                         <span>{customer.phone}</span>
                       </div>
-                      <div className="flex items-center space-x-1 text-sm">
-                        <MapPin className="h-3 w-3" />
-                        {/* <span className="truncate max-w-xs">{customer.address}</span> */}
-                        <span className="truncate max-w-xs">
-                          {customer.address.city}
-                        </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-1 text-sm">
+                      <MapPin className="h-3 w-3" />
+                      <div>
+                        <p>{customer.address.city}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {customer.address.district}
+                        </p>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{customer.type}</Badge>
+                    <span className="font-medium">{customer.orderCount}</span>
                   </TableCell>
                   <TableCell>
-                    <span className="font-medium">{customer.totalOrders}</span>
-                  </TableCell>
-                  {/* <TableCell>
-                    <span className="font-medium">${customer.totalValue.toLocaleString()}</span>
-                  </TableCell> */}
-                  <TableCell>{customer.lastOrder}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        customer.status === "Active" ? "default" : "secondary"
-                      }
-                    >
-                      {customer.status}
-                    </Badge>
+                    <span className={customer.lastOrderTime === "N/A" ? "text-muted-foreground" : ""}>
+                      {customer.lastOrderTime}
+                    </span>
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() =>
-                          onViewCustomerOrders?.(
-                            customer.id,
-                            customer.firstName
-                          )
-                        }
+                        onClick={() => router.push(`/boss/customers/${customer.id}`)}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -335,6 +405,66 @@ export function CustomerManagement({
               ))}
             </TableBody>
           </Table>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between mt-6 pt-4 border-t">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Səhifə başına:</span>
+                <Select
+                  value={pageSize.toString()}
+                  onValueChange={(value) => {
+                    setPageSize(Number(value));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-[70px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <span className="text-sm text-muted-foreground">
+                {totalCount > 0 ? (
+                  <>
+                    {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, totalCount)} / {totalCount} arası göstərilir
+                  </>
+                ) : (
+                  'Nəticə yoxdur'
+                )}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                Səhifə {currentPage} / {totalPages}
+              </span>
+              <div className="flex gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                  disabled={!hasPreviousPage || isLoading}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  disabled={!hasNextPage || isLoading}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

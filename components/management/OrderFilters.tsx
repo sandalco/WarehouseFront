@@ -120,7 +120,7 @@ export function OrderFilters({
               <SelectContent>
                 <SelectItem value="all">Bütün Müştərilər</SelectItem>
                 {customers.map((customer) => (
-                  <SelectItem key={customer.id} value={customer.fullName}>
+                  <SelectItem key={customer.id} value={customer.id}>
                     {customer.fullName}
                   </SelectItem>
                 ))}

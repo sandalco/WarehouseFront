@@ -8,15 +8,32 @@ const api = axios.create({
   },
 });
 
-console.log('Axios baseURL configured as:', process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000')
+// Token təzələnməsi prosesi davam edərkən sorğuların saxlanması üçün
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: any) => void;
+  reject: (reason?: any) => void;
+}> = [];
+
+const processQueue = (error: any = null, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
 
 api.interceptors.request.use((config) => {
-  console.log('Making request to:', (config.baseURL || '') + (config.url || ''))
-  console.log('Full config:', config)
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.log('No token found in localStorage');
     }
   }
   return config;
@@ -29,18 +46,88 @@ api.interceptors.response.use(
     // Response artıq standart ApiResponse formatındadır
     return response.data;
   },
-  (error) => {
+  async (error) => {
     console.log('API Error:', error)
     console.log('Error response:', error.response)
     console.log('Error response data:', error.response?.data)
     
-    // Mərkəzi 401 yoxlaması
-    if (error.response?.status === 401) {
-      if (typeof window !== 'undefined') {
-        // Token-i təmizlə və login səhifəsinə yönləndir
-        localStorage.removeItem('token');
-        sessionStorage.removeItem('token');
-        window.location.href = '/';
+    const originalRequest = error.config;
+    
+    // 401 xətası və token təzələnmə endpoint-i deyilsə
+    if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/refresh-token') {
+      if (isRefreshing) {
+        // Token təzələnməsi davam edir, növbəyə əlavə et
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(token => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshTokenValue = typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null;
+      
+      if (!refreshTokenValue) {
+        // Refresh token yoxdursa, logout et
+        isRefreshing = false;
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+          localStorage.removeItem('refresh_token');
+          localStorage.removeItem('token_expires_in');
+          localStorage.removeItem('user');
+          window.location.href = '/';
+        }
+        return Promise.reject(error);
+      }
+
+      try {
+        // Refresh token endpoint-ini çağır
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'}/refresh-token`,
+          { RefreshToken: refreshTokenValue },
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+
+        if (response.data.isSuccess && response.data.data.access_token) {
+          const { access_token, refresh_token, expires_in } = response.data.data;
+          
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('token', access_token);
+            localStorage.setItem('refresh_token', refresh_token);
+            localStorage.setItem('token_expires_in', expires_in.toString());
+          }
+          
+          // Header-i yenilə
+          originalRequest.headers.Authorization = `Bearer ${access_token}`;
+          
+          // Növbədəki sorğuları işlə
+          processQueue(null, access_token);
+          isRefreshing = false;
+          
+          // Orijinal sorğunu təkrar göndər
+          return api(originalRequest);
+        } else {
+          throw new Error('Token təzələnə bilmədi');
+        }
+      } catch (refreshError) {
+        // Token təzələnə bilmədi, logout et
+        processQueue(refreshError, null);
+        isRefreshing = false;
+        
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+          localStorage.removeItem('refresh_token');
+          localStorage.removeItem('token_expires_in');
+          localStorage.removeItem('user');
+          window.location.href = '/';
+        }
+        
+        return Promise.reject(refreshError);
       }
     }
     

@@ -1,15 +1,37 @@
 import api from "../axios";
 import { Order, OrderCreate } from "@/types/order";
 import { ApiResponse } from "@/types/api-response";
+import { PaginatedResponse } from "@/types/paginated-response";
+
+export interface OrderFiltersRequest {
+  customerId?: string | null;
+  status?: string | null;
+  fromDate?: string | null;
+  toDate?: string | null;
+}
 
 // 1. Sifarişin statusunu al
 export async function getOrderStatus(id: string): Promise<ApiResponse<string>> {
   return await api.get(`/order/${id}/status`);
 }
 
-// 2. Şirkət üzrə bütün sifarişlər
-export async function getOrdersByCompany(): Promise<ApiResponse<Order[]>> {
-  return await api.get("/order/company");
+// 2. Şirkət üzrə bütün sifarişlər (paginated with filters)
+export async function getOrdersByCompany(
+  page: number = 1, 
+  size: number = 10,
+  filters?: OrderFiltersRequest
+): Promise<PaginatedResponse<Order>> {
+  return await api.post("/order/company", 
+    {
+      customerId: filters?.customerId || null,
+      status: filters?.status || null,
+      fromDate: filters?.fromDate || null,
+      toDate: filters?.toDate || null,
+    },
+    {
+      params: { page, size }
+    }
+  );
 }
 
 // 3. Anbar üzrə bütün sifarişlər

@@ -6,31 +6,38 @@ export interface OrderAddress {
 }
 
 export interface OrderProduct {
-  orderId: string;
-  order: null; // Əgər gələcəkdə order obyekti gələrsə, onu da əlavə edə bilərsən
-  productId: string;
-  productName: string;
-  unitPrice: number;
-  imageUrl: string;
-  quantity: number;
   id: string;
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+  name: string;
+  totalPrice: number;
+  shelfCode: string;
+  // Köhnə sahələr (backwards compatibility)
+  orderId?: string;
+  order?: null;
+  productName?: string;
+  imageUrl?: string;
 }
 
 export interface Order {
   id: string;
+  warehouse: string;
+  customer: string;
   opened: string;
   openedBy: string;
   closed: string | null;
   closedBy: string | null;
-  companyId: string;
-  warehouseId: string;
-  warehouseName: string;
-  customer: string;
-  note: string;
-  address: OrderAddress;
-  products: OrderProduct[];
   status: string;
+  quantity: number;
   totalPrice: number;
+  note: string;
+  products: OrderProduct[];
+  // Köhnə sahələr (backwards compatibility)
+  companyId?: string;
+  warehouseId?: string;
+  warehouseName?: string;
+  address?: OrderAddress;
 }
 
 

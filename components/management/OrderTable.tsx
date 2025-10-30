@@ -14,6 +14,8 @@ interface OrderTableProps {
   incomingOrders: Order[]
   onViewOrder: (order: Order) => void
   getStatusColor: (status: string) => string
+  currentPage?: number
+  pageSize?: number
 }
 
 export function OrderTable({ 
@@ -21,8 +23,12 @@ export function OrderTable({
   outgoingOrders, 
   incomingOrders, 
   onViewOrder,
-  getStatusColor 
+  getStatusColor,
+  currentPage = 1,
+  pageSize = 10
 }: OrderTableProps) {
+  // Başlanğıc nömrəsini hesabla
+  const startIndex = (currentPage - 1) * pageSize
   return (
     <Tabs defaultValue="all" className="space-y-4">
       <TabsList>
@@ -48,7 +54,7 @@ export function OrderTable({
           <TableBody>
             {orders.map((order, index) => (
               <TableRow key={order.id}>
-                <TableCell className="font-medium">{index + 1}</TableCell>
+                <TableCell className="font-medium">{startIndex + index + 1}</TableCell>
                 <TableCell>
                   <Badge variant="outline" className="flex items-center w-fit">
                     {order.customer ? (
@@ -98,7 +104,7 @@ export function OrderTable({
           <TableBody>
             {outgoingOrders.map((order, index) => (
               <TableRow key={order.id}>
-                <TableCell className="font-medium">{index + 1}</TableCell>
+                <TableCell className="font-medium">{startIndex + index + 1}</TableCell>
                 <TableCell>{order.customer}</TableCell>
                 <TableCell>₼{order.totalPrice?.toLocaleString?.() ?? "-"}</TableCell>
                 <TableCell>
@@ -138,7 +144,7 @@ export function OrderTable({
           <TableBody>
             {incomingOrders.map((order, index) => (
               <TableRow key={order.id}>
-                <TableCell className="font-medium">{index + 1}</TableCell>
+                <TableCell className="font-medium">{startIndex + index + 1}</TableCell>
                 <TableCell>{order.customer || "-"}</TableCell>
                 <TableCell>₼{order.totalPrice?.toLocaleString?.() ?? "-"}</TableCell>
                 <TableCell>

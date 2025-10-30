@@ -39,23 +39,6 @@ const transformSubscriptionPackageToFrontend = (backendPackage: SubscriptionPack
   }
 }
 
-// Mock current subscription - replace with real API data when available
-const mockCurrentSubscription: UserSubscription = {
-  id: "sub-123",
-  planId: "2", // Default to Silver plan
-  tier: "silver",
-  status: "active",
-  currentPeriodStart: "2024-01-01",
-  currentPeriodEnd: "2024-02-01",
-  cancelAtPeriodEnd: false,
-  usage: {
-    warehouses: 3,
-    users: 12,
-    orders: 234,
-    storageUsed: "12GB",
-  },
-}
-
 export function SubscriptionProvider({ children }: { children: React.ReactNode }) {
   const [currentSubscription, setCurrentSubscription] = useState<UserSubscription | null>(null)
   const [availablePlans, setAvailablePlans] = useState<SubscriptionPlan[]>([])

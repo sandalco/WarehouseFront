@@ -7,10 +7,17 @@ export interface CustomerAddress {
 
 export interface Customer {
   id: string;
-  firstName: string;
-  lastName: string;
   fullName: string;
   email: string;
   phone: string;
   address: CustomerAddress;
+  orderCount: number;
+  lastOrderTime: string;
+}
+
+// Enum for customer sorting options
+export enum CustomerSortBy {
+  Name = 0,
+  OrderCount = 1,
+  LastOrder = 2
 }

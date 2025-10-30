@@ -37,24 +37,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Mövcud sessiyanı yoxla
     const savedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
+    const refreshToken = localStorage.getItem("refresh_token");
     let valid = false;
+    
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split(".")[1]));
         if (payload.exp && payload.exp > Date.now() / 1000) {
           valid = true;
+        } else if (refreshToken) {
+          // Token müddəti bitib, amma refresh token var
+          // Bu halda token avtomatik təzələnəcək ilk API sorğusu zamanı
+          valid = true;
         } else {
+          // Nə token, nə də refresh token valid deyil
           apiLogout();
           localStorage.removeItem("user");
           localStorage.removeItem("token");
+          localStorage.removeItem("refresh_token");
+          localStorage.removeItem("token_expires_in");
           setUser(null);
         }
       } catch (error) {
         localStorage.removeItem("user");
         localStorage.removeItem("token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("token_expires_in");
         setUser(null);
       }
     }
+    
     if (savedUser && valid) {
       setUser(JSON.parse(savedUser));
     } else {
@@ -66,26 +78,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    // Mock autentifikasiya - real tətbiqdə bu API çağırışı olacaq
     try {
       const token = await apiLogin(email, password);
       if (token) {
         const decoded = JSON.parse(atob(token.split(".")[1]));
+        
         const user: User = {
           id: decoded.sub,
           email: decoded.email,
           name: decoded.fullName,
           role: decoded.roles,
-          companyId: decoded.company,
-          warehouseId: decoded.warehouse,
+          companyId: decoded.company || decoded.companyId || "",
+          warehouseId: decoded.warehouse || decoded.warehouseId,
         };
 
-        if (user.id && user.email && user.name && user.role && user.companyId) {
+        if (user.id && user.email && user.name && user.role) {
           setUser(user);
           localStorage.setItem("user", JSON.stringify(user));
           return true;
         } else {
-          // Əgər user məlumatı natamamdırsa, login uğursuz sayılır
           return false;
         }
       }
@@ -100,6 +111,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("token_expires_in");
     apiLogout();
     // Router istifadə etmək əvəzinə window.location istifadə edirik
     // çünki bu metod müxtəlif komponentlərdən çağırıla bilər
