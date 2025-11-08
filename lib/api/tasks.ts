@@ -1,5 +1,6 @@
 import axiosInstance from '../axios'
 import { ApiResponse } from "@/types/api-response";
+import { PaginatedResponse } from "@/types/paginated-response";
 
 export interface TaskProduct {
   id: string
@@ -29,6 +30,12 @@ export interface Task {
 export const tasksApi = {
   getTasks: async (): Promise<ApiResponse<Task[]>> => {
     return await axiosInstance.get('/Task')
+  },
+
+  getPaginatedTasks: async (page: number = 1, size: number = 10): Promise<PaginatedResponse<Task>> => {
+    return await axiosInstance.get('/Task', {
+      params: { page, size }
+    })
   },
   
   getTaskById: async (taskId: string): Promise<ApiResponse<Task>> => {

@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getOrdersByCompany, OrderFiltersRequest } from "@/lib/api/order"
-import { getCustomers } from "@/lib/api/customer"
+import { getCustomerLookup } from "@/lib/api/customer"
 import { createApiCall } from "@/lib/api-helpers"
 import { toast } from "@/hooks/use-toast"
 import { getExportDataWithDateRange } from "@/lib/api/template"
 import { Order } from "@/types/order"
-import { Customer } from "@/types/customer"
+import { LookupItem } from "@/types/api-response"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
@@ -28,15 +28,16 @@ import {
 interface EnhancedOrderManagementProps {
   onViewOrder?: (order: any) => void
   onCreateOrder?: () => void
+  initialCustomerId?: string | null
 }
 
-export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: EnhancedOrderManagementProps = {}) {
+export function EnhancedOrderManagement({ onViewOrder, onCreateOrder, initialCustomerId }: EnhancedOrderManagementProps = {}) {
   const router = useRouter()
   const { toast } = useToast()
 
   // State
   const [orders, setOrders] = useState<Order[]>([])
-  const [customers, setCustomers] = useState<Customer[]>([])
+  const [customers, setCustomers] = useState<LookupItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const vendors: string[] = []
 
@@ -54,6 +55,13 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
   const [customerFilter, setCustomerFilter] = useState("all")
   const [dateFrom, setDateFrom] = useState<Date>()
   const [dateTo, setDateTo] = useState<Date>()
+
+  // Set initial customer filter if provided
+  useEffect(() => {
+    if (initialCustomerId) {
+      setCustomerFilter(initialCustomerId)
+    }
+  }, [initialCustomerId])
 
   // Load data
   useEffect(() => {
@@ -105,7 +113,7 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder }: Enhanced
     }
     
     createApiCall(
-      getCustomers,
+      getCustomerLookup,
       () => {}, // No separate loading state for customers
       (data) => setCustomers(data),
       (error) => toast({ title: "Xəta", description: error, variant: "destructive" })

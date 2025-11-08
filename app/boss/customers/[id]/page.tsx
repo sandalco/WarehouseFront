@@ -50,11 +50,12 @@ export default function CustomerDetailsPage() {
         })
       }
 
-      // Load customer orders (only last 5)
+      // Load customer orders (maximum 5)
       const ordersResponse = await getOrdersByCustomer(customerId)
       if (ordersResponse.isSuccess && ordersResponse.data) {
-        // Get only last 5 orders
-        setOrders(ordersResponse.data.slice(0, 5))
+        // Take only first 5 orders (backend already returns limited data)
+        const limitedOrders = ordersResponse.data.slice(0, 5)
+        setOrders(limitedOrders)
       }
     } catch (error) {
       console.error("Error loading customer data:", error)
@@ -84,8 +85,9 @@ export default function CustomerDetailsPage() {
   }
 
   const handleViewAllOrders = () => {
-    // Navigate to orders page with customer filter
-    router.push(`/boss/orders?customerId=${customerId}`)
+    // Navigate to orders page with customer filter pre-applied
+    // The filter will be handled by the orders page component
+    router.push(`/boss/orders?customer=${customer?.fullName}&customerId=${customerId}`)
   }
 
   const handleViewOrder = (orderId: string) => {
@@ -277,7 +279,6 @@ export default function CustomerDetailsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Sifariş ID</TableHead>
                       <TableHead>Anbar</TableHead>
                       <TableHead>Açılma Tarixi</TableHead>
                       <TableHead>Bağlanma Tarixi</TableHead>
@@ -290,9 +291,6 @@ export default function CustomerDetailsPage() {
                   <TableBody>
                     {orders.map((order) => (
                       <TableRow key={order.id}>
-                        <TableCell className="font-mono text-sm">
-                          {order.id.substring(0, 8)}...
-                        </TableCell>
                         <TableCell>{order.warehouse}</TableCell>
                         <TableCell>{order.opened}</TableCell>
                         <TableCell>

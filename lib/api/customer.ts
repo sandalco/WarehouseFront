@@ -1,6 +1,6 @@
 import api from "../axios";
 import { Customer, CustomerSortBy } from "@/types/customer";
-import { ApiResponse } from "@/types/api-response";
+import { ApiResponse, LookupItem } from "@/types/api-response";
 import { PaginatedResponse } from "@/types/paginated-response";
 
 export interface CustomerFiltersRequest {
@@ -42,4 +42,8 @@ export async function createCustomer(customer: Omit<Customer, "id">): Promise<Ap
 
 export async function deleteCustomer(id: string): Promise<ApiResponse<any>> {
   return await api.delete(`/customer/${id}`);
+}
+
+export async function getCustomerLookup(): Promise<ApiResponse<LookupItem[]>> {
+  return await api.get("/customer/lookup");
 }

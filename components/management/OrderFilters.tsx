@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Search, Filter, CalendarIcon, X } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
-import { Customer } from "@/types/customer"
+import { LookupItem } from "@/types/api-response"
 
 interface OrderFiltersProps {
   searchTerm: string
@@ -24,7 +24,7 @@ interface OrderFiltersProps {
   setDateFrom: (date: Date | undefined) => void
   dateTo: Date | undefined
   setDateTo: (date: Date | undefined) => void
-  customers: Customer[]
+  customers: LookupItem[]
   vendors: string[]
 }
 
@@ -121,7 +121,7 @@ export function OrderFilters({
                 <SelectItem value="all">Bütün Müştərilər</SelectItem>
                 {customers.map((customer) => (
                   <SelectItem key={customer.id} value={customer.id}>
-                    {customer.fullName}
+                    {customer.name}
                   </SelectItem>
                 ))}
                 {vendors.map((vendor) => (

@@ -9,3 +9,9 @@ export interface ApiResponse<T = any> {
 export interface ApiCollectionResponse<T = any> extends ApiResponse<T[]> {}
 
 export interface ApiSingleResponse<T = any> extends ApiResponse<T> {}
+
+// Lookup item for select boxes
+export interface LookupItem {
+  id: string
+  name: string
+}
