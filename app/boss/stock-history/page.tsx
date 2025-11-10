@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -82,7 +82,7 @@ interface ProductDetail {
   }>;
 }
 
-export default function StockHistoryPage() {
+function StockHistoryContent() {
   const searchParams = useSearchParams();
   const productId = searchParams?.get("productId");
   const { toast } = useToast();
@@ -525,5 +525,13 @@ export default function StockHistoryPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function StockHistoryPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen">Yüklənir...</div>}>
+      <StockHistoryContent />
+    </Suspense>
   );
 }

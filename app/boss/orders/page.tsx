@@ -2,10 +2,10 @@
 
 import { EnhancedOrderManagement } from "@/components/management/EnhancedOrderManagement"
 import { CreateOrderPage } from "@/components/pages/CreateOrderPage"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 
-export default function BossOrdersPage() {
+function OrdersContent() {
   const searchParams = useSearchParams()
   const [showCreateOrder, setShowCreateOrder] = useState(false)
   const [initialCustomerId, setInitialCustomerId] = useState<string | null>(null)
@@ -37,5 +37,13 @@ export default function BossOrdersPage() {
         />
       )}
     </>
+  )
+}
+
+export default function BossOrdersPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen">Yüklənir...</div>}>
+      <OrdersContent />
+    </Suspense>
   )
 }

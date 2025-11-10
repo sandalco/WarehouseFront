@@ -72,8 +72,18 @@ export default function CompanyManagement() {
   const createCompany = () => {
     setFormError("") // Clear previous errors
     
+    // Convert to FormData
+    const formData = new FormData()
+    formData.append("name", createFormData.name)
+    formData.append("description", createFormData.description)
+    formData.append("logoUrl", createFormData.logoUrl)
+    formData.append("email", createFormData.email)
+    formData.append("firstName", createFormData.firstName)
+    formData.append("lastName", createFormData.lastName)
+    formData.append("phoneNumber", createFormData.phoneNumber)
+    
     createApiCall(
-      () => CompanyAPI.createCompany(createFormData),
+      () => CompanyAPI.createCompany(formData),
       () => {}, // No loading state for this operation
       () => {
         toast({
@@ -101,7 +111,6 @@ export default function CompanyManagement() {
         })
       }
     )
-  }
   }
 
   useEffect(() => {
