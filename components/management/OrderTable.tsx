@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Eye, Edit, ArrowUpCircle, ArrowDownCircle } from "lucide-react"
+import { Eye, X, ArrowUpCircle, ArrowDownCircle } from "lucide-react"
 import { formatDate } from "@/utils/dateFormat"
 import { Order } from "@/types/order"
 
@@ -13,6 +13,7 @@ interface OrderTableProps {
   outgoingOrders: Order[]
   incomingOrders: Order[]
   onViewOrder: (order: Order) => void
+  onCancelOrder?: (order: Order) => void
   getStatusColor: (status: string) => string
   currentPage?: number
   pageSize?: number
@@ -23,12 +24,18 @@ export function OrderTable({
   outgoingOrders, 
   incomingOrders, 
   onViewOrder,
+  onCancelOrder,
   getStatusColor,
   currentPage = 1,
   pageSize = 10
 }: OrderTableProps) {
   // Başlanğıc nömrəsini hesabla
   const startIndex = (currentPage - 1) * pageSize
+
+  // Status yoxlama funksiyası
+  const canCancelOrder = (status: string) => {
+    return status === "Submitted" || status === "StockConfirmed"
+  }
   return (
     <Tabs defaultValue="all" className="space-y-4">
       <TabsList>
@@ -77,9 +84,15 @@ export function OrderTable({
                     <Button variant="outline" size="sm" onClick={() => onViewOrder(order)}>
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm">
-                      <Edit className="h-4 w-4" />
-                    </Button>
+                    {canCancelOrder(order.status) && onCancelOrder && (
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        onClick={() => onCancelOrder(order)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -117,9 +130,15 @@ export function OrderTable({
                     <Button variant="outline" size="sm" onClick={() => onViewOrder(order)}>
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm">
-                      <Edit className="h-4 w-4" />
-                    </Button>
+                    {canCancelOrder(order.status) && onCancelOrder && (
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        onClick={() => onCancelOrder(order)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -157,9 +176,15 @@ export function OrderTable({
                     <Button variant="outline" size="sm" onClick={() => onViewOrder(order)}>
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm">
-                      <Edit className="h-4 w-4" />
-                    </Button>
+                    {canCancelOrder(order.status) && onCancelOrder && (
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        onClick={() => onCancelOrder(order)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>

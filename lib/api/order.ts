@@ -21,7 +21,7 @@ export async function getOrdersByCompany(
   size: number = 10,
   filters?: OrderFiltersRequest
 ): Promise<PaginatedResponse<Order>> {
-  return await api.post("/order/company", 
+  return await api.post("/order/paginated", 
     {
       customerId: filters?.customerId || null,
       status: filters?.status || null,
@@ -41,11 +41,6 @@ export async function getOrdersByWarehouse(warehouseId?: string): Promise<ApiRes
   });
 }
 
-// 4. Statusa görə sifarişlər
-export async function getOrdersByStatus(status: string): Promise<ApiResponse<Order[]>> {
-  return await api.get(`/order/ByStatus/${status}`);
-}
-
 // 5. Müştəriyə görə sifarişlər
 export async function getOrdersByCustomer(customerId: string): Promise<ApiResponse<Order[]>> {
   return await api.get(`/order/ByCustomer/${customerId}`);
@@ -56,11 +51,6 @@ export async function getOrderById(id: string): Promise<ApiResponse<Order>> {
   return await api.get(`/order/${id}`);
 }
 
-// 7. Sifarişin məhsullarını id ilə al
-export async function getOrderProductsById(id: string): Promise<ApiResponse<any>> {
-  return await api.get(`/order/${id}/products`);
-}
-
 // 8. Yeni sifariş yarat
 export async function createOrder(orderData: OrderCreate): Promise<ApiResponse<Order>> {
   return await api.post("/order", orderData);
@@ -69,6 +59,10 @@ export async function createOrder(orderData: OrderCreate): Promise<ApiResponse<O
 // 9. Sifarişi tamamla
 export async function completeOrder(id: string, products: any[]): Promise<ApiResponse<any>> {
   return await api.post(`/order/${id}/complete`, { products });
+}
+
+export async function cancelOrder(id: string): Promise<ApiResponse<any>> {
+  return await api.post(`/order/${id}/cancel`);
 }
 
 // 10. Sifarişi yenidən yoxla (retry)

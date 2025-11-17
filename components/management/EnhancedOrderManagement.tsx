@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { getOrdersByCompany, OrderFiltersRequest } from "@/lib/api/order"
+import { getOrdersByCompany, OrderFiltersRequest, cancelOrder } from "@/lib/api/order"
 import { getCustomerLookup } from "@/lib/api/customer"
 import { createApiCall } from "@/lib/api-helpers"
 import { toast } from "@/hooks/use-toast"
@@ -163,6 +163,39 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder, initialCus
     }
   }
 
+  // Cancel order handler
+  const handleCancelOrder = async (order: Order) => {
+    if (!confirm(`"${order.customer}" müştərisinə aid ${order.id} nömrəli sifarişi ləğv etmək istədiyinizdən əminsiniz?`)) {
+      return
+    }
+
+    try {
+      const response = await cancelOrder(order.id)
+      
+      if (response.isSuccess) {
+        toast({
+          title: "Uğurlu",
+          description: "Sifariş ləğv edildi.",
+        })
+        // Siyahını yenilə
+        loadData()
+      } else {
+        toast({
+          title: "Xəta",
+          description: response.errors?.[0] || "Sifariş ləğv edilə bilmədi.",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Error canceling order:", error)
+      toast({
+        title: "Xəta",
+        description: "Sifarişi ləğv edərkən xəta baş verdi.",
+        variant: "destructive",
+      })
+    }
+  }
+
   // Frontend axtarış (search) - yalnız ID və anbar adı üçün
   const filteredOrders = orders.filter((order) => {
     if (!searchTerm) return true
@@ -250,6 +283,7 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder, initialCus
             outgoingOrders={outgoingOrders}
             incomingOrders={incomingOrders}
             onViewOrder={handleViewOrder}
+            onCancelOrder={handleCancelOrder}
             getStatusColor={getStatusColor}
             currentPage={currentPage}
             pageSize={pageSize}
