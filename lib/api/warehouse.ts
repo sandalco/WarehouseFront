@@ -1,9 +1,13 @@
 import { Warehouse, CreateWarehouseDto } from "@/types/warehouse";
 import api from "../axios";
-import { ApiResponse } from "@/types/api-response";
+import { ApiResponse, LookupItem } from "@/types/api-response";
 
 export async function getWarehouses(): Promise<ApiResponse<Warehouse[]>> {
   return await api.get("/warehouse");
+}
+
+export async function getWarehouseLookup(): Promise<ApiResponse<LookupItem[]>> {
+  return await api.get("/warehouse/lookup");
 }
 
 export async function createWarehouse(data: CreateWarehouseDto): Promise<ApiResponse<Warehouse>> {

@@ -14,17 +14,9 @@ export interface TaskProduct {
 
 export interface Task {
   id: string
-  warehouse: string
-  customer: string
   opened: string
-  openedBy: string
-  closed: string | null
-  closedBy: string | null
-  status: string | null
-  quantity: number
-  totalPrice: number
-  note: string
-  products: TaskProduct[]
+  totalQuantity: number
+  productCount: number
 }
 
 export const tasksApi = {

@@ -1,11 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getWarehouses } from "@/lib/api/warehouse"
+import { getWarehouseLookup } from "@/lib/api/warehouse"
 import { getCustomers } from "@/lib/api/customer"
 import { getProducts } from "@/lib/api/products"
 import { createApiCall } from "@/lib/api-helpers"
 import { Product } from "@/types/product"
+import { LookupItem } from "@/types/api-response"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,7 +16,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { ArrowLeft, Plus, Trash2, Package, Building, Warehouse, AlertTriangle, CheckCircle } from "lucide-react"
-import { Warehouse as WarehouseType } from "@/types/warehouse"
 import { Customer } from "@/types/customer"
 import { createOrder } from "@/lib/api/order"
 import { OrderCreate, OrderCreateItem, OrderAddress } from "@/types/order"
@@ -44,7 +44,7 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
   const [orderProducts, setOrderProducts] = useState<OrderProduct[]>([])
   const [selectedProduct, setSelectedProduct] = useState("")
   const [productQuantity, setProductQuantity] = useState(1)
-  const [warehouses, setWarehouses] = useState<WarehouseType[]>([])
+  const [warehouses, setWarehouses] = useState<LookupItem[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [availableProducts, setAvailableProducts] = useState<Product[]>([])
   const [address, setAddress] = useState({
@@ -61,7 +61,7 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
 
   const loadData = () => {
     createApiCall(
-      getWarehouses,
+      getWarehouseLookup,
       setIsLoading,
       (data) => setWarehouses(data),
       (error) => toast({ title: "Xəta", description: error, variant: "destructive" })
@@ -296,7 +296,6 @@ export function CreateOrderPage({ onBack }: CreateOrderPageProps) {
                           <div className="flex items-center space-x-2">
                             <Warehouse className="h-4 w-4" />
                             <span>{warehouse.name}</span>
-                            <span className="text-sm text-gray-500">({warehouse.city})</span>
                           </div>
                         </SelectItem>
                       ))}

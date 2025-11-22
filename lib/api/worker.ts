@@ -30,9 +30,6 @@ export async function getPaginatedWorkers(
   );
 }
 
-export async function getWarehouseLookup(): Promise<ApiResponse<LookupItem[]>> {
-  return await api.get("/warehouse/lookup");
-}
 
 export async function getRolesLookup(): Promise<ApiResponse<LookupItem[]>> {
   return await api.get("/roles/lookup");

@@ -8,13 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Loader2, Package, User, Calendar, MapPin, FileText, ShoppingCart, DollarSign } from "lucide-react"
+import { ArrowLeft, Loader2, Package, User, Calendar, MapPin, FileText, ShoppingCart, DollarSign, AlertTriangle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 // Status tərcümələri
 const statusTranslations: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   Pending: { label: "Gözləyir", variant: "outline" },
   StockConfirmed: { label: "Stok Təsdiqləndi", variant: "secondary" },
+  StockInsufficient: { label: "Stok Çatışmır", variant: "destructive" },
   Confirmed: { label: "Təsdiqləndi", variant: "default" },
   Completed: { label: "Tamamlandı", variant: "default" },
   Cancelled: { label: "Ləğv Edildi", variant: "destructive" },
@@ -240,6 +241,41 @@ export default function OrderDetailsPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Çatışmayan Məhsullar */}
+          {order.insufficientProducts && order.insufficientProducts.length > 0 && (
+            <Card className="border-destructive">
+              <CardHeader className="bg-destructive/10">
+                <CardTitle className="flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-5 w-5" />
+                  Çatışmayan Məhsullar ({order.insufficientProducts.length})
+                </CardTitle>
+                <CardDescription>
+                  Bu məhsullar anbarda kifayət qədər stokda yoxdur
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="space-y-3">
+                  {order.insufficientProducts.map((product, index) => (
+                    <div key={index}>
+                      {index > 0 && <Separator className="my-3" />}
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-start gap-3">
+                          <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
+                          <div>
+                            <h4 className="font-medium">{product.name}</h4>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Tələb olunan miqdar: <span className="font-semibold text-destructive">{product.quantity} ədəd</span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Sağ tərəf - Maliyyə məlumatları */}

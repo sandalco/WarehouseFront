@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Clock, Package, MapPin, User, AlertCircle, CheckCircle, PlayCircle, RefreshCw, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react"
+import { Clock, Package, AlertCircle, ExternalLink, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react"
 import { tasksApi } from '@/lib/api/tasks'
 import { Task } from '@/types/task'
 import { useToast } from '@/hooks/use-toast'
@@ -23,7 +23,6 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null)
   const { toast } = useToast()
   const router = useRouter()
 
@@ -66,106 +65,9 @@ export default function TasksPage() {
     }
   }
 
-  const updateTaskStatus = async (taskId: string, newStatus: string) => {
-    setUpdatingTaskId(taskId)
-    
-    try {
-      const response = await tasksApi.updateTaskStatus(taskId, newStatus)
-      
-      if (response.isSuccess) {
-        // Update local state
-        setTasks(prevTasks => 
-          prevTasks.map(task => 
-            task.id === taskId 
-              ? { ...task, status: newStatus, closed: newStatus === 'completed' ? new Date().toISOString() : task.closed }
-              : task
-          )
-        )
-        
-        toast({
-          title: "Uğur",
-          description: `Tapşırıq statusu ${newStatus === 'completed' ? 'tamamlandı' : 'yeniləndi'} olaraq dəyişdirildi`,
-        })
-      } else {
-        toast({
-          title: "Xəta", 
-          description: response.errors?.[0] || "Status yenilənə bilmədi",
-          variant: "destructive"
-        })
-      }
-    } catch (error) {
-      console.error('Error updating task status:', error)
-      toast({
-        title: "Xəta",
-        description: "Status yenilənərkən xəta baş verdi",
-        variant: "destructive"
-      })
-    } finally {
-      setUpdatingTaskId(null)
-    }
-  }
-
-  const startTask = async (taskId: string) => {
-    setUpdatingTaskId(taskId)
-    
-    try {
-      const response = await tasksApi.startTask(taskId)
-      
-      if (response.isSuccess) {
-        // Update local state
-        setTasks(prevTasks => 
-          prevTasks.map(task => 
-            task.id === taskId 
-              ? { ...task, status: 'in-progress' }
-              : task
-          )
-        )
-        
-        toast({
-          title: "Tapşırıq Başladı",
-          description: "Tapşırıq uğurla başladıldı",
-        })
-      } else {
-        toast({
-          title: "Xəta",
-          description: response.errors?.[0] || "Tapşırıq başladıla bilmədi",
-          variant: "destructive"
-        })
-      }
-    } catch (error) {
-      console.error('Error starting task:', error)
-      toast({
-        title: "Xəta",
-        description: "Tapşırıq başladılarkən xəta baş verdi",
-        variant: "destructive"
-      })
-    } finally {
-      setUpdatingTaskId(null)
-    }
-  }
-
   const fetchTaskDetail = async (taskId: string) => {
     // Navigate to task detail page
     router.push(`/warehouseman/tasks/${taskId}`)
-  }
-
-  const getStatusColor = (status: string | null) => {
-    if (!status) return 'bg-gray-100 text-gray-800'
-    
-    switch (status.toLowerCase()) {
-      case 'pending':
-      case 'new':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'in-progress':
-      case 'in progress':
-        return 'bg-blue-100 text-blue-800'
-      case 'stockconfirmed':
-        return 'bg-purple-100 text-purple-800'
-      case 'completed':
-        return 'bg-green-100 text-green-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
   }
 
   const formatDate = (dateString: string) => {
@@ -186,35 +88,6 @@ export default function TasksPage() {
     } catch {
       return dateString
     }
-  }
-
-  const getStatusText = (status: string | null) => {
-    if (!status) return 'Naməlum'
-    
-    switch (status.toLowerCase()) {
-      case 'pending':
-      case 'new':
-        return 'Gözləyir'
-      case 'in-progress':
-      case 'in progress':
-        return 'İcra olunur'
-      case 'stockconfirmed':
-        return 'Anbar təsdiqləndi'
-      case 'completed':
-        return 'Tamamlandı'
-      default:
-        return status
-    }
-  }
-
-  const canStartTask = (status: string | null) => {
-    if (!status) return true
-    const lowerStatus = status.toLowerCase()
-    return lowerStatus === 'pending' || lowerStatus === 'new' || lowerStatus === ''
-  }
-
-  const canCompleteTask = (status: string | null) => {
-    return status?.toLowerCase() === 'in-progress' || status?.toLowerCase() === 'in progress'
   }
 
   if (loading) {
@@ -330,63 +203,20 @@ export default function TasksPage() {
           >
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-xl">{task.id}</CardTitle>
-                <div className="flex items-center gap-2">
-                  <Badge className={getStatusColor(task.status)}>
-                    {getStatusText(task.status)}
-                  </Badge>
-                  
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      fetchTaskDetail(task.id)
-                    }}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-1" />
-                    Aç
-                  </Button>
-                  
-                  {canStartTask(task.status) && (
-                    <Button
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        startTask(task.id)
-                      }}
-                      disabled={updatingTaskId === task.id}
-                    >
-                      <PlayCircle className="h-4 w-4 mr-1" />
-                      Başla
-                    </Button>
-                  )}
-                  
-                  {canCompleteTask(task.status) && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        updateTaskStatus(task.id, 'completed')
-                      }}
-                      disabled={updatingTaskId === task.id}
-                    >
-                      <CheckCircle className="h-4 w-4 mr-1" />
-                      Tamamla
-                    </Button>
-                  )}
-                </div>
+                <CardTitle className="text-xl">Tapşırıq #{task.id.slice(0, 8)}</CardTitle>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    fetchTaskDetail(task.id)
+                  }}
+                >
+                  <ExternalLink className="h-4 w-4 mr-1" />
+                  Aç
+                </Button>
               </div>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
-                  {task.warehouse}
-                </div>
-                <div className="flex items-center gap-1">
-                  <User className="h-4 w-4" />
-                  {task.customer}
-                </div>
                 <div className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
                   {formatDate(task.opened)}
@@ -395,21 +225,22 @@ export default function TasksPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Package className="h-4 w-4" />
-                    <span className="font-medium">{task.quantity} məhsul</span>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col p-4 bg-muted rounded-lg">
+                    <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                      <Package className="h-4 w-4" />
+                      <span className="text-sm">Məhsul növü</span>
+                    </div>
+                    <span className="text-2xl font-bold">{task.productCount}</span>
                   </div>
-                  <div className="text-lg font-semibold">
-                    ₼{task.totalPrice.toFixed(2)}
+                  <div className="flex flex-col p-4 bg-muted rounded-lg">
+                    <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                      <Package className="h-4 w-4" />
+                      <span className="text-sm">Ümumi miqdar</span>
+                    </div>
+                    <span className="text-2xl font-bold">{task.totalQuantity}</span>
                   </div>
                 </div>
-
-                {task.note && (
-                  <div className="p-3 bg-muted rounded-lg">
-                    <p className="text-sm truncate">{task.note}</p>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>

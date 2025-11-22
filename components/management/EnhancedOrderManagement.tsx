@@ -14,6 +14,16 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { OrderFilters } from "./OrderFilters"
 import { OrderTable } from "./OrderTable"
 import { OrderExportDialog } from "./OrderExportDialog"
@@ -55,6 +65,10 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder, initialCus
   const [customerFilter, setCustomerFilter] = useState("all")
   const [dateFrom, setDateFrom] = useState<Date>()
   const [dateTo, setDateTo] = useState<Date>()
+
+  // Cancel order modal state
+  const [orderToCancel, setOrderToCancel] = useState<Order | null>(null)
+  const [isCanceling, setIsCanceling] = useState(false)
 
   // Set initial customer filter if provided
   useEffect(() => {
@@ -164,19 +178,23 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder, initialCus
   }
 
   // Cancel order handler
-  const handleCancelOrder = async (order: Order) => {
-    if (!confirm(`"${order.customer}" müştərisinə aid ${order.id} nömrəli sifarişi ləğv etmək istədiyinizdən əminsiniz?`)) {
-      return
-    }
+  const handleCancelOrder = (order: Order) => {
+    setOrderToCancel(order)
+  }
 
+  const confirmCancelOrder = async () => {
+    if (!orderToCancel) return
+
+    setIsCanceling(true)
     try {
-      const response = await cancelOrder(order.id)
+      const response = await cancelOrder(orderToCancel.id)
       
       if (response.isSuccess) {
         toast({
           title: "Uğurlu",
           description: "Sifariş ləğv edildi.",
         })
+        setOrderToCancel(null)
         // Siyahını yenilə
         loadData()
       } else {
@@ -193,6 +211,8 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder, initialCus
         description: "Sifarişi ləğv edərkən xəta baş verdi.",
         variant: "destructive",
       })
+    } finally {
+      setIsCanceling(false)
     }
   }
 
@@ -349,6 +369,38 @@ export function EnhancedOrderManagement({ onViewOrder, onCreateOrder, initialCus
           </div>
         </CardContent>
       </Card>
+
+      {/* Cancel Order Modal */}
+      <AlertDialog open={!!orderToCancel} onOpenChange={(open) => !open && setOrderToCancel(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sifarişi ləğv et</AlertDialogTitle>
+            <AlertDialogDescription>
+              {orderToCancel && (
+                <>
+                  <span className="font-semibold text-foreground">"{orderToCancel.customer}"</span> müştərisinə aid{" "}
+                  <span className="font-semibold text-foreground">{orderToCancel.id}</span> nömrəli sifarişi ləğv etmək istədiyinizdən əminsiniz?
+                  <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                    <p className="text-sm text-amber-800">
+                      ⚠️ Bu əməliyyat geri qaytarıla bilməz və sifariş statusu "Cancelled" olaraq dəyişdiriləcək.
+                    </p>
+                  </div>
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isCanceling}>Ləğv et</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmCancelOrder}
+              disabled={isCanceling}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {isCanceling ? "Ləğv edilir..." : "Bəli, ləğv et"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

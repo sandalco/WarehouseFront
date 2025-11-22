@@ -19,8 +19,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Search, Edit, Trash2, User, Mail, Phone, Eye, ChevronLeft, ChevronRight } from "lucide-react"
 import { Worker } from "@/types/worker"
 import { LookupItem } from "@/types/api-response"
-import { getPaginatedWorkers, getWarehouseLookup, getRolesLookup, WorkerFiltersRequest } from "@/lib/api/worker"
+import { getPaginatedWorkers, getRolesLookup, WorkerFiltersRequest } from "@/lib/api/worker"
 import { toast } from "@/hooks/use-toast"
+import { getWarehouseLookup } from "@/lib/api/warehouse"
 
 interface WorkerManagementProps {
   onViewWorker?: (workerId: string) => void

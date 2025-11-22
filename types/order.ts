@@ -20,6 +20,12 @@ export interface OrderProduct {
   imageUrl?: string;
 }
 
+export interface InsufficientProduct {
+  id: string | null;
+  name: string;
+  quantity: number;
+}
+
 export interface Order {
   id: string;
   warehouse: string;
@@ -33,6 +39,7 @@ export interface Order {
   totalPrice: number;
   note: string;
   products: OrderProduct[];
+  insufficientProducts?: InsufficientProduct[];
   // Köhnə sahələr (backwards compatibility)
   companyId?: string;
   warehouseId?: string;

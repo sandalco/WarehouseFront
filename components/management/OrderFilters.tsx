@@ -107,6 +107,7 @@ export function OrderFilters({
                 <SelectItem value="Prepared">Hazırlanıb</SelectItem>
                 <SelectItem value="Shipped">Göndərilib</SelectItem>
                 <SelectItem value="Cancelled">İmtina</SelectItem>
+                <SelectItem value="StockInsufficient">Stok yetərsizdir</SelectItem>
               </SelectContent>
             </Select>
           </div>
