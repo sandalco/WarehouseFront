@@ -1,9 +1,10 @@
 export interface Notification {
+  id: string
   recipient: string
   content: string
+  dateTime: string
   channel: number
   title: string
-  id?: string
   timestamp?: Date
   read?: boolean
 }
@@ -14,5 +15,6 @@ export interface NotificationContextType {
   markAsRead: (id: string) => void
   markAllAsRead: () => void
   clearNotifications: () => void
+  deleteNotification: (id: string) => void
   isConnected: boolean
 }

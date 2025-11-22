@@ -11,9 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Bell, Settings, User, LogOut, Check, Trash2 } from "lucide-react"
 import { useAuth } from "@/components/auth/AuthProvider"
 import { useRouter } from "next/navigation"
-import { useNotifications } from "@/components/NotificationProvider"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
+import { NotificationBell } from "@/components/ui/notification-bell"
 
 const getPageTitle = (pathname: string) => {
   switch (pathname) {
@@ -45,7 +43,6 @@ export default function BossLayout({
   const pageTitle = getPageTitle(pathname)
   const { user, logout } = useAuth()
   const router = useRouter()
-  const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotifications, isConnected } = useNotifications()
 
   const handleLogout = () => {
     logout()
@@ -72,88 +69,7 @@ export default function BossLayout({
           
           <div className="ml-auto flex items-center gap-2">
             {/* Notifications */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className={`h-4 w-4 ${!isConnected ? 'text-muted-foreground' : ''}`} />
-                  {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-80" align="end" forceMount>
-                <DropdownMenuLabel className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span>Bildirişlər</span>
-                    {!isConnected && (
-                      <Badge variant="outline" className="text-xs">
-                        Bağlantı yoxdur
-                      </Badge>
-                    )}
-                  </div>
-                  {notifications.length > 0 && (
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={markAllAsRead}
-                        className="h-6 px-2 text-xs"
-                      >
-                        <Check className="h-3 w-3 mr-1" />
-                        Hamısını oxu
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearNotifications}
-                        className="h-6 px-2 text-xs"
-                      >
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        Təmizlə
-                      </Button>
-                    </div>
-                  )}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {notifications.length === 0 ? (
-                  <div className="p-4 text-center text-sm text-muted-foreground">
-                    Bildiriş yoxdur
-                  </div>
-                ) : (
-                  <ScrollArea className="h-[300px]">
-                    <div className="space-y-1">
-                      {notifications.slice(0, 10).map((notification) => (
-                        <DropdownMenuItem
-                          key={notification.id}
-                          className={`flex flex-col items-start gap-1 p-3 cursor-pointer ${
-                            !notification.read ? 'bg-blue-50 border-l-2 border-l-blue-500' : ''
-                          }`}
-                          onClick={() => notification.id && markAsRead(notification.id)}
-                        >
-                          <div className="flex items-start justify-between w-full">
-                            <div className="font-medium text-sm">{notification.title}</div>
-                            <div className="text-xs text-muted-foreground ml-2">
-                              {notification.timestamp?.toLocaleTimeString('az-AZ', {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </div>
-                          </div>
-                          <div className="text-xs text-muted-foreground leading-relaxed">
-                            {notification.content}
-                          </div>
-                          {!notification.read && (
-                            <div className="w-2 h-2 bg-blue-500 rounded-full self-end"></div>
-                          )}
-                        </DropdownMenuItem>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <NotificationBell />
 
             {/* Profile Dropdown */}
             <DropdownMenu>

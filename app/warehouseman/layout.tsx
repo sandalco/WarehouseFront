@@ -11,6 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Bell, Settings, User, LogOut } from "lucide-react"
 import { useAuth } from "@/components/auth/AuthProvider"
 import { useRouter } from "next/navigation"
+import { NotificationBell } from "@/components/ui/notification-bell"
 
 const getPageTitle = (pathname: string) => {
   switch (pathname) {
@@ -64,12 +65,7 @@ export default function WarehousemanLayout({
           
           <div className="ml-auto flex items-center gap-2">
             {/* Notifications */}
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
-                3
-              </span>
-            </Button>
+            <NotificationBell />
 
             {/* Profile Dropdown */}
             <DropdownMenu>

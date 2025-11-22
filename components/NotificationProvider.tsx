@@ -4,8 +4,9 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import * as signalR from '@microsoft/signalr'
 import type { Notification as NotificationType, NotificationContextType } from '@/types/notification'
 import { useToast } from '@/hooks/use-toast'
+import { getNotifications } from '@/lib/api/notification'
 
-const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
+export const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
 
 interface NotificationProviderProps {
   children: ReactNode
@@ -19,6 +20,42 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
 
   // Get unread count
   const unreadCount = notifications.filter(n => !n.read).length
+
+  // Load initial notifications from API
+  useEffect(() => {
+    const loadNotifications = async () => {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token')
+      console.log('🔔 Loading notifications, token exists:', !!token)
+      
+      if (!token) {
+        console.log('❌ No token found, skipping notification load')
+        return
+      }
+
+      try {
+        console.log('📡 Fetching notifications from API...')
+        const response = await getNotifications()
+        console.log('📥 Notification response:', response)
+        
+        if (response.isSuccess && response.data) {
+          // Transform API notifications to internal format
+          const transformedNotifications: NotificationType[] = response.data.map((notif) => ({
+            ...notif,
+            timestamp: new Date(notif.dateTime),
+            read: false
+          }))
+          console.log('✅ Loaded notifications:', transformedNotifications.length)
+          setNotifications(transformedNotifications)
+        } else {
+          console.log('⚠️ API response not successful:', response.errors)
+        }
+      } catch (error) {
+        console.error('❌ Error loading notifications:', error)
+      }
+    }
+
+    loadNotifications()
+  }, [])
 
   // Initialize SignalR connection
   useEffect(() => {
@@ -45,11 +82,10 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       try {
         // Set up event handlers before starting connection
         hubConnection.on('ReceiveNotification', (payload: NotificationType) => {          
-          // Create notification with unique ID and timestamp
+          // Create notification with timestamp
           const notification: NotificationType = {
             ...payload,
-            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-            timestamp: new Date(),
+            timestamp: payload.dateTime ? new Date(payload.dateTime) : new Date(),
             read: false
           }
 
@@ -133,12 +169,18 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     setNotifications([])
   }
 
+  // Delete single notification
+  const deleteNotification = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id))
+  }
+
   const value: NotificationContextType = {
     notifications,
     unreadCount,
     markAsRead,
     markAllAsRead,
     clearNotifications,
+    deleteNotification,
     isConnected,
   }
 
