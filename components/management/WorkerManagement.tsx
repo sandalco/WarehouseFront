@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Search, Edit, Trash2, User, Mail, Phone, Eye, ChevronLeft, ChevronRight } from "lucide-react"
 import { Worker } from "@/types/worker"
 import { LookupItem } from "@/types/api-response"
-import { getPaginatedWorkers, getRolesLookup, WorkerFiltersRequest } from "@/lib/api/worker"
+import { getPaginatedWorkers, getRolesLookup, WorkerFiltersRequest, createWorker, CreateWorkerRequest } from "@/lib/api/worker"
 import { toast } from "@/hooks/use-toast"
 import { getWarehouseLookup } from "@/lib/api/warehouse"
 
@@ -48,6 +48,16 @@ export function WorkerManagement({ onViewWorker }: WorkerManagementProps) {
   // Lookup data
   const [warehouses, setWarehouses] = useState<LookupItem[]>([])
   const [roles, setRoles] = useState<LookupItem[]>([])
+
+  // Form state
+  const [formData, setFormData] = useState<CreateWorkerRequest>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    roleId: "",
+    warehouseId: undefined,
+  })
 
   // Load lookups on mount
   useEffect(() => {
@@ -139,6 +149,87 @@ export function WorkerManagement({ onViewWorker }: WorkerManagementProps) {
     }
   }
 
+  const handleAddWorker = async () => {
+    try {
+      // Validasiya
+      if (!formData.firstName || !formData.lastName || !formData.email || !formData.phoneNumber || !formData.roleId) {
+        toast({
+          title: "Xəta",
+          description: "Bütün məcburi sahələri doldurun",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Email validasiya
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(formData.email)) {
+        toast({
+          title: "Xəta",
+          description: "Düzgün email ünvanı daxil edin",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Telefon format yoxlaması
+      const phoneRegex = /^\+994\d{2}-\d{3}-\d{2}-\d{2}$/
+      if (!phoneRegex.test(formData.phoneNumber)) {
+        toast({
+          title: "Xəta",
+          description: "Telefon nömrəsi +994xx-xxx-xx-xx formatında olmalıdır",
+          variant: "destructive",
+        })
+        return
+      }
+
+      setIsLoading(true)
+
+      // Əgər seçilmiş rol WarehouseMan deyilsə, warehouseId-ni göndərmə
+      const selectedRole = roles.find(r => r.id === formData.roleId)
+      const dataToSend: CreateWorkerRequest = {
+        ...formData,
+        warehouseId: selectedRole?.name === "WarehouseMan" ? formData.warehouseId : undefined,
+      }
+
+      const response = await createWorker(dataToSend)
+
+      if (response.isSuccess) {
+        toast({
+          title: "Uğurlu",
+          description: "İşçi uğurla əlavə edildi",
+        })
+
+        setIsAddDialogOpen(false)
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phoneNumber: "",
+          roleId: "",
+          warehouseId: undefined,
+        })
+
+        loadWorkers() // Siyahını yenilə
+      } else {
+        toast({
+          title: "Xəta",
+          description: response.errors?.[0] || "İşçi əlavə edilə bilmədi",
+          variant: "destructive",
+        })
+      }
+    } catch (error: any) {
+      console.error('Error creating worker:', error)
+      toast({
+        title: "Xəta",
+        description: error?.response?.data?.errors?.[0] || "İşçi əlavə edilərkən xəta baş verdi",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -159,37 +250,55 @@ export function WorkerManagement({ onViewWorker }: WorkerManagementProps) {
               <DialogDescription>Yeni anbar işçisi üçün məlumatları daxil edin</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="workerName">Tam Ad</Label>
-                <Input id="workerName" placeholder="Tam adı daxil edin" />
-              </div>
-              <div>
-                <Label htmlFor="email">E-poçt</Label>
-                <Input id="email" type="email" placeholder="worker@company.com" />
-              </div>
-              <div>
-                <Label htmlFor="phone">Telefon</Label>
-                <Input id="phone" placeholder="+1 (555) 123-4567" />
-              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="warehouse">Anbar</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Anbar seçin" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {warehouses.map((warehouse) => (
-                        <SelectItem key={warehouse.id} value={warehouse.id}>
-                          {warehouse.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="firstName">Ad *</Label>
+                  <Input
+                    id="firstName"
+                    placeholder="Adı daxil edin"
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  />
                 </div>
                 <div>
-                  <Label htmlFor="shift">Rol</Label>
-                  <Select>
+                  <Label htmlFor="lastName">Soyad *</Label>
+                  <Input
+                    id="lastName"
+                    placeholder="Soyadı daxil edin"
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="email">E-poçt *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="worker@company.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="phone">Telefon *</Label>
+                <Input
+                  id="phone"
+                  placeholder="+99470-123-45-67"
+                  value={formData.phoneNumber}
+                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Format: +994xx-xxx-xx-xx
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="role">Rol *</Label>
+                  <Select value={formData.roleId} onValueChange={(value) => setFormData({ ...formData, roleId: value })}>
                     <SelectTrigger>
                       <SelectValue placeholder="Rol seçin" />
                     </SelectTrigger>
@@ -202,12 +311,40 @@ export function WorkerManagement({ onViewWorker }: WorkerManagementProps) {
                     </SelectContent>
                   </Select>
                 </div>
+                <div>
+                  <Label htmlFor="warehouse">
+                    Anbar {roles.find(r => r.id === formData.roleId)?.name === "WarehouseMan" && "*"}
+                  </Label>
+                  <Select
+                    value={formData.warehouseId || ""}
+                    onValueChange={(value) => setFormData({ ...formData, warehouseId: value })}
+                    disabled={roles.find(r => r.id === formData.roleId)?.name !== "WarehouseMan"}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Anbar seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {warehouses.map((warehouse) => (
+                        <SelectItem key={warehouse.id} value={warehouse.id}>
+                          {warehouse.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {roles.find(r => r.id === formData.roleId)?.name !== "WarehouseMan" && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Yalnız anbardar rolü üçün məcburi
+                    </p>
+                  )}
+                </div>
               </div>
               <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} disabled={isLoading}>
                   Ləğv Et
                 </Button>
-                <Button onClick={() => setIsAddDialogOpen(false)}>İşçi Əlavə Et</Button>
+                <Button onClick={handleAddWorker} disabled={isLoading}>
+                  {isLoading ? "Əlavə edilir..." : "İşçi Əlavə Et"}
+                </Button>
               </div>
             </div>
           </DialogContent>

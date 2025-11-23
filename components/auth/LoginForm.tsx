@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import Link from "next/link"
 
 export function LoginForm() {
   const [email, setEmail] = useState("")
@@ -68,6 +69,13 @@ export function LoginForm() {
                 required
               />
             </div>
+            
+            <div className="flex justify-end">
+              <Link href="/forgot-password" className="text-sm text-purple-primary hover:text-purple-600">
+                Şifrəni unutmusunuz?
+              </Link>
+            </div>
+            
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>

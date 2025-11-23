@@ -9,6 +9,15 @@ export interface WorkerFiltersRequest {
   roleId?: string | null;
 }
 
+export interface CreateWorkerRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  roleId: string;
+  warehouseId?: string;
+}
+
 export async function getWorkers(): Promise<ApiResponse<Worker[]>> {
   return await api.get("/employee");
 }
@@ -33,4 +42,8 @@ export async function getPaginatedWorkers(
 
 export async function getRolesLookup(): Promise<ApiResponse<LookupItem[]>> {
   return await api.get("/roles/lookup");
+}
+
+export async function createWorker(data: CreateWorkerRequest): Promise<ApiResponse<Worker>> {
+  return await api.post("/employee/createworker", data);
 }
