@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
                   <p className="font-medium mb-2">{email} ünvanına parol sıfırlama linki göndərildi.</p>
                   <p className="text-sm text-muted-foreground">
                     E-poçtunuzu yoxlayın və parolunuzu sıfırlamaq üçün linkə klikləyin. 
-                    Link 24 saat ərzində etibarlıdır.
+                    Link 1 saat ərzində etibarlıdır.
                   </p>
                 </AlertDescription>
               </Alert>
